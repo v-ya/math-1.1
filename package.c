@@ -72,7 +72,7 @@ var* package_import(char *path, char **name)
 	Err_path:
 	if _oF(path)
 	{
-		path=dlerror();
+		path=(char*) dlerror();
 		if _oT(path)
 		{
 			vp=var_alloc(tlog_string,leng_no);
