@@ -1,0 +1,197 @@
+// 错误字符串定义
+#define ss(n)	static char n[]=
+
+ss(errcl_Code_S)	"代码基类";
+	ss(errty_CodeInt_S)	"中断类别";
+		ss(errid_IntError_S)		"程序内部错误";
+		ss(errid_IntFuncErr_S)		"函数内部错误";
+		ss(errid_IntDivZero_S)		"除零错误中断";
+		ss(errid_IntKilled_S)		"线程意外终止";
+	ss(errty_CodeGra_S)	"语法类别";
+		ss(errid_GraQuoVarname_S)	"变量名称非法";
+		ss(errid_GraBraMismatch_S)	"缺少括号匹配";
+		ss(errid_GraVarType_S)		"变量类型错误";
+		ss(errid_GraUnknowSym_S)	"发现未知符号";
+		ss(errid_GraLackSem_S)		"语句缺少 ';'";
+		ss(errid_GraSprintfFormat_S)	"格式化字符串匹配错误";
+		ss(errid_GraOvermuchUnOp_S)	"连续过多的一元运算符";
+	ss(errty_CodeSys_S)	"系统类别";
+		ss(errid_SysPtvarNotfind_S)	"系统线程相关变量未找到";
+		ss(errid_SysDlpathNotopen_S)	"无法打开路径中的被链接包";
+		ss(errid_SysDlsymNotfind_S)	"被链接包内预定义符号未找到";
+		ss(errid_SysPackageCheck_S)	"被链接包验证失败";
+		ss(errid_SysPackageName_S)	"被链接包同名冲突";
+		ss(errid_SysPackageInit_S)	"被链接包初始化失败";
+		ss(errid_SysPackageNotfind_S)	"被链接包未找到";
+		ss(errid_SysPackageTakeup_S)	"被链接包占用状态";
+		ss(errid_SysPackageDamage_S)	"被链接包损毁";
+	ss(errty_CodeFun_S)	"函数类别";
+		ss(errid_FunArgvType_S)		"函数传参类型错误";
+		ss(errid_FunNotfindLabel_S)	"不能找到标签";
+
+ss(errcl_Res_S)		"资源基类";
+	ss(errty_ResMem_S)	"空间类别";
+		ss(errid_MemLess_S)		"空间资源不足";
+		ss(errid_ReqOver_S)		"资源申请超限";
+
+ss(errcl_Var_S)		"变量基类";
+	ss(errty_VarExist_S)	"存在类别";
+		ss(errid_VarNotFind_S)		"变量不能找到";
+		ss(errid_VarNotUsetmp_S)	"无法创建临时变量";
+		ss(errid_ArrayLength_S)		"数组长度引用超限";
+		ss(errid_ArrayBuffer_S)		"数组空间意外丢失";
+	ss(errty_VarType_S)	"类型类别";
+		ss(errid_VarUnknowType_S)	"未知变量类型";
+		ss(errid_VarNotObject_S)	"变量不是对象";
+		ss(errid_VarNotArray_S)		"变量不是数组";
+		ss(errid_VarNotKey_S)		"变量不是关键字";
+		ss(errid_VarNotFun_S)		"变量不是函数";
+		ss(errid_VarNotString_S)	"变量不是字符串";
+		ss(errid_VarNotNumber_S)	"变量不是数字";
+		ss(errid_VarUnknowFun_S)	"未知函数类型";
+	ss(errty_VarAuth_S)	"权限类别";
+		ss(errid_VarNotRetype_S)	"无权重置变量类型";
+		ss(errid_VarNotRead_S)		"无权读取变量";
+		ss(errid_VarNotWrite_S)		"无权写入变量";
+		ss(errid_VarNotLink_S)		"无权链接变量";
+		ss(errid_VarNotRun_S)		"无权运行变量";
+
+#undef ss
+
+static char *errty_CodeInt_idA[]={
+	NULL,
+	errid_IntError_S,
+	errid_IntFuncErr_S,
+	errid_IntDivZero_S,
+	errid_IntKilled_S,
+} ;
+
+static char *errty_CodeGra_idA[]={
+	NULL,
+	errid_GraQuoVarname_S,
+	errid_GraBraMismatch_S,
+	errid_GraVarType_S,
+	errid_GraUnknowSym_S,
+	errid_GraLackSem_S,
+	errid_GraSprintfFormat_S,
+	errid_GraOvermuchUnOp_S,
+} ;
+
+static char *errty_CodeSys_idA[]={
+	NULL,
+	errid_SysPtvarNotfind_S,
+	errid_SysDlpathNotopen_S,
+	errid_SysDlsymNotfind_S,
+	errid_SysPackageCheck_S,
+	errid_SysPackageName_S,
+	errid_SysPackageInit_S,
+	errid_SysPackageNotfind_S,
+	errid_SysPackageTakeup_S,
+	errid_SysPackageDamage_S,
+} ;
+
+static char *errty_CodeFun_idA[]={
+	NULL,
+	errid_FunArgvType_S,
+	errid_FunNotfindLabel_S,
+} ;
+
+	static char **errcl_Code_idA[]={
+		NULL,
+		errty_CodeInt_idA,
+		errty_CodeGra_idA,
+		errty_CodeSys_idA,
+		errty_CodeFun_idA,
+	} ;
+
+static char *errty_ResMem_idA[]={
+	NULL,
+	errid_MemLess_S,
+	errid_ReqOver_S,
+} ;
+
+	static char **errcl_Res_idA[]={
+		NULL,
+		errty_ResMem_idA,
+	} ;
+
+
+static char *errty_VarExist_idA[]={
+	NULL,
+	errid_VarNotFind_S,
+	errid_VarNotUsetmp_S,
+	errid_ArrayLength_S,
+	errid_ArrayBuffer_S,
+} ;
+
+static char *errty_VarType_idA[]={
+	NULL,
+	errid_VarUnknowType_S,
+	errid_VarNotObject_S,
+	errid_VarNotArray_S,
+	errid_VarNotKey_S,
+	errid_VarNotFun_S,
+	errid_VarNotString_S,
+	errid_VarNotNumber_S,
+	errid_VarUnknowFun_S,
+} ;
+
+static char *errty_VarAuth_idA[]={
+	NULL,
+	errid_VarNotRetype_S,
+	errid_VarNotRead_S,
+	errid_VarNotWrite_S,
+	errid_VarNotLink_S,
+	errid_VarNotRun_S,
+} ;
+
+	static char **errcl_Var_idA[]={
+		NULL,
+		errty_VarExist_idA,
+		errty_VarType_idA,
+		errty_VarAuth_idA,
+	} ;
+
+		static char ***error_idA[]={
+			NULL,
+			errcl_Code_idA,
+			errcl_Res_idA,
+			errcl_Var_idA,
+		} ;
+
+static char *errcl_Code_tyA[]={
+	NULL,
+	errty_CodeInt_S,
+	errty_CodeGra_S,
+	errty_CodeSys_S,
+	errty_CodeFun_S,
+} ;
+
+
+static char *errcl_Res_tyA[]={
+	NULL,
+	errty_ResMem_S,
+} ;
+
+static char *errcl_Var_tyA[]={
+	NULL,
+	errty_VarExist_S,
+	errty_VarType_S,
+	errty_VarAuth_S,
+} ;
+
+	static char **error_tyA[]={
+		NULL,
+		errcl_Code_tyA,
+		errcl_Res_tyA,
+		errcl_Var_tyA,
+	} ;
+
+static char *error_clA[]={
+	NULL,
+	errcl_Code_S,
+	errcl_Res_S,
+	errcl_Var_S,
+} ;
+
+

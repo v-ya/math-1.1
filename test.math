@@ -1,0 +1,32 @@
+#!./math
+# test.math
+
+### next
+完善 wav 静态变量群
+	功能待定
+###
+
+function void:print_version(o:.type.object)
+{
+	.echo("%s.%s-v%d.%d.%d\n",o.info.author,o.info.package,
+		o.info.version.major,o.info.version.minor,o.info.version.rev);
+} ;
+
+var string:s,string:path="output/test.wav";
+s=import("wav","package/model/wav.so");
+.echo("Load ... ");
+print_version(wav);
+wav.loudmode.value=wav.loudmode.db_atte;
+.echo("New ... \n");
+var vlist:w;
+wav.new(w,1.0);
+.debug.list(w);
+.echo("rsin_inc w,1,10,0,%? ...\n",w.size);
+wav.rsin_inc(w,1,10,0,w.size);
+.echo("Write %s ...\n",path);
+wav.write(w,path);
+.echo("Clear ...\n");
+delete w,wav;
+.remove(s);
+.echo("Done.\n");
+

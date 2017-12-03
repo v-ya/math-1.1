@@ -1,0 +1,25 @@
+# example/args.math
+###
+	print .args.*
+###
+
+function void:print_argv()
+{
+	i=0;
+	n=.length(.args.argv);
+	.echo(".argv[%d] = {\n",n);
+	.while i<n;
+		.echo("\t[%d]\t= %s\n",i,.args.argv[i]):
+		i+=1;
+	.echo("}\n");
+} ;
+print_argv.var int:i,int:n;
+
+.echo(".debug.list(.args):\n");
+.debug.list(.args);
+.echo("\nprint .args.*\n");
+.echo(".exec\t= %s\n",.args.exec);
+.echo(".script\t= %s\n",.args.script);
+.if .args.exist("argv"); print_argv();
+delete print_argv;
+

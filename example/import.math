@@ -1,0 +1,30 @@
+# example/import.math
+###
+	import package/model/hello.so
+	print version
+	list hello.*
+	run hello.hello()
+	remove hello
+###
+
+function void:print_version(o:.type.object)
+{
+	.echo("%s.%s-v%d.%d.%d\n",o.info.author,o.info.package,
+		o.info.version.major,o.info.version.minor,o.info.version.rev);
+} ;
+
+var string:package;
+.echo("Load ... ");
+package=import("hello","package/model/hello.so");
+.echo("%s\n",package);
+.echo("version = ");
+print_version(hello);
+.echo("hello.* =\n");
+.debug.list(hello);
+.echo("hello.hello()\n");
+hello.hello();
+.echo("remove %s ...\n",package);
+delete hello;
+.remove(package);
+.echo("Done.\n");
+
