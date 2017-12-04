@@ -122,6 +122,8 @@ var* var_define(char *exp, char **expp, var *root)
 		goto Err_malloc;
 	}
 	if _oF(buffer[0]=='u') vp->type|=type_unsign;
+	// set var auth
+	if _oF(vl->v) vp->mode=((vp->mode)&(~auth_all))|((vl->v->mode)&auth_all);
 	// var link
 	vlist_link(vl,vp);
 	// get [value]
