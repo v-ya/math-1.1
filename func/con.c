@@ -76,6 +76,15 @@ func(exist)
 	return ret;
 }
 
+func(get_type)
+{
+	static char *label=".get_type";
+	if _oF(argc!=1) return get_error(errid_FunArgvType,label);
+	ret->type=type_long;
+	ret->v.v_long=argv->v->type;
+	return ret;
+}
+
 func(import)
 {
 	static char *label="[object].import";

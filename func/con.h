@@ -8,6 +8,7 @@ func(echo);
 func(length);
 func(this);
 func(exist);
+func(get_type);
 func(import);
 func(remove);
 

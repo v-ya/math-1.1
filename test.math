@@ -6,6 +6,10 @@
 	功能待定
 ###
 
+
+
+###
+
 function void:print_version(o:.type.object)
 {
 	.echo("%s.%s-v%d.%d.%d\n",o.info.author,o.info.package,

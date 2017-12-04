@@ -9,7 +9,7 @@
 		// 对象通用子项
 		var	key	0	r	addr_key(var)
 		delete	key	0	r	addr_key(delete)
-		function	key	0	r	addr_key(function)
+		function key	0	r	addr_key(function)
 		exist	fun	0	r	addr_fun(exist)
 		import	fun	0	r	addr_fun(import)
 		
@@ -80,6 +80,7 @@
 	print	-link	.echo
 	length	fun	0	r	addr_fun(length)
 	this	fun	0	r	addr_fun(this)
+	get_type fun	0	r	addr_fun(get_type)
 	remove	fun	0	r	addr_fun(remove)
 		// 数学库
 		srand	fun	0	r	addr_fun(srand)
@@ -153,6 +154,8 @@
 		integer	uint	0	r	type_znum
 		number	uint	0	r	type_num
 		object	uint	0	r	type_object
+		// 特殊类型
+		unsign	uint	0	r	type_unsign
 	}
 	// 调试相关
 	debug	vlist	0	r	{
