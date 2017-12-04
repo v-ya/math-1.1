@@ -6,10 +6,6 @@
 	功能待定
 ###
 
-
-
-###
-
 function void:print_version(o:.type.object)
 {
 	.echo("%s.%s-v%d.%d.%d\n",o.info.author,o.info.package,
@@ -23,12 +19,9 @@ print_version(wav);
 wav.loudmode.value=wav.loudmode.db_atte;
 .echo("New ... \n");
 var vlist:w;
-wav.new(w,1.0);
-.debug.list(w);
-.echo("rsin_inc w,1,10,0,%? ...\n",w.size);
-wav.rsin_inc(w,1,10,0,w.size);
-.echo("Write %s ...\n",path);
-wav.write(w,path);
+
+
+
 .echo("Clear ...\n");
 delete w,wav;
 .remove(s);

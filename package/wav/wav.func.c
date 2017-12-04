@@ -18,10 +18,11 @@ vya_wav* get_wav(var *obj)
 func(new)
 {
 	static char *label=label_name("new");
-	static u32 type_2[2]={type_object,type_num};
+	static u32 type_2[2]={type_object,type_num|type_string};
 	var *obj,*vp;
 	value v={0};
 	double time;
+	char *path;
 	vya_wav *wav;
 	extern var *_lim_maxtime;
 	
@@ -30,12 +31,28 @@ func(new)
 	if _oF((argc!=2)||base->check_varlist(argv,2,type_2)) return base->get_error(errid_FunArgvType,label);
 	obj=argv->v;
 	vp=argv->r->v;
-	time=vpntof(vp);
-	vp=base->type_empty(obj);
-	if _oF(vp) return vp;
-	if _oF((time<=0)||(time>_phy_maxtime)||(time>_lim_maxtime->v.v_float)) return base->get_error(errid_ReqOver,label);
-	wav=wav_new(time);
-	if _oF(!wav) goto Err_mem;
+	if _oF(vp->type&type_string)
+	{
+		path=vp->v.v_string;
+		if _oF(!path) goto Err_notopen;
+		vp=base->type_empty(obj);
+		if _oF(vp) return vp;
+		wav=wav_load(&path);
+		if _oF(!wav)
+		{
+			if _oT(path) return get_error(path,label);
+			else goto Err_mem;
+		}
+	}
+	else
+	{
+		time=vpntof(vp);
+		vp=base->type_empty(obj);
+		if _oF(vp) return vp;
+		if _oF((time<=0)||(time>_phy_maxtime)||(time>_lim_maxtime->v.v_float)) return base->get_error(errid_ReqOver,label);
+		wav=wav_new(time);
+		if _oF(!wav) goto Err_mem;
+	}
 	v.v_void=wav->data;
 	vp=base->var_set(obj,"data",tlog_int,wav->size,free_pointer|auth_read|auth_write,&v);
 	if _oF(!vp)
@@ -59,6 +76,8 @@ func(new)
 	return ret;
 	Err_mem:
 	return base->get_error(errid_MemLess,label);
+	Err_notopen:
+	return get_error(error_load_path,label);
 }
 
 func(write)

@@ -1,5 +1,6 @@
 #include "wav.h"
 #include "wav.code.h"
+#include "wav.string.h"
 
 static vya_wav_hi _tp_wav_hi = {
 	.RIFF[0]='R',
@@ -35,7 +36,7 @@ vya_wav* wav_new(double time)
 	if _oF(time<=0||time>_phy_maxtime) return NULL;
 	wav=malloc(sizeof(vya_wav));
 	if _oF(!wav) return NULL;
-	wav->size=(u32)time*SamFre;
+	wav->size=(u32)(time*SamFre);
 	wav->data=malloc(wav->size*SamBytes);
 	if _oF(!wav->data) 
 	{
@@ -44,6 +45,191 @@ vya_wav* wav_new(double time)
 	}
 	memset(wav->data,0,wav->size*SamBytes);
 	return wav;
+}
+
+vya_wav* wav_load(char **path)
+{
+	FILE *fp;
+	u32 label,size,s_start,s_end,s_this,data;
+	u32 samp_f,align,i;
+	vya_wav *wav;
+	double l1,l2,r,k;
+	
+	fp=fopen(*path,"rb");
+	if _oF(!fp) goto Err_open;
+	#define _ic4(c0,c1,c2,c3) ((u32)(c0)|(c1<<8)|(c2<<16)|(c3<<24))
+	s_start=0;
+	fseek(fp,0,SEEK_END);
+	s_end=ftell(fp);
+	fseek(fp,0,SEEK_SET);
+	// check 'RIFF'
+	if _oF(s_end<8) goto Err_format;
+	if _oF(fread(&label,4,1,fp)<1) goto Err_open;
+	if _oF(label!=_ic4('R','I','F','F')) goto Err_format;
+	if _oF(fread(&size,4,1,fp)<1) goto Err_open;
+	s_start=ftell(fp);
+	if _oF((s_start+size)<s_end) s_end=s_start+size;
+	// check 'WAVE'
+	if _oF((s_this+4)>s_end) goto Err_format;
+	if _oF(fread(&label,4,1,fp)<1) goto Err_open;
+	if _oF(label!=_ic4('W','A','V','E')) goto Err_format;
+	s_start=ftell(fp);
+	if _oF((s_start+size)<s_end) s_end=s_start+size;
+	// find first 'fmt '
+	s_this=s_start;
+	while(1)
+	{
+		if _oF((s_this+8)>s_end) goto Err_format;
+		if _oF(fread(&label,4,1,fp)<1) goto Err_open;
+		if _oF(fread(&size,4,1,fp)<1) goto Err_open;
+		if _oT((label==_ic4('f','m','t',' '))&&(size==0x10)) break;
+		s_this+=8+size;
+	}
+	s_start=s_this+8+size;
+	// read 'fmt '
+		// .format && .channel
+	if _oF(fread(&data,4,1,fp)<1) goto Err_open;
+		// .format==1 && .channel==1 (PCM && one channel)
+	if _oF(data!=0x00010001) goto Err_format;
+		// .samp_f, .samp_bf, .align & .depth
+	if _oF(fread(&samp_f,4,1,fp)<1) goto Err_open;
+	if _oF(fread(&data,4,1,fp)<1) goto Err_open;
+	if _oF(fread(&align,4,1,fp)<1) goto Err_open;
+		// check .samp_bf
+	if _oF(data!=(samp_f*(align&0xffff))) goto Err_format;
+	data=align>>16;
+	align&=0xffff;
+		// check .depth
+	if _oF(data!=(align*8)) goto Err_format;
+		// check .align
+	if _oF(align!=1&&align!=2&&align!=4) goto Err_format;
+	// find 'data'
+	s_this=s_start;
+	if _oF((s_this+8)>s_end) goto Err_format;
+	fseek(fp,s_this,SEEK_SET);
+	while(1)
+	{
+		if _oF((s_this+8)>s_end) goto Err_format;
+		if _oF(fread(&label,4,1,fp)<1) goto Err_open;
+		if _oF(fread(&size,4,1,fp)<1) goto Err_open;
+		if _oT(label==_ic4('d','a','t','a')) break;
+		s_this+=8+size;
+	}
+	s_start=s_this+8;
+	s_end=s_start+size;
+	// new wav
+	size/=align;
+		// check time
+	if _oF(((double)size/samp_f)>_phy_maxtime) goto Err_time;
+		// alloc wav
+	wav=malloc(sizeof(vya_wav));
+	if _oF(!wav) goto Err_mem;
+		// calc wav->size
+	wav->size=(u32)(((double)size/samp_f)*SamFre);
+		// alloc wav->data
+	wav->data=malloc(wav->size*SamBytes);
+	if _oF(!wav->data) 
+	{
+		free(wav);
+		goto Err_mem;
+	}
+	// read 'data' && set wav
+	k=(double)samp_f/SamFre;
+	s_this=0;
+	fseek(fp,s_start,SEEK_SET);
+	switch(align)
+	{
+		case 1:
+			for(i=0;i<wav->size;i++)
+			{
+				r=i*k;
+				align=(u32)r;
+				r-=align;
+				align+=2;
+				if _oF(align>size)
+				{
+					align=size;
+					r=1;
+				}
+				while(s_this<align)
+				{
+					data=getc(fp)<<24;
+					l1=l2;
+					l2=(s32)data;
+					s_this++;
+				}
+				r=l1*(1-r)+l2*r;
+				r=(r>0)?(r+0.5):(r<0)?(r-0.5):0;
+				wav->data[i]=(s32)r;
+			}
+			break;
+		case 2:
+			for(i=0;i<wav->size;i++)
+			{
+				r=i*k;
+				align=(u32)r;
+				r-=align;
+				align+=2;
+				if _oF(align>size)
+				{
+					align=size;
+					r=1;
+				}
+				while(s_this<align)
+				{
+					fread(&data,2,1,fp);
+					data<<=16;
+					l1=l2;
+					l2=(s32)data;
+					s_this++;
+				}
+				r=l1*(1-r)+l2*r;
+				r=(r>0)?(r+0.5):(r<0)?(r-0.5):0;
+				wav->data[i]=(s32)r;
+			}
+			break;
+		case 4:
+			for(i=0;i<wav->size;i++)
+			{
+				r=i*k;
+				align=(u32)r;
+				r-=align;
+				align+=2;
+				if _oF(align>size)
+				{
+					align=size;
+					r=1;
+				}
+				while(s_this<align)
+				{
+					fread(&data,4,1,fp);
+					l1=l2;
+					l2=(s32)data;
+					s_this++;
+				}
+				r=l1*(1-r)+l2*r;
+				r=(r>0)?(r+0.5):(r<0)?(r-0.5):0;
+				wav->data[i]=(s32)r;
+			}
+			break;
+	}
+	#undef _ic4
+	return wav;
+	Err:
+	if (fp) fclose(fp);
+	return NULL;
+	Err_open:
+	*path=error_load_path;
+	goto Err;
+	Err_format:
+	*path=error_load_format;
+	goto Err;
+	Err_mem:
+	*path=NULL;
+	goto Err;
+	Err_time:
+	*path=error_load_time;
+	goto Err;
 }
 
 void wav_free(vya_wav *wav)

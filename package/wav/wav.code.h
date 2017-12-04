@@ -1,6 +1,7 @@
 #include "wav.h"
 
 vya_wav* wav_new(double time);
+vya_wav* wav_load(char **path);
 void wav_free(vya_wav *wav);
 int wav_write(vya_wav *wav, char *path);
 s32 loudness(double f);
