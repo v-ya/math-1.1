@@ -460,7 +460,7 @@ char* get_code(char *exp, char **pexp)
 				case '}':
 					exp++;
 					ii--;
-					if _oT(ii==0) save[size]==0;
+					if _oT(ii==0) save[size]=0;
 					else save[size++]='}';
 					continue;
 				default:
