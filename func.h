@@ -38,6 +38,7 @@ extern var *_type_null;
 #include "func/key.h"
 #include "func/con.h"
 #include "func/math.h"
+#include "func/string.h"
 #include "func/debug.h"
 
 #endif
