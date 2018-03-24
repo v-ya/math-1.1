@@ -17,9 +17,17 @@
 		}
 	}
 	limit	vlist	0	r	{
+		// new
 		maxtime	float	0	rw	_def_maxtime
-		_lim_maxtime	-export	.limit.maxtime
 		maxtime_phy	float	0	r	_phy_maxtime
+		_lim_maxtime	-export	.limit.maxtime
+		// noise: 最大迭代次数 最大迭代比例 终止迭代误差
+		noise_ni	ubyte	0	rw	20
+		noise_ri	float	0	rw	0.05
+		noise_ei	float	0	rw	0.01
+		_lim_noise_ni	-export	.limit.noise_ni
+		_lim_noise_ri	-export	.limit.noise_ri
+		_lim_noise_ei	-export	.limit.noise_ei
 	}
 	loudmode	vlist	0	r	{
 		value	ubyte	0	rw	loudmode_ra
@@ -42,5 +50,7 @@
 	rcos_inc	fun	0	r	addr_fun(rcos_inc)
 	rsin_get	fun	0	r	addr_fun(rsin_get)
 	rcos_get	fun	0	r	addr_fun(rcos_get)
+	
+	noise	fun	0	r	addr_fun(noise)
 }
 

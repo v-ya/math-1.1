@@ -11,4 +11,5 @@ func(rcos_inc);
 func(rsin_get);
 func(rcos_get);
 
+func(noise);
 

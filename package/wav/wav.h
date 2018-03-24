@@ -6,7 +6,7 @@
 #ifndef	PACKAGE
 	#define AUTHOR			"vya"
 	#define PACKAGE			"wav"
-	#define PACKAGE_major		0
+	#define PACKAGE_major		1
 	#define PACKAGE_minor		0
 	#define PACKAGE_revision	1
 	#define PACKAGE_type		"vya.wav"

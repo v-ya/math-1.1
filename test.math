@@ -16,14 +16,11 @@ var string:s,string:path="output/test.wav";
 s=import("wav","package/model/wav.so");
 .echo("Load ... ");
 print_version(wav);
-wav.loudmode.value=wav.loudmode.db_atte;
-.echo("New ... \n");
-var vlist:w;
 
 
 
 .echo("Clear ...\n");
-delete w,wav;
+delete wav;
 .remove(s);
 .echo("Done.\n");
 

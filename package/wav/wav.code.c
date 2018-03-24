@@ -480,4 +480,52 @@ s32 rcos_get(vya_wav *wav, u32 n, u32 b, s32 t)
 	return (s32) loud;
 }
 
+double _noise_k(u32 j)
+{
+	u32 g,h,i;
+	double k,k1;
+	k=0;
+	for(i=0;i<=j;i++)
+	{
+		g=(2*i>j)?i:j-i;
+		k1=1;
+		for(h=g+1;h<=j;h++)
+			k1*=h;
+		for(h=j-g;h>0;h--)
+			k1/=h;
+		k+=((double)k1)*k1;
+	}
+	return k;
+}
+
+double noise(double *sa, u32 n)
+{
+	double e=0,e1=0,e2,ei,k=1;
+	u32 ni,i,j=0;
+	extern var *_lim_noise_ni;
+	extern var *_lim_noise_ri;
+	extern var *_lim_noise_ei;
+	
+	ni=n*fabs(_lim_noise_ri->v.v_float);
+	if _oF(_lim_noise_ni->v.v_int<ni) ni=_lim_noise_ni->v.v_int;
+	ei=fabs(_lim_noise_ei->v.v_float);
+	if _oF(!ni) ni++;
+	
+	while(j<ni)
+	{
+		e2=e1;
+		e1=e;
+		if _oF(!(--n)) return e;
+		k=sqrt(_noise_k(j)/_noise_k(j+1));
+		j++;
+		for(i=0;i<n;i++)
+			sa[i]=(sa[i+1]-sa[i])*k;
+		e=0;
+		for(i=0;i<n;i++)
+			e+=sa[i]*sa[i];
+		e=sqrt(e/n);
+		if _oF((fabs(e-e1)/e<ei)&&((fabs(e-e2)/e<ei))) break;
+	}
+	return e;
+}
 

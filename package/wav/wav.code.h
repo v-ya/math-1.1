@@ -12,3 +12,5 @@ void rcos_inc(vya_wav *wav, u32 n, s32 loud, u32 b, s32 t);
 s32 rsin_get(vya_wav *wav, u32 n, u32 b, s32 t);
 s32 rcos_get(vya_wav *wav, u32 n, u32 b, s32 t);
 
+double noise(double *sa, u32 n);
+
