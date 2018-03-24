@@ -80,6 +80,21 @@ var* var_define(char *exp, char **expp, var *root)
 	if _oF(!is_Name(*exp)) goto Err_notname;
 	name=get_name(exp,&exp);
 	if _oF(!name) goto Err_malloc;
+	// alloc link
+	vl=v_find(root,name);
+	if _oT(!vl)
+	{
+		vl=vlist_alloc(name);
+		if _oF(!vl) goto Err_malloc;
+		if _oT(root->type&type_vlist) root->v.v_vlist=vlist_insert(root->v.v_vlist,vl);
+		else vmat_insert(root->v.v_vmat,vl);
+	}
+	else if _oT(vl->v)
+	{
+		// check auth
+		vp=vl->v;
+		if _oF(!(vp->mode&auth_retype)) goto Err_notretype;
+	}
 	// get [length]
 	while(is_space(*exp)) exp++;
 	if _oF(*exp=='[')
@@ -98,21 +113,6 @@ var* var_define(char *exp, char **expp, var *root)
 	if _oF(length>_lim_array_max->v.v_long) goto Err_notlength;
 	// check name
 	if _oF(var_find(_vm_gobj,name)) goto Err_notname;
-	// alloc link
-	vl=v_find(root,name);
-	if _oT(!vl)
-	{
-		vl=vlist_alloc(name);
-		if _oF(!vl) goto Err_malloc;
-		if _oT(root->type&type_vlist) root->v.v_vlist=vlist_insert(root->v.v_vlist,vl);
-		else vmat_insert(root->v.v_vmat,vl);
-	}
-	else if _oT(vl->v)
-	{
-		// check auth
-		vp=vl->v;
-		if _oF(!(vp->mode&auth_retype)) goto Err_notretype;
-	}
 	// alloc var
 	vp=var_alloc(tlog,length);
 	if _oF(!vp)
