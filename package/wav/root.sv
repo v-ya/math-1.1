@@ -51,6 +51,7 @@
 	rsin_get	fun	0	r	addr_fun(rsin_get)
 	rcos_get	fun	0	r	addr_fun(rcos_get)
 	
+	aloud	fun	0	r	addr_fun(aloud)
 	noise	fun	0	r	addr_fun(noise)
 }
 

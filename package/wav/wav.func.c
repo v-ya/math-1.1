@@ -342,6 +342,143 @@ func(rcos_get)
 	return get_error(error_wav,label);
 }
 
+func(aloud)
+{
+	static char *label=label_name("aloud");
+	static u32 type_1[1]={type_object|type_num};
+	static u32 type_3[3]={type_object|type_num,type_num,type_num};
+	double sa=0;
+	void *sp;
+	u32 s,t,i;
+	var *o,*vp;
+	vya_wav *wav;
+	
+	ret->type=type_float;
+	ret->v.v_float=0;
+	switch(argc)
+	{
+		case 1:
+			if _oF(base->check_varlist(argv,1,type_1)) goto Err_argv;
+			o=argv->v;
+			if _oF(o->type&type_object)
+			{
+				// wav
+				if _oF(base->type_check(o,type->v.v_string)<=0) goto Err_check;
+				wav=get_wav(o);
+				if _oF(!wav) goto Err_wav;
+				s=0;
+				t=wav->size;
+				goto _w;
+			}
+			else
+			{
+				// array
+				if _oF(o->length==leng_no) goto Err_argv;
+				s=0;
+				t=o->length;
+				if _oF(o->type&type_float) goto _f;
+				else goto _i;
+			}
+			goto Err_argv;
+		case 3:
+			if _oF(base->check_varlist(argv,3,type_3)) goto Err_argv;
+			o=argv->v;
+			argv=argv->r;
+			vp=argv->v;
+			s=vpntof(vp);
+			argv=argv->r;
+			vp=argv->v;
+			t=vpntof(vp);
+			if _oF(o->type&type_object)
+			{
+				// wav
+				if _oF(base->type_check(o,type->v.v_string)<=0) goto Err_check;
+				wav=get_wav(o);
+				if _oF(!wav) goto Err_wav;
+				if _oF(s>=wav->size) goto End;
+				if _oF(s+t>wav->size) goto End;
+				if _oF(s+t<=s) goto End;
+				goto _w;
+			}
+			else
+			{
+				// array
+				if _oF(o->length==leng_no) goto Err_argv;
+				if _oF(s>=o->length) goto End;
+				if _oF(s+t>o->length) goto End;
+				if _oF(s+t<=s) goto End;
+				if _oF(o->type&type_float) goto _f;
+				else goto _i;
+			}
+			goto Err_argv;
+		default:
+			Err_argv:
+			return base->get_error(errid_FunArgvType,label);
+	}
+	_f:
+	sp=o->v.v_void;
+	t+=s;
+	for(i=s;i<t;i++)
+		sa+=((double*)sp)[i]*((double*)sp)[i];
+	ret->v.v_float=sqrt(sa/(t-s));
+	goto End;
+	_i:
+	sp=o->v.v_void;
+	t+=s;
+	switch(o->type)
+	{
+		case type_byte:
+			for(i=s;i<t;i++)
+				sa+=(double)((s8*)sp)[i]*((s8*)sp)[i];
+			break;
+		case type_byte|type_unsign:
+			for(i=s;i<t;i++)
+				sa+=(double)((u8*)sp)[i]*((u8*)sp)[i];
+			break;
+		case type_word:
+			for(i=s;i<t;i++)
+				sa+=(double)((s16*)sp)[i]*((s16*)sp)[i];
+			break;
+		case type_word|type_unsign:
+			for(i=s;i<t;i++)
+				sa+=(double)((u16*)sp)[i]*((u16*)sp)[i];
+			break;
+		case type_int:
+			for(i=s;i<t;i++)
+				sa+=(double)((s32*)sp)[i]*((s32*)sp)[i];
+			break;
+		case type_int|type_unsign:
+			for(i=s;i<t;i++)
+				sa+=(double)((u32*)sp)[i]*((u32*)sp)[i];
+			break;
+		case type_long:
+			for(i=s;i<t;i++)
+				sa+=(double)((s64*)sp)[i]*((s64*)sp)[i];
+			break;
+		case type_long|type_unsign:
+			for(i=s;i<t;i++)
+				sa+=(double)((u64*)sp)[i]*((u64*)sp)[i];
+			break;
+		default:
+			goto Err_argv;
+	}
+	ret->v.v_float=sqrt(sa/(t-s));
+	goto End;
+	_w:
+	sp=o->v.v_void;
+	t+=s;
+	for(i=s;i<t;i++)
+		sa+=(double)wav->data[i]*wav->data[i];
+	sa=sqrt(sa/(t-s));
+	ret->v.v_float=loudexpe((s32)(sa+0.5));
+	End:
+	return ret;
+	Err_check:
+	return get_error(error_type,label);
+	Err_wav:
+	return get_error(error_wav,label);
+}
+
 func(noise)
 {
 	static char *label=label_name("noise");
