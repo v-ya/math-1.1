@@ -65,7 +65,7 @@
 		}
 		// 信息
 		info	vlist	0	r	{
-			rand_max	ulong	0	r	RAND_MAX
+			rand_max	ulong	0	r	RAND_MAX_L
 		}
 	}
 	// 关键字函数

@@ -21,6 +21,9 @@
 #include "package.h"
 #include "func.h"
 
+// 定义 RAND_MAX_L
+#define RAND_MAX_L (1ull+RAND_MAX)
+
 // 信息抛出
 #define print(format, ...) fprintf(stdout, format, ##__VA_ARGS__)
 #define err_throw(name, format, ...) fprintf(stderr, #name ": " format "\n", ##__VA_ARGS__)

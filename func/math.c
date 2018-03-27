@@ -43,7 +43,7 @@ func(rand)
 		{
 			// float mode
 			ret->type=type_float;
-			ret->v.v_float=vp->v.v_float*rand()/RAND_MAX;
+			ret->v.v_float=vp->v.v_float*rand()/RAND_MAX_L;
 			return ret;
 		}
 		else
@@ -51,12 +51,12 @@ func(rand)
 			// integer mode
 			ret->type=type_long;
 			rand_max=vp->v.v_long;
-			ret->v.v_long=(s64)((float)vp->v.v_long*rand()/RAND_MAX);
-			rand_max/=RAND_MAX;
+			ret->v.v_long=(s64)((float)vp->v.v_long*rand()/RAND_MAX_L);
+			rand_max/=RAND_MAX_L;
 			if _oF(rand_max) do
 			{
-				ret->v.v_long+=(s64)(vp->v.v_float*rand()/RAND_MAX);
-				rand_max/=RAND_MAX;
+				ret->v.v_long+=(s64)(vp->v.v_float*rand()/RAND_MAX_L);
+				rand_max/=RAND_MAX_L;
 			} while(rand_max);
 			return ret;
 		}
