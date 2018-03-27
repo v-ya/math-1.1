@@ -43,6 +43,7 @@ keyword(delete)
 			while(is_space(**expp)) (*expp)++;
 			goto Loop;
 		default:
+			if _oF(!is_Name(**expp)) return get_error(errid_GraQuoVarname,label);
 			name=get_name(*expp,expp);
 			if _oF(!name) return get_error(errid_MemLess,label);
 			vp=var_find(call,name);
