@@ -36,9 +36,12 @@
 		ra	ubyte	0	r	loudmode_ra
 		db_atte	ubyte	0	r	loudmode_db_atte
 	}
-	// data
-	type	string	0	r	PACKAGE_type
-	type	-export .type
+	type	vlist	0	r	{
+		wav	string	0	r	PACKAGE_type
+		type	-export .type.wav
+		spwav	string	0	r	PACKAGE_type_spwav
+		type_spwav	-export	.type.spwav
+	}
 	SamFre	slong	0	r	SamFre
 	// func
 	new	fun	0	r	addr_fun(new)
@@ -53,5 +56,6 @@
 	
 	aloud	fun	0	r	addr_fun(aloud)
 	noise	fun	0	r	addr_fun(noise)
+	spwav_new	fun	0	r	addr_fun(spwav_new)
 }
 

@@ -4,7 +4,6 @@
 
 char *author	=AUTHOR;
 char *package	=PACKAGE;
-extern var *type;
 
 void init(void)
 {
@@ -15,7 +14,11 @@ void init(void)
 void uini(void)
 {
 	static char *label="uini";
-	if _oF(type->inode>1) throw_error(error_takeup,label);
+	if _oF(type->inode>1) goto Err_takeup;
+	if _oF(type_spwav->inode>1) goto Err_takeup;
+	return ;
+	Err_takeup:
+	throw_error(error_takeup,label);
 }
 
 

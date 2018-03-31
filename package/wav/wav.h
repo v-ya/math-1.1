@@ -10,6 +10,7 @@
 	#define PACKAGE_minor		0
 	#define PACKAGE_revision	1
 	#define PACKAGE_type		"vya.wav"
+	#define PACKAGE_type_spwav	"vya.spwav"
 	
 	#define SamFre			96000
 	#define SamBytes		4
@@ -22,6 +23,9 @@
 		#define loudmode_ra		1
 		#define loudmode_db_atte	2
 #endif
+
+extern var *type;
+extern var *type_spwav;
 
 typedef struct __attribute__ ((packed)) Svya_wav_hi {
 	// head
@@ -45,6 +49,39 @@ typedef struct Svya_wav {
 	u32 size;
 	s32 *data;
 } vya_wav;
+
+typedef struct Svya_wav_spwav {
+	// 状态标志
+	// >0 未初始化; ==0 已初始化; <0 读取结束
+	s8 *status;
+	// 中间变量
+	double *ts;
+	double *te;
+	double *aloud;
+	// 约束变量
+	double *et;
+	double *ea;
+	double *el;
+	double *amin;
+	double *ta;
+	double *tb;
+	// 初始化周期约束
+	double *tmin;
+	double *tmax;
+	// 链接波形结构
+	vya_wav *wav;
+} vya_wav_spwav;
+
+typedef struct Svya_wav_fse {
+	// 傅里叶展开最大级数
+	u8 sn;
+	// 周期 平均响度
+	double *t;
+	double *ar;
+	// 相对幅值 相位 [sn+1]
+	double *r;
+	double *p;
+} vya_wav_fse;
 
 typedef struct Interface_vya_wav {
 

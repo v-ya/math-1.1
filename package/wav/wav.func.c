@@ -4,8 +4,8 @@
 #include "wav.string.h"
 
 #define	label_name(n) "[vya.wav]." n
-extern var *type;
 static char *_wav_="_wav_";
+static char *_spwav_="_spwav_";
 
 vya_wav* get_wav(var *obj)
 {
@@ -609,6 +609,96 @@ func(noise)
 	ret->v.v_float=loudexpe((s32)(noise(sa,t)+0.5));
 	free(sa);
 	End:
+	return ret;
+	Err_check:
+	return get_error(error_type,label);
+	Err_wav:
+	return get_error(error_wav,label);
+	Err_mem:
+	return base->get_error(errid_MemLess,label);
+}
+
+func(spwav_new)
+{
+	static char *label=label_name("spwav_new");
+	static u32 type_2[2]={type_object,type_object};
+	var *o,*obj,*w,*vp;
+	value v={0};
+	vya_wav *wav;
+	vya_wav_spwav *sp;
+	
+	ret->type=type_void;
+	ret->v.v_long=0;
+	if _oF((argc!=2)||base->check_varlist(argv,2,type_2)) return base->get_error(errid_FunArgvType,label);
+	o=argv->v;
+	w=argv->r->v;
+	vp=base->type_empty(o);
+	if _oF(vp) return vp;
+	if _oF(base->type_check(w,type->v.v_string)<=0) goto Err_check;
+	wav=get_wav(w);
+	if _oF(!wav) goto Err_wav;
+	sp=malloc(sizeof(vya_wav_spwav));
+	if _oF(!sp) goto Err_mem;
+	memset(sp,0,sizeof(vya_wav_spwav));
+	// 新建变量
+	v.v_void=sp;
+	vp=base->var_set(o,_spwav_,tlog_void,leng_no,free_pointer,&v);
+	if _oF(!vp)
+	{
+		free(sp);
+		goto Err_mem;
+	}
+	v.v_long=1;
+	vp=base->var_set(o,"status",tlog_byte,leng_no,auth_read,&v);
+	if _oF(!vp) goto Err_mem;
+	sp->status=&(vp->v.v_byte);
+	v.v_float=0;
+	vp=base->var_set(o,"ts",tlog_float,leng_no,auth_read,&v);
+	if _oF(!vp) goto Err_mem;
+	sp->ts=&(vp->v.v_float);
+	vp=base->var_set(o,"te",tlog_float,leng_no,auth_read,&v);
+	if _oF(!vp) goto Err_mem;
+	sp->te=&(vp->v.v_float);
+	vp=base->var_set(o,"aloud",tlog_float,leng_no,auth_read,&v);
+	if _oF(!vp) goto Err_mem;
+	sp->aloud=&(vp->v.v_float);
+	// .limit
+	vp=base->var_replace(o,"limit",tlog_vlist,leng_no);
+	if _oF(!vp) goto Err_mem;
+	vp->mode=free_pointer|auth_read;
+	obj=o;
+	o=vp;
+	vp=base->var_link(o,"wav",w);
+	sp->wav=wav;
+	v.v_float=0;
+	vp=base->var_set(o,"et",tlog_float,leng_no,auth_read|auth_write,&v);
+	if _oF(!vp) goto Err_mem;
+	sp->et=&(vp->v.v_float);
+	vp=base->var_set(o,"ea",tlog_float,leng_no,auth_read|auth_write,&v);
+	if _oF(!vp) goto Err_mem;
+	sp->ea=&(vp->v.v_float);
+	vp=base->var_set(o,"el",tlog_float,leng_no,auth_read|auth_write,&v);
+	if _oF(!vp) goto Err_mem;
+	sp->el=&(vp->v.v_float);
+	vp=base->var_set(o,"amin",tlog_float,leng_no,auth_read|auth_write,&v);
+	if _oF(!vp) goto Err_mem;
+	sp->amin=&(vp->v.v_float);
+	vp=base->var_set(o,"init_tmin",tlog_float,leng_no,auth_read|auth_write,&v);
+	if _oF(!vp) goto Err_mem;
+	sp->tmin=&(vp->v.v_float);
+	vp=base->var_set(o,"init_tmax",tlog_float,leng_no,auth_read|auth_write,&v);
+	if _oF(!vp) goto Err_mem;
+	sp->tmax=&(vp->v.v_float);
+	vp=base->var_set(o,"start",tlog_float,leng_no,auth_read|auth_write,&v);
+	if _oF(!vp) goto Err_mem;
+	sp->ta=&(vp->v.v_float);
+	v.v_float=wav->size;
+	vp=base->var_set(o,"end",tlog_float,leng_no,auth_read|auth_write,&v);
+	if _oF(!vp) goto Err_mem;
+	sp->tb=&(vp->v.v_float);
+	// set type
+	vp=base->type_set(obj,type_spwav);
+	if _oF(vp) return vp;
 	return ret;
 	Err_check:
 	return get_error(error_type,label);
