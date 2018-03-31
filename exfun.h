@@ -3,7 +3,7 @@
 
 #ifndef __nosym__
 
-u32 type_check(var *obj, char *type);
+s32 type_check(var *obj, char *type);
 var* type_set(var *obj, var *type);
 var* type_empty(var *obj);
 

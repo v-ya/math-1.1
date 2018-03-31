@@ -77,7 +77,7 @@ typedef struct Interface_Base {
 	double	(*get_float)		(char* exp, char **expp, var **vpp_err);
 	var*	(*run_script)		(var *pt_text, var *pt_this);
 	// exfun.h
-	u32	(*type_check)		(var *obj, char *type);
+	s32	(*type_check)		(var *obj, char *type);
 	var*	(*type_set)		(var *obj, var *type);
 	var*	(*type_empty)		(var *obj);
 	

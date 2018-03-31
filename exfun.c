@@ -2,7 +2,7 @@
 
 static char *type_name="_type_";
 
-u32 type_check(var *obj, char *type)
+s32 type_check(var *obj, char *type)
 {
 	var *vp;
 	char *st;
