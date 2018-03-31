@@ -154,6 +154,7 @@ vlist* var_insert(var *obj, char *name, u32 tlog, u32 length);
 void var_delete(var *obj, char *name);
 var* var_replace(var *obj, char *name, u32 tlog, u32 length);
 var* var_set(var *obj, char *name, u32 tlog, u32 length, u32 mode, value *v);
+var* var_link(var *obj, char *name, var *v);
 void get_tmpvar(char *exp, char **expp, var *v);
 
 void var_fixvalue(var *vp);

@@ -536,6 +536,40 @@ var* var_set(var *obj, char *name, u32 tlog, u32 length, u32 mode, value *v)
 	return vp;
 }
 
+var* var_link(var *obj, char *name, var *v)
+{
+	vlist *vl;
+	u32 i;
+	if _oF(obj==NULL) return NULL;
+	if _oF(obj->length!=leng_no) return NULL;
+	if _oF(obj->type&type_vmat)
+	{
+		i=vname_gen(name);
+		vl=vlist_find(obj->v.v_vmat->vl[i],name);
+		if _oT(!vl)
+		{
+			vl=vlist_alloc(name);
+			if _oF(!vl) return NULL;
+			obj->v.v_vmat->vl[i]=vlist_insert(obj->v.v_vmat->vl[i],vl);
+		}
+		vlist_link(vl,v);
+		return v;
+	}
+	else if _oT(obj->type&type_vlist)
+	{
+		vl=vlist_find(obj->v.v_vlist,name);
+		if _oT(!vl)
+		{
+			vl=vlist_alloc(name);
+			if _oF(!vl) return NULL;
+			obj->v.v_vlist=vlist_insert(obj->v.v_vlist,vl);
+		}
+		vlist_link(vl,v);
+		return v;
+	}
+	else return NULL;
+}
+
 void get_tmpvar(char *exp, char **expp, var *v)
 {
 	u64 tv_u64;
