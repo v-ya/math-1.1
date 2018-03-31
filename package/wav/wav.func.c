@@ -37,8 +37,6 @@ func(new)
 	{
 		path=vp->v.v_string;
 		if _oF(!path) goto Err_notopen;
-		vp=base->type_empty(obj);
-		if _oF(vp) return vp;
 		wav=wav_load(&path);
 		if _oF(!wav)
 		{
@@ -49,8 +47,6 @@ func(new)
 	else
 	{
 		time=vpntof(vp);
-		vp=base->type_empty(obj);
-		if _oF(vp) return vp;
 		if _oF((time<=0)||(time>_phy_maxtime)||(time>_lim_maxtime->v.v_float)) return base->get_error(errid_ReqOver,label);
 		wav=wav_new(time);
 		if _oF(!wav) goto Err_mem;
