@@ -43,7 +43,7 @@ void print_vlist(vlist *vl, u32 tab)
 		if _oF(vl->v->length) print("[%6u]", vl->v->length);
 		else print("        ");
 		// inode
-		print("  %6u", vl->v->inode);
+		print("  %6u", (tab==0&&vl->v->inode>0)?(vl->v->inode-1):vl->v->inode);
 		// value
 		if _oF((vl->v->length==leng_no)&&(vl->v->type&type_string)&&vl->v->v.v_string)
 		{
