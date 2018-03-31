@@ -27,6 +27,7 @@ var* type_set(var *obj, var *type)
 	static char *label="type_set";
 	vlist *vl;
 	if _oF(!(obj->mode&auth_write)) return get_error(errid_VarNotWrite,label);
+	if _oF(!(obj->mode&auth_retype)) return get_error(errid_VarNotRetype,label);
 	if _oT(obj->type&type_vlist)
 	{
 		vl=vlist_find(obj->v.v_vlist,type_name);
@@ -36,7 +37,6 @@ var* type_set(var *obj, var *type)
 			if _oF(!vl) goto Err_mem;
 			obj->v.v_vlist=vlist_insert(obj->v.v_vlist,vl);
 		}
-		
 	}
 	else if _oT(obj->type&type_vmat)
 	{

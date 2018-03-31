@@ -30,6 +30,8 @@ func(new)
 	ret->v.v_long=0;
 	if _oF((argc!=2)||base->check_varlist(argv,2,type_2)) return base->get_error(errid_FunArgvType,label);
 	obj=argv->v;
+	vp=base->type_empty(obj);
+	if _oF(vp) return vp;
 	vp=argv->r->v;
 	if _oF(vp->type&type_string)
 	{
