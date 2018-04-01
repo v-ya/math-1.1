@@ -7,4 +7,6 @@ char *error_wav			= "不能获取 [vya.wav]._wav_";
 char *error_load_path		= "读取加载对象出错";
 char *error_load_format		= "未知加载格式";
 char *error_load_time		= "加载对象时长超出处理范围";
+char *error_type_spwap		= "目标对象非 vya.spwav 类型";
+char *error_spwav		= "不能获取 [vya.spwav]._spwav_";
 

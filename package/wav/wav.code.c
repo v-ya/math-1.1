@@ -529,3 +529,183 @@ double noise(double *sa, u32 n)
 	return e;
 }
 
+double find_nextzero(s32 *data, double start, u32 end)
+{
+	u32 i;
+	s32 v;
+	i=floor(start)+1;
+	if _oF(i>=end) goto Not;
+	if _oF(data[i]==0) return i;
+	v=(i-start)*data[i-1]+(start+1-i)*data[i];
+	if _oT(v>0) goto _pos;
+	else if _oT(v<0) goto _neg;
+	if _oF(data[i]<0) goto _neg;
+	_pos:
+	for(;i<end;i++)
+		if _oF(data[i]<=0) goto End;
+	goto Not;
+	_neg:
+	for(;i<end;i++)
+		if _oF(data[i]>=0) goto End;
+	goto Not;
+	End:
+	if _oF(data[i]==0) return i;
+	start=data[i]-data[i-1];
+	return i-(data[i]/start);
+	Not:
+	return -1;
+}
+
+double aloud(s32 *data, double start, double end)
+{
+	u32 s,e;
+	s=ceil(start);
+	e=ceil(end);
+	if _oF(s>=e) return 0;
+	end=e-s;
+	for(start=0;s<e;s++)
+		start+=(double)data[s]*data[s];
+	return sqrt(start/end);
+}
+
+double spwav_like(s32 *data, double t0, double t1, double t2, double a1, double a2)
+{
+	u32 i,n,j;
+	double like,tk,i1,v1;
+	i=ceil(t1);
+	n=ceil(t2);
+	if _oF(i>=n) return 0;
+	tk=(t1-t0)/(t2-t1);
+	for(like=0;i<n;i++)
+	{
+		i1=(i-t1)*tk+t0;
+		j=i1;
+		v1=(i1-j)*data[j+1]+(j+1-i1)*data[j];
+		v1=(data[i]/a2)-(v1/a1);
+		like+=v1*v1;
+	}
+	like/=n-ceil(t1);
+	return sqrt(like);
+}
+
+void spwav_get(vya_wav_spwav *sp)
+{
+	double etmax,eamax,elmax,size;
+	double a,ts,te,tne,tne_a,tne_b;
+	double a1,l1,te1,at,lt;
+	s32 *data;
+	
+	if _oF(*(sp->status)<0) return ;
+	
+	data=sp->wav->data;
+	etmax=*(sp->etmax);
+	eamax=*(sp->eamax);
+	elmax=*(sp->elmax);
+	size=*(sp->tb);
+	ts=*(sp->ts);
+	te=*(sp->te);
+	a=aloud(data,ts,te);
+	
+	if _oF(etmax<0||eamax<0||elmax<0||te>=size) goto Not;
+	tne_a=te+(te-ts)*(1.0-etmax);
+	tne_b=te+(te-ts)*(1.0+etmax);
+	if _oF(tne_a<te) tne_a=te;
+	if _oF(tne_b>size) tne_b=size;
+	
+	te1=-1;
+	for(tne=find_nextzero(data,te,tne_b);tne>0;tne=find_nextzero(data,tne,tne_b))
+	
+	if _oT(tne>=tne_a)
+	{
+		at=aloud(data,te,tne);
+		if _oT(fabs(at/a-1)<=eamax)
+		{
+			lt=spwav_like(data,ts,te,tne,a,at);
+			if _oF(lt>elmax) continue;
+			if _oF(te1<0||lt<l1)
+			{
+				_set:
+				te1=tne;
+				a1=at;
+				l1=lt;
+			}
+			else if _oF(lt==l1)
+			{
+				if _oF(fabs(tne-te*2+ts)<fabs(te1-te*2+ts)) goto _set;
+			}
+		}
+	}
+	
+	if _oT(te1<0) goto Not;
+	*(sp->ts)=te;
+	*(sp->te)=te1;
+	*(sp->aloud)=loudexpe(a1);
+	*(sp->like)=l1;
+	*(sp->et)=(te1-te)/(te-ts)-1;
+	*(sp->ea)=a1/a-1;
+	return ;
+	Not:
+	*(sp->status)=-1;
+	return ;
+}
+
+void spwav_init(vya_wav_spwav *sp)
+{
+	double ts,te,size,like,tmax,tmin,amin,te1;
+	s32 *data;
+	
+	data=sp->wav->data;
+	ts=*(sp->ta);
+	size=*(sp->tb);
+	tmax=*(sp->tmax);
+	tmin=*(sp->tmin);
+	amin=loudness(*(sp->amin));
+	if _oF(ts<0) ts=0;
+	if _oF(ts>size) goto Not;
+	
+	ts=find_nextzero(data,ts,size);
+	while((te=find_nextzero(data,ts,size))>0)
+	{
+		if (aloud(data,ts,te)>amin) break;
+		ts=te;
+	}
+	
+	like=-1;
+	tmin+=ts;
+	tmax+=ts;
+	if _oF(tmax>size) tmax=size;
+	for(;te>0;te=find_nextzero(data,te,tmax))
+	if _oT(te>tmin)
+	{
+		*(sp->status)=0;
+		*(sp->ts)=ts;
+		*(sp->te)=te;
+		spwav_get(sp);
+		if _oF(*(sp->status)<0) continue;
+		if _oF(like<0||*(sp->like)<like)
+		{
+			te1=te;
+			like=*(sp->like);
+		}
+	}
+	
+	if _oF(like<0) goto Not;
+	*(sp->status)=0;
+	*(sp->ts)=ts;
+	*(sp->te)=te1;
+	*(sp->aloud)=loudexpe(aloud(data,ts,te1));
+	*(sp->like)=like;
+	*(sp->et)=0;
+	*(sp->ea)=0;
+	return ;
+	Not:
+	*(sp->status)=-1;
+	*(sp->ts)=*(sp->ta);
+	*(sp->te)=size;
+	*(sp->aloud)=loudexpe(aloud(data,*(sp->ta),size));
+	*(sp->like)=0;
+	*(sp->et)=0;
+	*(sp->ea)=0;
+	return ;
+}
+

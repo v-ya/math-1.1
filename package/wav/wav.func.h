@@ -14,4 +14,5 @@ func(rcos_get);
 func(aloud);
 func(noise);
 func(spwav_new);
+func(spwav_get);
 

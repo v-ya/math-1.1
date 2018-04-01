@@ -13,4 +13,6 @@ s32 rsin_get(vya_wav *wav, u32 n, u32 b, s32 t);
 s32 rcos_get(vya_wav *wav, u32 n, u32 b, s32 t);
 
 double noise(double *sa, u32 n);
+void spwav_get(vya_wav_spwav *sp);
+void spwav_init(vya_wav_spwav *sp);
 

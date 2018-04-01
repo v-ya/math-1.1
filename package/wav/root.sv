@@ -57,5 +57,6 @@
 	aloud	fun	0	r	addr_fun(aloud)
 	noise	fun	0	r	addr_fun(noise)
 	spwav_new	fun	0	r	addr_fun(spwav_new)
+	spwav_get	fun	0	r	addr_fun(spwav_get)
 }
 

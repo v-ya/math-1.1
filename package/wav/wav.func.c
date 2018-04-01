@@ -651,7 +651,7 @@ func(spwav_new)
 	v.v_long=1;
 	vp=base->var_set(o,"status",tlog_byte,leng_no,auth_read,&v);
 	if _oF(!vp) goto Err_mem;
-	sp->status=&(vp->v.v_byte);
+	sp->status=&(vp->v.v_long);
 	v.v_float=0;
 	vp=base->var_set(o,"ts",tlog_float,leng_no,auth_read,&v);
 	if _oF(!vp) goto Err_mem;
@@ -662,6 +662,15 @@ func(spwav_new)
 	vp=base->var_set(o,"aloud",tlog_float,leng_no,auth_read,&v);
 	if _oF(!vp) goto Err_mem;
 	sp->aloud=&(vp->v.v_float);
+	vp=base->var_set(o,"et",tlog_float,leng_no,auth_read,&v);
+	if _oF(!vp) goto Err_mem;
+	sp->et=&(vp->v.v_float);
+	vp=base->var_set(o,"ea",tlog_float,leng_no,auth_read,&v);
+	if _oF(!vp) goto Err_mem;
+	sp->ea=&(vp->v.v_float);
+	vp=base->var_set(o,"like",tlog_float,leng_no,auth_read,&v);
+	if _oF(!vp) goto Err_mem;
+	sp->like=&(vp->v.v_float);
 	// .limit
 	vp=base->var_replace(o,"limit",tlog_vlist,leng_no);
 	if _oF(!vp) goto Err_mem;
@@ -671,16 +680,16 @@ func(spwav_new)
 	vp=base->var_link(o,"wav",w);
 	sp->wav=wav;
 	v.v_float=0;
-	vp=base->var_set(o,"et",tlog_float,leng_no,auth_read|auth_write,&v);
+	vp=base->var_set(o,"etmax",tlog_float,leng_no,auth_read|auth_write,&v);
 	if _oF(!vp) goto Err_mem;
-	sp->et=&(vp->v.v_float);
-	vp=base->var_set(o,"ea",tlog_float,leng_no,auth_read|auth_write,&v);
+	sp->etmax=&(vp->v.v_float);
+	vp=base->var_set(o,"eamax",tlog_float,leng_no,auth_read|auth_write,&v);
 	if _oF(!vp) goto Err_mem;
-	sp->ea=&(vp->v.v_float);
-	vp=base->var_set(o,"el",tlog_float,leng_no,auth_read|auth_write,&v);
+	sp->eamax=&(vp->v.v_float);
+	vp=base->var_set(o,"elmax",tlog_float,leng_no,auth_read|auth_write,&v);
 	if _oF(!vp) goto Err_mem;
-	sp->el=&(vp->v.v_float);
-	vp=base->var_set(o,"amin",tlog_float,leng_no,auth_read|auth_write,&v);
+	sp->elmax=&(vp->v.v_float);
+	vp=base->var_set(o,"init_amin",tlog_float,leng_no,auth_read|auth_write,&v);
 	if _oF(!vp) goto Err_mem;
 	sp->amin=&(vp->v.v_float);
 	vp=base->var_set(o,"init_tmin",tlog_float,leng_no,auth_read|auth_write,&v);
@@ -692,7 +701,7 @@ func(spwav_new)
 	vp=base->var_set(o,"start",tlog_float,leng_no,auth_read|auth_write,&v);
 	if _oF(!vp) goto Err_mem;
 	sp->ta=&(vp->v.v_float);
-	v.v_float=wav->size;
+	v.v_float=wav->size-1;
 	vp=base->var_set(o,"end",tlog_float,leng_no,auth_read|auth_write,&v);
 	if _oF(!vp) goto Err_mem;
 	sp->tb=&(vp->v.v_float);
@@ -706,5 +715,38 @@ func(spwav_new)
 	return get_error(error_wav,label);
 	Err_mem:
 	return base->get_error(errid_MemLess,label);
+}
+
+vya_wav_spwav* get_spwav(var *obj)
+{
+	var *vp;
+	vp=base->var_find(obj,_spwav_);
+	if _oF(!vp) return NULL;
+	return (vya_wav_spwav*) vp->v.v_void;
+}
+
+func(spwav_get)
+{
+	static char *label=label_name("spwav_get");
+	static u32 type_1[1]={type_object};
+	var *o,*vp;
+	vya_wav_spwav *sp;
+	
+	ret->type=type_byte;
+	if _oF((argc!=1)||base->check_varlist(argv,1,type_1)) return base->get_error(errid_FunArgvType,label);
+	o=argv->v;
+	if _oF(base->type_check(o,type_spwav->v.v_string)<=0) goto Err_check_spwap;
+	sp=get_spwav(o);
+	if _oF(!sp) goto Err_spwav;
+	
+	if _oF(*(sp->status)>0) spwav_init(sp);
+	else if _oT(*(sp->status)==0) spwav_get(sp);
+	
+	ret->v.v_long=*(sp->status);
+	return ret;
+	Err_check_spwap:
+	return get_error(error_type_spwap,label);
+	Err_spwav:
+	return get_error(error_spwav,label);
 }
 

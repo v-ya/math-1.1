@@ -53,19 +53,22 @@ typedef struct Svya_wav {
 typedef struct Svya_wav_spwav {
 	// 状态标志
 	// >0 未初始化; ==0 已初始化; <0 读取结束
-	s8 *status;
+	s64 *status;
 	// 中间变量
 	double *ts;
 	double *te;
 	double *aloud;
-	// 约束变量
 	double *et;
 	double *ea;
-	double *el;
-	double *amin;
+	double *like;
+	// 约束变量
+	double *etmax;
+	double *eamax;
+	double *elmax;
 	double *ta;
 	double *tb;
 	// 初始化周期约束
+	double *amin;
 	double *tmin;
 	double *tmax;
 	// 链接波形结构
