@@ -156,6 +156,7 @@
 		integer	uint	0	r	type_znum
 		number	uint	0	r	type_num
 		object	uint	0	r	type_object
+		func	uint	0	r	type_void|type_vlist
 		// 特殊类型
 		unsign	uint	0	r	type_unsign
 	}

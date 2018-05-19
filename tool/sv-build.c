@@ -96,6 +96,10 @@ int get_mode(char *mode)
 			m|=auth_link;
 			mode++;
 			goto loop;
+		case 'S':
+			m|=auth_relength;
+			mode++;
+			goto loop;
 		case 0:
 			return m;
 		default:
