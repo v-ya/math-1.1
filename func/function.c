@@ -61,8 +61,7 @@ var* var_define(char *exp, char **expp, var *root)
 	var *vp;
 	vlist *vl;
 	u32 length;
-	int i,tlog;
-	i=0;
+	int i=0,tlog,ex=0;
 	while(i<15&&is_name(*exp))
 	{
 		buffer[i++]=*(exp++);
@@ -70,13 +69,21 @@ var* var_define(char *exp, char **expp, var *root)
 	buffer[i]=0;
 	tlog=get_tlog(buffer);
 	if _oF(tlog>=tlog_max) goto Err_nottype;
-	// get name
 	while(is_space(*exp)) exp++;
 	if _oT(*exp==':')
 	{
 		exp++;
 		while(is_space(*exp)) exp++;
 	}
+	// ex struct type:(name= , ...), ...
+	if _oF(*exp=='(')
+	{
+		ex=1;
+		exp++;
+		while(is_space(*exp)) exp++;
+	}
+	Loop:
+	// get name
 	if _oF(!is_Name(*exp)) goto Err_notname;
 	name=get_name(exp,&exp);
 	if _oF(!name) goto Err_malloc;
@@ -273,6 +280,22 @@ var* var_define(char *exp, char **expp, var *root)
 		}
 	}
 	while(is_space(*exp)) exp++;
+	if _oF(ex)
+	{
+		if _oT(*exp==',')
+		{
+			exp++;
+			while(is_space(*exp)) exp++;
+			goto Loop;
+		}
+		else if _oT(*exp==')')
+		{
+			exp++;
+			while(is_space(*exp)) exp++;
+			goto End;
+		}
+		goto Err_notbra;
+	}
 	End:
 	if _oT(expp) *expp=exp;
 	return vp;
