@@ -20,6 +20,6 @@ print_argv.var int:i,int:n;
 .echo("\nprint .args.*\n");
 .echo(".exec\t= %s\n",.args.exec);
 .echo(".script\t= %s\n",.args.script);
-.if .args.exist("argv"); print_argv();
+.if .length(.args.argv); print_argv();
 delete print_argv;
 
