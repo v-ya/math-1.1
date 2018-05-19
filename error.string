@@ -55,6 +55,7 @@ ss(errcl_Var_S)		"变量基类";
 		ss(errid_VarNotWrite_S)		"无权写入变量";
 		ss(errid_VarNotLink_S)		"无权链接变量";
 		ss(errid_VarNotRun_S)		"无权运行变量";
+		ss(errid_VarNotRelength_S)	"无权重置变量长度";
 
 #undef ss
 
@@ -143,6 +144,7 @@ static char *errty_VarAuth_idA[]={
 	errid_VarNotWrite_S,
 	errid_VarNotLink_S,
 	errid_VarNotRun_S,
+	errid_VarNotRelength_S,
 } ;
 
 	static char **errcl_Var_idA[]={

@@ -80,20 +80,29 @@ var* var_define(char *exp, char **expp, var *root)
 	if _oF(!is_Name(*exp)) goto Err_notname;
 	name=get_name(exp,&exp);
 	if _oF(!name) goto Err_malloc;
-	// alloc link
+	// check var
 	vl=v_find(root,name);
+	if _oF(vl)
+	{
+		// check var's auth
+		vp=vl->v;
+		if _oF(!(vp->mode&auth_retype))
+		{
+			if _oT(vp->type^(1<<tlog)^(buffer[0]=='u'?type_unsign:0)) goto Err_notretype;
+			else if _oF(!(vp->mode&auth_relength)) goto Err_notrelength;
+		}
+	}
+	// check name
+	else if _oF(var_find(_vm_gobj,name)) goto Err_notname;
+	// alloc link
 	if _oT(!vl)
 	{
+		// chack root's auth
+		if _oF(!(root->mode&auth_write)) goto Err_nowrite;
 		vl=vlist_alloc(name);
 		if _oF(!vl) goto Err_malloc;
 		if _oT(root->type&type_vlist) root->v.v_vlist=vlist_insert(root->v.v_vlist,vl);
 		else vmat_insert(root->v.v_vmat,vl);
-	}
-	else if _oT(vl->v)
-	{
-		// check auth
-		vp=vl->v;
-		if _oF(!(vp->mode&auth_retype)) goto Err_notretype;
 	}
 	// get [length]
 	while(is_space(*exp)) exp++;
@@ -111,8 +120,6 @@ var* var_define(char *exp, char **expp, var *root)
 	if _oF(length&&(tlog==tlog_vlist||tlog==tlog_vmat)) goto Err_nottype;
 	// check length
 	if _oF(length>_lim_array_max->v.v_long) goto Err_notlength;
-	// check name
-	if _oF(var_find(_vm_gobj,name)) goto Err_notname;
 	// alloc var
 	vp=var_alloc(tlog,length);
 	if _oF(!vp)
@@ -286,6 +293,12 @@ var* var_define(char *exp, char **expp, var *root)
 	goto End;
 	Err_notretype:
 	vp=get_error(errid_VarNotRetype,label);
+	goto End;
+	Err_nowrite:
+	vp=get_error(errid_VarNotWrite,label);
+	goto End;
+	Err_notrelength:
+	vp=get_error(errid_VarNotRelength,label);
 	goto End;
 }
 

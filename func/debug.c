@@ -35,7 +35,7 @@ void print_vlist(vlist *vl, u32 tab)
 	{
 		// auth
 		r=vl->v->mode;
-		print("%c%c%c%c%c%c", (r&auth_retype)?'s':'-', (r&auth_read)?'r':'-', (r&auth_write)?'w':'-',
+		print("%c%c%c%c%c%c", (r&auth_retype)?'s':(r&auth_relength?'S':'-'), (r&auth_read)?'r':'-', (r&auth_write)?'w':'-',
 			(r&auth_link)?'l':'-', (r&auth_run)?'f':'-', (r&auth_key)?'k':'-');
 		// type
 		print("%8s", get_type(vl->v->type));

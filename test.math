@@ -1,26 +1,4 @@
 #!./math
 # test.math
 
-### next
-完善 wav 静态变量群
-	功能待定
-###
-
-function void:print_version(o:.type.object)
-{
-	.echo("%s.%s-v%d.%d.%d\n",o.info.author,o.info.package,
-		o.info.version.major,o.info.version.minor,o.info.version.rev);
-} ;
-
-var string:s,string:path="output/test.wav";
-s=import("wav","package/model/wav.so");
-.echo("Load ... ");
-print_version(wav);
-
-
-
-.echo("Clear ...\n");
-delete wav;
-.remove(s);
-.echo("Done.\n");
 

@@ -24,6 +24,16 @@ char* get_exp(char *path)
 	return NULL;
 }
 
+char* init_args_copynew(char *str)
+{
+	int n;
+	char *sn;
+	n=strlen(str)+1;
+	sn=malloc(n);
+	if (sn) memcpy(sn,str,n);
+	return sn;
+}
+
 int init_args(int argc, char *argv[])
 {
 	var *args,*vp;
@@ -32,26 +42,20 @@ int init_args(int argc, char *argv[])
 	args=var_replace(_vm_sysm,"args",tlog_vlist,leng_no);
 	args->mode=auth_read|free_pointer;
 	if (!args) return 1;
-	v.v_string=argv[0];
-	vp=var_set(args,"exec",tlog_string,leng_no,auth_read,&v);
+	v.v_string=init_args_copynew(argv[0]);
+	vp=var_set(args,"exec",tlog_string,leng_no,auth_read|auth_write|free_pointer,&v);
 	if (!vp) return 1;
-	v.v_string=argv[1];
-	vp=var_set(args,"script",tlog_string,leng_no,auth_read,&v);
+	v.v_string=init_args_copynew(argv[1]);
+	vp=var_set(args,"script",tlog_string,leng_no,auth_read|auth_write|free_pointer,&v);
 	if (!vp) return 1;
-	if (argc>2)
+	if (argc>=2)
 	{
 		vp=var_replace(args,"argv",tlog_string,argc-2);
 		if (!vp) return 1;
-		vp->mode=auth_read;
-		v.v_void=vp->v.v_void;
-		if (!var_set(args,"_argv_",tlog_void,leng_no,free_pointer,&v))
-		{
-			vp->mode|=free_pointer;
-			return 1;
-		}
+		vp->mode=auth_read|auth_write|auth_relength|free_pointer;
 		for(i=2;i<argc;i++)
 		{
-			vp->v.vp_string[i-2]=argv[i];
+			vp->v.vp_string[i-2]=init_args_copynew(argv[i]);
 		}
 	}
 	return 0;
