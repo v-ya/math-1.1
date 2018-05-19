@@ -572,13 +572,14 @@ var* var_link(var *obj, char *name, var *v)
 
 void get_tmpvar(char *exp, char **expp, var *v)
 {
+	int is_neg=0;
 	u64 tv_u64;
 	double tv_d0,tv_d1;
 	if _oF(*exp=='0')
 	{
 		exp++;
 		tv_u64=0;
-		if _oF(*exp=='.') goto label;
+		if _oF(*exp=='.') goto label_dot;
 		else if _oF(*exp=='x')
 		{
 			exp++;
@@ -661,28 +662,51 @@ void get_tmpvar(char *exp, char **expp, var *v)
 	}
 	else if _oT(*exp>'0'&&*exp<='9')
 	{
+		label_znum:
 		tv_u64=0;
 		while(*exp>='0'&&*exp<='9')
 			tv_u64=tv_u64*10+(*(exp++)-'0');
-		if _oF(*exp=='.')
+		if _oF(*exp=='.'||*exp=='e'||*exp=='E')
 		{
-			label:
-			exp++;
+			label_dot:
 			tv_d0=tv_u64;
 			tv_d1=1;
+			if _oT(*exp=='.') exp++;
+			else goto label_e;
 			while(*exp>='0'&&*exp<='9')
 			{
 				tv_d1/=10;
 				tv_d0+=tv_d1*(*(exp++)-'0');
 			}
-			v->v.v_float=tv_d0;
+			if _oF(*exp=='e'||*exp=='E') goto label_e;
+			v->v.v_float=is_neg?-tv_d0:tv_d0;
 			v->type=type_float;
 		}
 		else
 		{
-			v->v.v_long=tv_u64;
+			v->v.v_long=is_neg?-tv_u64:tv_u64;
 			v->type=type_long;
 		}
+		goto End;
+		label_e:
+		exp++;
+		if _oF(is_neg)
+		{
+			tv_d0=-tv_d0;
+			is_neg=0;
+		}
+		if _oF(*exp=='-')
+		{
+			exp++;
+			is_neg=1;
+		}
+		else if _oF(*exp=='+') exp++;
+		tv_u64=0;
+		while(*exp>='0'&&*exp<='9')
+			tv_u64=tv_u64*10+(*(exp++)-'0');
+		v->type=type_float;
+		if _oF(is_neg) v->v.v_float=tv_d0*pow(0.1,tv_u64);
+		else v->v.v_float=tv_d0*pow(10.0,tv_u64);
 	}
 	else if _oT(*exp=='-')
 	{
@@ -693,29 +717,10 @@ void get_tmpvar(char *exp, char **expp, var *v)
 			v->type=type_long;
 			v->v.v_long=0;
 			exp--;
+			goto End;
 		}
-		tv_u64=0;
-		while(*exp>='0'&&*exp<='9')
-			tv_u64=tv_u64*10+(*(exp++)-'0');
-		if _oF(*exp=='.')
-		{
-			exp++;
-			tv_d0=tv_u64;
-			tv_d1=1;
-			while(*exp>='0'&&*exp<='9')
-			{
-				tv_d1/=10;
-				tv_d0+=tv_d1*(*(exp++)-'0');
-			}
-			v->v.v_float=-tv_d0;
-			v->type=type_float;
-		}
-		else
-		{
-			v->v.v_long=tv_u64;
-			v->v.v_long=-v->v.v_long;
-			v->type=type_long;
-		}
+		is_neg=1;
+		goto label_znum;
 	}
 	else if _oF(*exp=='\"')
 	{
@@ -739,6 +744,7 @@ void get_tmpvar(char *exp, char **expp, var *v)
 		v->type=type_void;
 		v->v.v_long=0;
 	}
+	End:
 	if _oT(expp) *expp=exp;
 }
 

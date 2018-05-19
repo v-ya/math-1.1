@@ -123,6 +123,7 @@
 		int	-link	.sint
 		long	slong	0	rw
 		float	float	0	rw
+		string	string	NULL	rw
 		// 字符串处理库
 		sprint	fun	0	r	addr_fun(sprint)
 	// 常数表
@@ -153,8 +154,9 @@
 		vlist	uint	0	r	type_vlist
 		vmat	uint	0	r	type_vmat
 		// 复合类型
-		integer	uint	0	r	type_znum
-		number	uint	0	r	type_num
+		znum	uint	0	r	type_znum
+		num	uint	0	r	type_num
+		snum	uint	0	r	type_snum
 		object	uint	0	r	type_object
 		func	uint	0	r	type_void|type_vlist
 		// 特殊类型

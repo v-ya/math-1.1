@@ -551,6 +551,83 @@ var* get_var(char *exp, char **expp, int *array_n)
 	goto Err;
 }
 
+var* cal_strtran(var *r0, var *r1)
+{
+	static char *label="cal_strtran";
+	var *sbuf,t={.mode=auth_tmpvar|free_temp};
+	vlist vl;
+	int size;
+	// r0 = r1 || r1 @ r0
+	if _oF(r0->length) goto Err_type;
+	if _oT((r1->type&type_string)&&(r1->length==leng_no))
+	{
+		if _oT(r0->type&type_string) goto _SS;
+		else goto _NS;
+	}
+	else if _oT(r0->type&type_string) goto _SN;
+	else goto Err_type;
+	_SS:
+	// str = str
+		if _oF(r0->mode&free_pointer)
+		{
+			free(r0->v.v_string);
+			r0->mode&=~free_pointer;
+		}
+		r0->v.v_string=NULL;
+		if _oT(r1->v.v_string)
+		{
+			size=strlen(r1->v.v_string)+1;
+			r0->v.v_string=malloc(size);
+			if _oF(!r0->v.v_string) goto Err_malloc;
+			memcpy(r0->v.v_string,r1->v.v_string,size);
+			r0->mode|=free_pointer;
+		}
+		return NULL;
+	_NS:
+	// num = str
+		if _oF(!r1->v.v_string) t.type=type_void;
+		else get_tmpvar(r1->v.v_string,NULL,&t);
+		if _oF(!(t.type&type_num))
+		{
+			if _oF(t.mode&free_pointer) free(t.v.v_void);
+			t.type=type_long;
+			t.v.v_long=0;
+		}
+		size=(r0->type|t.type)&type_all;
+		if _oT(!(size&~type_znum)) r0->v.v_long = t.v.v_long;
+		else if _oT(!(size&~type_num))
+		{
+			if _oT(r0->type&type_znum) r0->v.v_long = (s64)t.v.v_float;
+			else r0->v.v_float = (t.type&type_znum)?t.v.v_long:t.v.v_float;
+		}
+		else goto Err_type;
+		return NULL;
+	_SN:
+	// str = num
+		if _oF(r0->mode&free_pointer)
+		{
+			free(r0->v.v_string);
+			r0->mode&=~free_pointer;
+		}
+		r0->v.v_string=NULL;
+		if _oF((r1->type&type_void)&&(r1->length==leng_no)) return NULL;
+		vl.l=NULL;
+		vl.r=NULL;
+		vl.v=r1;
+		sbuf=sbuf_sprintf("%?",&vl);
+		size=strlen(sbuf->v.v_string)+1;
+		r0->v.v_string=malloc(size);
+		if _oF(!r0->v.v_string) goto Err_malloc;
+		memcpy(r0->v.v_string,sbuf->v.v_string,size);
+		r0->mode|=free_pointer;
+		return NULL;
+	// error
+	Err_type:
+	return get_error(errid_IntError,label);
+	Err_malloc:
+	return get_error(errid_MemLess,label);
+}
+
 var* cal(char *exp, char **expp)
 {
 	// 定义语法块入口
@@ -581,7 +658,7 @@ var* cal(char *exp, char **expp)
 	void *RetAddr;
 	int *array_n,an;
 	u32 t,con=0;
-	var *r,*r0=NULL,*vt,real={.inode=0,.length=0,.mode=auth_tmpvar|free_temp};
+	var *r,*r0=NULL,*ra,*vt,real={.inode=0,.length=0,.mode=auth_tmpvar|free_temp};
 	// 获取 r
 	array_n=NULL;
 	Begin:
@@ -982,18 +1059,14 @@ var* cal(char *exp, char **expp)
 				if _oT(r0->type&type_znum) r0->v.v_long = (s64)r->v.v_float;
 				else r0->v.v_float = vpntof(r);
 			}
-			else if _oT(!(t&~type_string))
+			else if _oT((!(t&~type_snum))||(r0->type&type_string))
 			{
-				if _oF(r0->mode&free_pointer) free(r0->v.v_string);
-				r0->v.v_string=NULL;
-				r0->mode&=~free_pointer;
-				if _oT(r->v.v_string)
+				vt=cal_strtran(r0,r);
+				if _oF(vt)
 				{
-					t=strlen(r->v.v_string)+1;
-					r0->v.v_string=malloc(t);
-					if _oF(!r0->v.v_string) goto Err_malloc;
-					memcpy(r0->v.v_string,r->v.v_string,t);
-					r0->mode|=free_pointer;
+					var_free(r);
+					r=vt;
+					goto Err;
 				}
 			}
 			else goto Err_nottype;
@@ -1364,11 +1437,13 @@ var* cal(char *exp, char **expp)
 		goto FuncGetVar;
 	GraAddr_Ass:
 		if _oF(r->length) goto Err_nottype;
-		if _oF(r!=&real)
+		r0=r;
+		if _oT(r0->type&type_num)
 		{
-			real.type=r->type;
-			real.v.v_long=r->v.v_long;
-			var_free(r);
+			real.type=r0->type;
+			real.v.v_long=r0->v.v_long;
+			var_free(r0);
+			r0=&real;
 		}
 		array_n=&an;
 		RetAddr=&&GraAddr_Ass_Ass;
@@ -1376,57 +1451,140 @@ var* cal(char *exp, char **expp)
 		GraAddr_Ass_Ass:
 		array_n=NULL;
 		if _oF(!(r->mode&auth_write)) goto Err_notwrite;
+		// r = r0
 		if _oF(r->length)
 		{
-			if _oF(an<0) goto Err_nottype;
-			switch(r->type&type_all)
+			ra=r;
+			r=malloc(sizeof(var));
+			if _oF(!r)
+			{
+				var_free(ra);
+				goto Err_malloc;
+			}
+			r->type=ra->type;
+			r->mode=auth_tmpvar;
+			r->length=leng_no;
+			r->inode=1;
+			// tran
+			if _oF(r0->length) goto Err_nottype;
+			t=(r0->type|r->type)&type_all;
+			if _oT(!(t&~type_znum)) r->v.v_long = r0->v.v_long;
+			else if _oT(!(t&~type_num))
+			{
+				if _oT(r->type&type_znum) r->v.v_long = (s64)r0->v.v_float;
+				else r->v.v_float = vpntof(r0);
+			}
+			else if _oT((!(t&~type_snum))||(r->type&type_string))
+			{
+				vt=cal_strtran(r,r0);
+				if _oF(vt)
+				{
+					var_free(r);
+					r=vt;
+					goto Err;
+				}
+			}
+			else goto Err_nottype;
+			var_fixvalue(r);
+			var_free(r0);
+			r0=NULL;
+			// set array ra[an]
+			switch(ra->type&type_all)
 			{
 				case type_byte:
-					real.v.v_long=r->v.vp_byte[an]=(s8)vpntof(&real);
+					ra->v.vp_byte[an]=r->v.v_byte;
 					break;
 				case type_word:
-					real.v.v_long=r->v.vp_word[an]=(s16)vpntof(&real);
+					ra->v.vp_word[an]=r->v.v_word;
 					break;
 				case type_int:
-					real.v.v_long=r->v.vp_int[an]=(s32)vpntof(&real);
+					ra->v.vp_int[an]=r->v.v_int;
 					break;
 				case type_long:
-					real.v.v_long=r->v.vp_long[an]=(s64)vpntof(&real);
+					ra->v.vp_long[an]=r->v.v_long;
 					break;
 				case type_float:
-					real.v.v_float=r->v.vp_float[an]=(double)vpntof(&real);
+					ra->v.vp_float[an]=r->v.v_float;
+					break;
+				case type_string:
+					if _oF(ra->v.vp_string[an]&&(ra->mode&free_pointer)) free(ra->v.vp_string[an]);
+					ra->v.vp_string[an]=NULL;
+					if _oF(!r->v.v_string) break;
+					t=strlen(r->v.v_string)+1;
+					ra->v.vp_string[an]=malloc(t);
+					if _oF(!ra->v.vp_string[an])
+					{
+						var_free(ra);
+						goto Err_malloc;
+					}
+					memcpy(ra->v.vp_string[an],r->v.v_string,t);
 					break;
 				default:
+					var_free(ra);
 					goto Err_nottype;
 			}
-			real.type=r->type;
-			var_free(r);
-			r=&real;
-			var_fixvalue(r);
+			var_free(ra);
 			goto LoopEntra;
 		}
 		else
 		{
-			t=(real.type|r->type)&type_all;
-			if _oT(!(t&~type_znum)) r->v.v_long = real.v.v_long;
+			if _oF(r0->length) goto Err_nottype;
+			t=(r0->type|r->type)&type_all;
+			if _oT(!(t&~type_znum)) r->v.v_long = r0->v.v_long;
 			else if _oT(!(t&~type_num))
 			{
-				if _oT(r->type&type_znum) r->v.v_long = (s64)real.v.v_float;
-				else r->v.v_float = vpntof(&real);
+				if _oT(r->type&type_znum) r->v.v_long = (s64)r0->v.v_float;
+				else r->v.v_float = vpntof(r0);
+			}
+			else if _oT((!(t&~type_snum))||(r->type&type_string))
+			{
+				vt=cal_strtran(r,r0);
+				if _oF(vt)
+				{
+					var_free(r);
+					r=vt;
+					goto Err;
+				}
 			}
 			else goto Err_nottype;
 			var_fixvalue(r);
+			var_free(r0);
+			r0=NULL;
 			goto LoopEntra;
 		}
 	GraAddr_Tmp:
 		if _oT(r!=&real)
 		{
 			if _oF(r->length) goto Err_nottype;
-			if _oF(!(r->type&type_num)) goto Err_nottype;
-			real.type=r->type;
-			real.v.v_long=r->v.v_long;
-			var_free(r);
-			r=&real;
+			if _oF(!(r->type&type_snum)) goto Err_nottype;
+			if _oF(r->type&type_string)
+			{
+				r0=r;
+				r=malloc(sizeof(var));
+				if _oF(!r) goto Err_malloc;
+				r->type=type_string;
+				r->mode=auth_tmpvar;
+				r->inode=1;
+				r->length=leng_no;
+				if _oF(!r0->v.v_string) r->v.v_string=NULL;
+				else
+				{
+					t=strlen(r0->v.v_string)+1;
+					r->v.v_string=malloc(t);
+					if _oF(!r->v.v_string) goto Err_malloc;
+					memcpy(r->v.v_string,r0->v.v_string,t);
+					r->mode|=free_pointer;
+				}
+				var_free(r0);
+				r0=NULL;
+			}
+			else
+			{
+				real.type=r->type;
+				real.v.v_long=r->v.v_long;
+				var_free(r);
+				r=&real;
+			}
 		}
 		while(is_space(*exp)) exp++;
 		goto LoopEntra;
