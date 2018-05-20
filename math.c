@@ -551,6 +551,56 @@ var* get_var(char *exp, char **expp, int *array_n)
 	goto Err;
 }
 
+var* cal_strcat(var *r0, var *r1)
+{
+	static char *label="cal_strcat";
+	var *r;
+	int s0,s1;
+	if _oF(r0->length||r1->length||r0->type!=type_string||r1->type!=type_string) goto Err_type;
+	r=malloc(sizeof(var));
+	if _oF(!r) goto Err_malloc;
+	r->type=type_string;
+	r->length=leng_no;
+	r->mode=auth_tmpvar;
+	r->inode=1;
+	r->v.v_string=NULL;
+	if _oT(r0->v.v_string) s0=strlen(r0->v.v_string);
+	else s0=0;
+	if _oT(r1->v.v_string) s1=strlen(r1->v.v_string);
+	else s1=0;
+	if _oT(s0||s1)
+	{
+		if _oT(s0&&s1)
+		{
+			r->v.v_string=malloc(s0+s1+1);
+			if _oF(!r->v.v_string) goto Err_malloc;
+			r->mode|=free_pointer;
+			memcpy(r->v.v_string,r0->v.v_string,s0);
+			memcpy(r->v.v_string+s0,r1->v.v_string,s1+1);
+		}
+		else if _oT(s0)
+		{
+			r->v.v_string=malloc(s0+1);
+			if _oF(!r->v.v_string) goto Err_malloc;
+			r->mode|=free_pointer;
+			memcpy(r->v.v_string,r0->v.v_string,s0+1);
+		}
+		else
+		{
+			r->v.v_string=malloc(s1+1);
+			if _oF(!r->v.v_string) goto Err_malloc;
+			r->mode|=free_pointer;
+			memcpy(r->v.v_string,r1->v.v_string,s1+1);
+		}
+	}
+	return r;
+	Err_type:
+	return get_error(errid_GraVarType,label);
+	Err_malloc:
+	if (r) free(r);
+	return get_error(errid_MemLess,label);
+}
+
 var* cal_strtran(var *r0, var *r1)
 {
 	static char *label="cal_strtran";
@@ -709,7 +759,22 @@ var* cal(char *exp, char **expp)
 		else
 		{
 			// +
-			if _oF(r!=&real)
+			if _oF(r->type&type_string)
+			{
+				// strcat
+				r0=r;
+				RetAddr=&&GraAddr_Add_AddStr;
+				goto FuncGetVar;
+				GraAddr_Add_AddStr:
+				vt=r;
+				r=cal_strcat(r0,vt);
+				var_free(r0);
+				var_free(vt);
+				r0=NULL;
+				if _oF(r->type&type_spe) goto Err;
+				goto LoopEntra;
+			}
+			else if _oF(r!=&real)
 			{
 				if _oF(r->length) goto Err_nottype;
 				real.type=r->type;

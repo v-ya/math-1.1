@@ -126,6 +126,7 @@
 		string	string	NULL	rw
 		// 字符串处理库
 		sprint	fun	0	r	addr_fun(sprint)
+		s	-link	.sprint
 	// 常数表
 	const	vmat	0	r	{
 		e	float	0	r	M_E
