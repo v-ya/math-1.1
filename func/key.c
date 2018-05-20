@@ -30,7 +30,6 @@ keyword(delete)
 	var *vp;
 	if _oF(!call) return get_error(errid_IntError,label);
 	if _oF(!(call->type&type_object)) return get_error(errid_VarNotObject,label);
-	if _oF(!(call->mode&auth_write)) return get_error(errid_VarNotWrite,label);
 	Loop:
 	switch(**expp)
 	{
