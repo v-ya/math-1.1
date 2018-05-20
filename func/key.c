@@ -295,3 +295,30 @@ keyword(exit)
 	return &exit;
 }
 
+keyword(run)
+{
+	static char *label="[object].run";
+	var *vp,*code;
+	if _oF(!call) return get_error(errid_IntError,label);
+	if _oF(!(call->type&type_object)) return get_error(errid_VarNotObject,label);
+	
+	vp=cal(*expp,expp);
+	if _oF(vp->type&type_spe) goto Err;
+	if _oF(**expp!=';')
+	{
+		var_free(vp);
+		vp=get_error(errid_GraLackSem,label);
+		goto Err;
+	}
+	if _oT(vp->type&type_string)
+	{
+		code=vp;
+		vp=run_script(code,call);
+		var_free(code);
+		return vp;
+	}
+	else vp=get_error(errid_VarNotString,label);
+	Err:
+	return vp;
+}
+

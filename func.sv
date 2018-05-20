@@ -12,6 +12,7 @@
 		function key	0	r	addr_key(function)
 		exist	fun	0	r	addr_fun(exist)
 		import	fun	0	r	addr_fun(import)
+		run	key	0	r	addr_key(run)
 		
 		// 占位符
 		_vt_	void	0	r

@@ -13,6 +13,7 @@ keyword(gotoup);
 keyword(if);
 keyword(while);
 keyword(exit);
+keyword(run);
 
 #endif
 
