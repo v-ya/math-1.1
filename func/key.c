@@ -322,3 +322,61 @@ keyword(run)
 	return vp;
 }
 
+keyword(try)
+{
+	static char *label="[object].try";
+	var *vp,*code,*deal;
+	if _oF(!call) return get_error(errid_IntError,label);
+	if _oF(!(call->type&type_object)) return get_error(errid_VarNotObject,label);
+	
+	vp=cal(*expp,expp);
+	if _oF(vp->type&type_spe) goto Err;
+	code=vp;
+	if _oF(**expp==',')
+	{
+		(*expp)++;
+		vp=cal(*expp,expp);
+		if _oF(vp->type&type_spe)
+		{
+			var_free(code);
+			goto Err;
+		}
+		deal=vp;
+	}
+	else deal=NULL;
+	if _oF(**expp!=';')
+	{
+		var_free(code);
+		var_free(deal);
+		vp=get_error(errid_GraLackSem,label);
+		goto Err;
+	}
+	if _oT((code->type&type_string)&&(deal==NULL||(deal->type&type_string)))
+	{
+		vp=run_script(code,call);
+		var_free(code);
+		if _oF(vp&&deal)
+		{
+			// Throw Error && run deal
+			backup_error();
+			vp=run_script(deal,call);
+			backup_clr_error();
+		}
+		else
+		{
+			clr_error();
+			vp=NULL;
+		}
+		var_free(deal);
+		return vp;
+	}
+	else
+	{
+		var_free(code);
+		var_free(deal);
+		vp=get_error(errid_VarNotString,label);
+	}
+	Err:
+	return vp;
+}
+

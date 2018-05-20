@@ -13,6 +13,7 @@
 		exist	fun	0	r	addr_fun(exist)
 		import	fun	0	r	addr_fun(import)
 		run	key	0	r	addr_key(run)
+		try	key	0	r	addr_key(try)
 		
 		// 占位符
 		_vt_	void	0	r
@@ -36,6 +37,7 @@
 		sbuf	vmat	0	-
 		kill	vlist	0	-
 		error	vlist	0	-
+		buerr	vlist	0	-
 		
 		_pt_this	-export	.thread.this
 		_pt_text	-export	.thread.text
@@ -43,6 +45,7 @@
 		_pt_sbuf	-export	.thread.sbuf
 		_pt_kill	-export .thread.kill
 		_pt_error	-export	.thread.error
+		_pt_buerr	-export	.thread.buerr
 	}
 	// 系统相关
 	sys	vmat	0	r	{
@@ -163,6 +166,16 @@
 		func	uint	0	r	type_void|type_vlist
 		// 特殊类型
 		unsign	uint	0	r	type_unsign
+	}
+	// try 处理错误函数
+	try	vlist	0	r	{
+		errid	fun	0	r	addr_fun(try_errid)
+		errstr_cl	fun	0	r	addr_fun(try_errstr_cl)
+		errstr_ty	fun	0	r	addr_fun(try_errstr_ty)
+		errstr_id	fun	0	r	addr_fun(try_errstr_id)
+		errstr_text	fun	0	r	addr_fun(try_errstr_text)
+		errstr_label	fun	0	r	addr_fun(try_errstr_label)
+		errnext	fun	0	r	addr_fun(try_errnext)
 	}
 	// 调试相关
 	debug	vlist	0	r	{

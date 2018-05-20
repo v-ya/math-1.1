@@ -80,6 +80,8 @@ typedef struct ERROR_INFO {
 var* get_error(u32 errid, char *label);
 void set_error(var *pt_text, char *script);
 void clr_error(void);
+void backup_error(void);
+void backup_clr_error(void);
 char* str_error_cl(u32 errid);
 char* str_error_ty(u32 errid);
 char* str_error_id(u32 errid);

@@ -24,6 +24,7 @@ extern var *_pt_temp;
 extern var *_pt_sbuf;
 extern var *_pt_kill;
 extern var *_pt_error;
+extern var *_pt_buerr;
 // 限制
 extern var *_lim_array_max;
 extern var *_lim_sbuf_base;
@@ -39,6 +40,7 @@ extern var *_type_null;
 #include "func/con.h"
 #include "func/math.h"
 #include "func/string.h"
+#include "func/try.h"
 #include "func/debug.h"
 
 #endif

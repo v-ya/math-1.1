@@ -96,6 +96,42 @@ void clr_error(void)
 	ptvar_free(_pt_error);
 }
 
+// [object].try's error backup
+
+void backup_error(void)
+{
+	var *vp;
+	backup_clr_error();
+	vp=ptvar_get(_pt_error);
+	if _oF(vp)
+	{
+		ptvar_replace(_pt_error,NULL);
+		ptvar_free(_pt_error);
+		ptvar_replace(_pt_buerr,vp);
+	}
+}
+
+void backup_clr_error(void)
+{
+	var *vp;
+	error_info *i;
+	vp=ptvar_get(_pt_buerr);
+	if _oT(vp)
+	{
+		i=vp->v.v_error;
+		while(i)
+		{
+			vp->v.v_error=i->last;
+			var_free(i->pt_text);
+			free(i);
+			i=vp->v.v_error;
+		}
+	}
+	ptvar_free(_pt_buerr);
+}
+
+// End
+
 char* str_error_cl(u32 errid)
 {
 	errid>>=16;

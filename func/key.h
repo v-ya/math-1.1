@@ -14,6 +14,7 @@ keyword(if);
 keyword(while);
 keyword(exit);
 keyword(run);
+keyword(try);
 
 #endif
 
