@@ -74,6 +74,7 @@ struct VMAT;
 
 #define vpntof(vp)	(((vp)->type&type_znum)?((vp)->v.v_long):((vp)->v.v_float))
 #define vpbool(vp)	(((vp)->type&type_void)?0:(((vp)->type&type_float)?(((vp)->v.v_float!=0)?1:0):(((vp)->v.v_long)?1:0)))
+#define isstring(vp)	((vp->type&type_string)&&(!vp->length))
 
 #define _kw_(p,n)	var* p##n(var *call, char **expp)
 #define _func_(p,n)	var* p##n(var *ret, int argc, vlist *argv)

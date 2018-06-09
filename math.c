@@ -509,6 +509,21 @@ var* get_var(char *exp, char **expp, int *array_n)
 			}
 	}
 	End:
+	if _oF(isstring(vp)&&vp->v.v_string)
+	{
+		root=vp;
+		vp=var_alloc(tlog_string,leng_no);
+		if _oF(!vp) goto Err_malloc;
+		length=strlen(root->v.v_string)+1;
+		vp->v.v_string=malloc(length);
+		if _oF(!vp->v.v_string)
+		{
+			free(vp);
+			goto Err_malloc;
+		}
+		vp->mode=auth_tmpvar|free_pointer;
+		memcpy(vp->v.v_string,root->v.v_string,length);
+	}
 	var_save(vp);
 	Err:
 	// unlock
