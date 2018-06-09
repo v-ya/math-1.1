@@ -15,6 +15,7 @@ keyword(while);
 keyword(exit);
 keyword(run);
 keyword(try);
+keyword(include);
 
 #endif
 

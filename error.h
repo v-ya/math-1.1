@@ -30,6 +30,8 @@
 		#define errid_SysPackageNotfind	(errty_CodeSys|0x07)
 		#define errid_SysPackageTakeup	(errty_CodeSys|0x08)
 		#define errid_SysPackageDamage	(errty_CodeSys|0x09)
+		#define errid_SysFileNotLoad	(errty_CodeSys|0x0a)
+		#define errid_SysFileStringSize	(errty_CodeSys|0x0b)
 	#define errty_CodeFun	errcl_Code|0x0400
 		#define errid_FunArgvType	(errty_CodeFun|0x01)
 		#define errid_FunNotfindLabel	(errty_CodeFun|0x02)

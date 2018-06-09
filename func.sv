@@ -14,6 +14,7 @@
 		import	fun	0	r	addr_fun(import)
 		run	key	0	r	addr_key(run)
 		try	key	0	r	addr_key(try)
+		include	key	0	r	addr_key(include)
 		
 		// 占位符
 		_vt_	void	0	r
@@ -61,11 +62,13 @@
 			sbuf_base	uword	0	rw	BASE_sbuf
 			sbuf_max	uword	0	rw	MAX_sbuf
 			fargc_max	ubyte	0	rw	MAX_fargc
+			file_str_size	uint	0	rw	SIZE_ftos
 			
 			_lim_array_max	-export	.sys.limit.array_max
 			_lim_sbuf_base	-export	.sys.limit.sbuf_base
 			_lim_sbuf_max	-export	.sys.limit.sbuf_max
 			_lim_fargc_max	-export	.sys.limit.fargc_max
+			_lim_ftos_size	-export	.sys.limit.file_str_size
 		}
 		// 路径
 		path	vlist	0	r	{

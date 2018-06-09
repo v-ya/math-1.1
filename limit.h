@@ -6,8 +6,8 @@
 
 // 版本号
 	#define	VERSION_major		1
-	#define VERSION_minor		1
-	#define VERSION_revision	0
+	#define VERSION_minor		2
+	#define VERSION_revision	1
 
 // 限制
 	// 自定义数组最大长度
@@ -18,6 +18,8 @@
 	#define MAX_sbuf		0x8000
 	// 自定义函数最大传递参数	
 	#define MAX_fargc		16
+	// 文本文件转换成字符串的最大大小（byte）: 64 KiB
+	#define SIZE_ftos		0x10000
 
 // 路径
 	// path 的分割符

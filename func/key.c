@@ -310,7 +310,7 @@ keyword(run)
 		vp=get_error(errid_GraLackSem,label);
 		goto Err;
 	}
-	if _oT(vp->type&type_string)
+	if _oT(isstring(vp))
 	{
 		code=vp;
 		vp=run_script(code,call);
@@ -351,7 +351,7 @@ keyword(try)
 		vp=get_error(errid_GraLackSem,label);
 		goto Err;
 	}
-	if _oT((code->type&type_string)&&(deal==NULL||(deal->type&type_string)))
+	if _oT(isstring(code)&&(deal==NULL||isstring(deal)))
 	{
 		vp=run_script(code,call);
 		var_free(code);
@@ -379,4 +379,48 @@ keyword(try)
 	Err:
 	return vp;
 }
+
+keyword(include)
+{
+	static char *label="[object].include";
+	char *path;
+	var *vp,code={.type=type_string,.inode=1,.mode=auth_tmpvar|free_temp,.length=leng_no};
+	if _oF(!call) return get_error(errid_IntError,label);
+	if _oF(!(call->type&type_object)) return get_error(errid_VarNotObject,label);
+	
+	vp=cal(*expp,expp);
+	if _oF(vp->type&type_spe) goto Err;
+	if _oF(**expp!=';')
+	{
+		var_free(vp);
+		vp=get_error(errid_GraLackSem,label);
+		goto Err;
+	}
+	if _oT(isstring(vp))
+	{
+		// get path
+		path=vp->v.v_string;
+		if _oF(_path_include->v.v_string&&path&&path[0]!=_path_incutup->v.v_byte)
+		{
+			path=get_path(_path_include->v.v_string,path);
+			code.v.v_string=load_string(path);
+			free(path);
+		}
+		else code.v.v_string=load_string(path);
+		var_free(vp);
+		if _oF(!code.v.v_string)
+		{
+			vp=ptvar_get(_pt_error);
+			if _oF(vp) return vp;
+			else return get_error(errid_SysFileNotLoad,label);
+		}
+		vp=run_script(&code,call);
+		free(code.v.v_string);
+		return vp;
+	}
+	else vp=get_error(errid_VarNotString,label);
+	Err:
+	return vp;
+}
+
 

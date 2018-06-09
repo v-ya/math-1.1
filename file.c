@@ -23,10 +23,43 @@ char* get_path(char *path_list, char *path_short)
 		p+=sz_l;
 		if _oT(path_list[p]==cu) p++;
 	}
-	ret=malloc(sz_s);
-	if _oF(!ret) return NULL;
-	memcpy(ret,path_short,sz_s);
-	return ret;
+	return NULL;
 }
 
+char* load_string(char *path)
+{
+	static char *label="load_string";
+	FILE *fp;
+	u64 size;
+	char *str;
+	if _oF(!path) return NULL;
+	fp=fopen(path,"rb");
+	if _oF(!fp) return NULL;
+	// 获取文件大小
+	fseek(fp,0,SEEK_END);
+	size=ftell(fp);
+	if _oF(size>=_lim_ftos_size->v.v_long)
+	{
+		fclose(fp);
+		get_error(errid_SysFileStringSize,label);
+		return NULL;
+	}
+	fseek(fp,0,SEEK_SET);
+	str=malloc(size+1);
+	if _oF(!str)
+	{
+		fclose(fp);
+		get_error(errid_MemLess,label);
+		return NULL;
+	}
+	if _oF(fread(str,1,size,fp)<size)
+	{
+		fclose(fp);
+		free(str);
+		return NULL;
+	}
+	str[size]=0;
+	fclose(fp);
+	return str;
+}
 

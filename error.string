@@ -25,6 +25,8 @@ ss(errcl_Code_S)	"代码基类";
 		ss(errid_SysPackageNotfind_S)	"被链接包未找到";
 		ss(errid_SysPackageTakeup_S)	"被链接包占用状态";
 		ss(errid_SysPackageDamage_S)	"被链接包损毁";
+		ss(errid_SysFileNotLoad_S)	"不能载入文件";
+		ss(errid_SysFileStringSize_S)	"文件转换字符串超出大小限制";
 	ss(errty_CodeFun_S)	"函数类别";
 		ss(errid_FunArgvType_S)		"函数传参类型错误";
 		ss(errid_FunNotfindLabel_S)	"不能找到标签";
@@ -89,6 +91,8 @@ static char *errty_CodeSys_idA[]={
 	errid_SysPackageNotfind_S,
 	errid_SysPackageTakeup_S,
 	errid_SysPackageDamage_S,
+	errid_SysFileNotLoad_S,
+	errid_SysFileStringSize_S,
 } ;
 
 static char *errty_CodeFun_idA[]={

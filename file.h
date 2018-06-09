@@ -4,6 +4,7 @@
 #ifndef __nosym__
 
 char* get_path(char *path_list, char *path_short);
+char* load_string(char *path);
 
 #endif
 
