@@ -100,7 +100,10 @@ func(import)
 	if _oF(!ret->v.v_void) goto Err_write;
 	name=argv->v->v.v_string;
 	argv=argv->r;
+	// 检查 name
 	if _oF(!vname_check(name)) goto Err_name;
+	if _oF(var_find(_vm_gobj,name)) goto Err_name;
+	if _oF(var_find(ret,name)) goto Err_samename;
 	// 获取 path
 	path=argv->v->v.v_string;
 	if _oF(_path_import->v.v_string&&path&&path[0]!=_path_incutup->v.v_byte)
@@ -132,6 +135,9 @@ func(import)
 	goto Err;
 	Err_name:
 	vp=get_error(errid_GraQuoVarname,label);
+	goto Err;
+	Err_samename:
+	vp=get_error(errid_VarIsExist,label);
 	goto Err;
 	Err_mem:
 	vp=get_error(errid_MemLess,label);
