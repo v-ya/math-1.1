@@ -343,8 +343,8 @@ func(rcos_get)
 func(aloud)
 {
 	static char *label=label_name("aloud");
-	static u32 type_1[1]={type_object|type_num};
-	static u32 type_3[3]={type_object|type_num,type_num,type_num};
+	static u32 type_1[1]={type_object|type_num|type_allowarray};
+	static u32 type_3[3]={type_object|type_num|type_allowarray,type_num,type_num};
 	double sa=0;
 	void *sp;
 	u32 s,t,i;
@@ -480,8 +480,8 @@ func(aloud)
 func(noise)
 {
 	static char *label=label_name("noise");
-	static u32 type_1[1]={type_object|type_num};
-	static u32 type_3[3]={type_object|type_num,type_num,type_num};
+	static u32 type_1[1]={type_object|type_num|type_allowarray};
+	static u32 type_3[3]={type_object|type_num|type_allowarray,type_num,type_num};
 	double *sa;
 	u32 s,t,i;
 	var *o,*vp;

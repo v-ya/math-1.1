@@ -9,6 +9,7 @@
 #include <pthread.h>
 #include <time.h>
 #include <dlfcn.h>
+#include <unistd.h>
 #include "type.h"
 #include "limit.h"
 #include "string.h"
@@ -16,6 +17,7 @@
 #include "error.h"
 #include "sbuf.h"
 #include "math.h"
+#include "file.h"
 #include "exfun.h"
 #include "BaseFunction.h"
 #include "package.h"

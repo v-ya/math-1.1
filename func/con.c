@@ -96,11 +96,20 @@ func(import)
 	else if _oF(check_varlist(argv,2,type_2)) return get_error(errid_FunArgvType,label);
 	// 判断 ret 是否可写
 	if _oF(!(ret->mode&auth_write)) goto Err_write;
+	// 空 vlist 不可写
+	if _oF(!ret->v.v_void) goto Err_write;
 	name=argv->v->v.v_string;
 	argv=argv->r;
-	path=argv->v->v.v_string;
 	if _oF(!vname_check(name)) goto Err_name;
-	vp=package_import(path,&fullname);
+	// 获取 path
+	path=argv->v->v.v_string;
+	if _oF(_path_import->v.v_string&&path&&path[0]!=_path_incutup->v.v_byte)
+	{
+		path=get_path(_path_import->v.v_string,path);
+		vp=package_import(path,&fullname);
+		free(path);
+	}
+	else vp=package_import(path,&fullname);
 	if _oF(vp->type&type_err) goto Err;
 	// 产生资源链接变量
 	vl=vlist_alloc(name);

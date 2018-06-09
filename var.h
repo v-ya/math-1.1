@@ -33,6 +33,8 @@ struct VMAT;
 #define type_vmat	0x00000100
 // unsigned type, only used by byte, word, int, long
 #define type_unsign	0x01000000
+// only used at check_varlist
+#define type_allowarray	0x01000000
 // type class
 #define type_all	0x00ffffff
 #define type_znum	0x0000001e

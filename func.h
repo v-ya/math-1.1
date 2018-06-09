@@ -30,6 +30,12 @@ extern var *_lim_array_max;
 extern var *_lim_sbuf_base;
 extern var *_lim_sbuf_max;
 extern var *_lim_fargc_max;
+// 路径
+extern var *_path_cutup;
+extern var *_path_incutup;
+extern var *_path_import;
+extern var *_path_include;
+extern var *_path_data;
 // 特殊
 extern var *_type_null;
 

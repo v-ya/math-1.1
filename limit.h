@@ -19,5 +19,17 @@
 	// 自定义函数最大传递参数	
 	#define MAX_fargc		16
 
+// 路径
+	// path 的分割符
+	#define PATH_cutup		':'
+	// path 内的分割符
+	#define PATH_incutup		'/'
+	// package 的默认储存路径
+	#define PATH_import		NULL
+	// 脚本文件的默认储存路径
+	#define PATH_include		NULL
+	// 数据文件的默认储存路径
+	#define PATH_data		NULL
+
 #endif
 

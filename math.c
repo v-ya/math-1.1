@@ -112,6 +112,7 @@ int check_varlist(vlist *vl, u32 argc, u32 type[])
 		if _oF(!vl) return 1;
 		else if _oF(!vl->v) return 1;
 		else if _oF(!(vl->v->type&type[i])) return 1;
+		else if _oF((!(type[i]&type_allowarray))&&vl->v->length) return 1;
 		vl=vl->r;
 	}
 	return 0;

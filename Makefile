@@ -1,7 +1,7 @@
 # if in Android and need PIE, then you can use 'CC = gcc -pie -fPIE'
 export	CC		= gcc #-pie -fPIE
 export	MAKEFLAGS	= --no-print-directory
-obj	= main.o string.o var.o error.o math.o sbuf.o BaseFunction.o package.o func.o exfun.o
+obj	= main.o string.o var.o error.o math.o sbuf.o file.o BaseFunction.o package.o func.o exfun.o
 func	= func/function.o func/key.o func/con.o func/math.o func/string.o func/try.o func/debug.o
 
 all: math package/package

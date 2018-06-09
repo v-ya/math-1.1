@@ -67,6 +67,21 @@
 			_lim_sbuf_max	-export	.sys.limit.sbuf_max
 			_lim_fargc_max	-export	.sys.limit.fargc_max
 		}
+		// 路径
+		path	vlist	0	r	{
+			cutup	sbyte	0	rw	PATH_cutup
+			incutup	sbyte	0	rw	PATH_incutup
+			_path_cutup	-export	.sys.path.cutup
+			_path_incutup	-export	.sys.path.incutup
+			
+			import	string	0	rw	PATH_import
+			include	string	0	rw	PATH_include
+			data	string	0	rw	PATH_data
+			
+			_path_import	-export	.sys.path.import
+			_path_include	-export	.sys.path.include
+			_path_data	-export	.sys.path.data
+		}
 		// 信息
 		info	vlist	0	r	{
 			rand_max	ulong	0	r	RAND_MAX_L
