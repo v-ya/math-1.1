@@ -7,7 +7,7 @@
 // 版本号
 	#define	VERSION_major		1
 	#define VERSION_minor		3
-	#define VERSION_revision	1
+	#define VERSION_revision	2
 
 // 限制
 	// 自定义数组最大长度

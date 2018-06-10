@@ -416,7 +416,7 @@ var* get_var(char *exp, char **expp, int *array_n)
 			if _oF(!(vp->mode&auth_run)) goto Err_notrun;
 			func=vp;
 			mode=func->mode;
-			func->mode&=~(auth_retype|auth_write);
+			func->mode&=~auth_retype;
 			var_save(func);
 			// unlock
 			exp=run_fun(exp,root,&vp);
