@@ -303,12 +303,11 @@ keyword(run)
 	if _oF(!(call->type&type_object)) return get_error(errid_VarNotObject,label);
 	
 	vp=cal(*expp,expp);
-	if _oF(vp->type&type_spe) goto Err;
+	if _oF(vp->type&type_spe) return vp;
 	if _oF(**expp!=';')
 	{
 		var_free(vp);
-		vp=get_error(errid_GraLackSem,label);
-		goto Err;
+		return get_error(errid_GraLackSem,label);
 	}
 	if _oT(isstring(vp))
 	{
@@ -317,9 +316,11 @@ keyword(run)
 		var_free(code);
 		return vp;
 	}
-	else vp=get_error(errid_VarNotString,label);
-	Err:
-	return vp;
+	else
+	{
+		var_free(vp);
+		return get_error(errid_VarNotString,label);
+	}
 }
 
 keyword(try)
@@ -330,7 +331,7 @@ keyword(try)
 	if _oF(!(call->type&type_object)) return get_error(errid_VarNotObject,label);
 	
 	vp=cal(*expp,expp);
-	if _oF(vp->type&type_spe) goto Err;
+	if _oF(vp->type&type_spe) return vp;
 	code=vp;
 	if _oF(**expp==',')
 	{
@@ -339,7 +340,7 @@ keyword(try)
 		if _oF(vp->type&type_spe)
 		{
 			var_free(code);
-			goto Err;
+			return vp;
 		}
 		deal=vp;
 	}
@@ -348,8 +349,7 @@ keyword(try)
 	{
 		var_free(code);
 		var_free(deal);
-		vp=get_error(errid_GraLackSem,label);
-		goto Err;
+		return get_error(errid_GraLackSem,label);
 	}
 	if _oT(isstring(code)&&(deal==NULL||isstring(deal)))
 	{
@@ -374,10 +374,8 @@ keyword(try)
 	{
 		var_free(code);
 		var_free(deal);
-		vp=get_error(errid_VarNotString,label);
+		return get_error(errid_VarNotString,label);
 	}
-	Err:
-	return vp;
 }
 
 keyword(include)
@@ -389,12 +387,11 @@ keyword(include)
 	if _oF(!(call->type&type_object)) return get_error(errid_VarNotObject,label);
 	
 	vp=cal(*expp,expp);
-	if _oF(vp->type&type_spe) goto Err;
+	if _oF(vp->type&type_spe) return vp;
 	if _oF(**expp!=';')
 	{
 		var_free(vp);
-		vp=get_error(errid_GraLackSem,label);
-		goto Err;
+		return get_error(errid_GraLackSem,label);
 	}
 	if _oT(isstring(vp))
 	{
@@ -418,9 +415,11 @@ keyword(include)
 		free(code.v.v_string);
 		return vp;
 	}
-	else vp=get_error(errid_VarNotString,label);
-	Err:
-	return vp;
+	else
+	{
+		var_free(vp);
+		return get_error(errid_VarNotString,label);
+	}
 }
 
 
