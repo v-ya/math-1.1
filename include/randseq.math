@@ -1,0 +1,149 @@
+# randseq
+
+.if .include.exist("randseq");
+	.exit ;
+
+var vlist:randseq;
+.include.var refer:randseq=randseq;
+
+randseq.var string:type="randseq";
+randseq.var string:default="m0x1n";
+randseq.function void:init(rs:.type.object, method:.type.string|.type.void)
+{
+	# rs.set
+	var string:(m,sf),uint:(i,n);
+	m=method;
+	.if !m;
+		m=default;
+	rs.function uint:set(x:.type.num);
+	rs.set._text_="x@i@_ret_";
+	.strarray m;
+		#loop;
+		.if !m[i]; .gotodw end;
+		m[i]@.ubyte;
+		i+=1;
+		.if .ubyte=='m';
+			"*"@sf:
+			.gotodw next;
+		.if .ubyte=='a';
+			"+"@sf:
+			.gotodw next;
+		.if .ubyte=='x';
+			"^"@sf:
+			.gotodw next;
+		.if .ubyte=='n';
+			rs.set._text_+"@_ret_:~_ret_"@rs.set._text_:
+			.gotoup loop;
+		.gotoup loop;
+		#next;
+		m[i]@.ubyte;
+		.if !.ubyte;
+			.gotoup loop;
+		.if (.ubyte<'0')||(.ubyte>'9');
+			rs.set._text_+sf+"i"@rs.set._text_:
+			.gotoup loop;
+		i+=1;
+		.ubyte-='0';
+		.ubyte>n?.ubyte@n;
+		rs.set._text_+sf+.sprint(.ubyte?"r[a+n-%d%%n]":"r[a]",.ubyte)@rs.set._text_;
+		.gotoup loop;
+		#end;
+	rs.set._text_+"@_ret_:a+=1>=n?0@a::_ret_@r[a];"@rs.set._text_;
+	n+=1;
+	rs.set.var uint:(i,a,n=n,r[n]);
+	delete m,sf,i,n;
+	
+	# reset
+	rs.function void:reset()
+	{
+		var uint:n=.length(root.set.r);
+		root.set.var uint:(i,a,n=n,r[n]);
+		root.get.var uint:a;
+		delete n;
+	};
+	rs.reset.var refer:root=rs;
+	
+	# mode
+	rs.function uint:get(x:.type.void|.type.num);
+	rs.function void:mode(m:.type.string)
+	{
+		.if m=="None";
+			None@root.get._text_:
+			root.reset();
+		.if m=="Loop";
+			Loop@root.get._text_:
+			root.reset();
+		.if m=="LoopInput"&&root.exist("input",.type.znum&~.type.long);
+			LoopInput@root.get._text_:
+			root.reset();
+	};
+	rs.get.var refer:root=rs;
+	rs.get.var uint:a;
+	rs.mode.var refer:root=rs;
+	rs.mode.var string:None={
+		root.set(x?x:0)@_ret_;
+	},string:Loop={
+		root.set(root.set.r[root.set.a])@_ret_;
+	},string:LoopInput={
+		root.set(root.input[a])@_ret_;
+		a+=1>=.length(root.input)?0@a;
+	};
+	rs.mode("Loop");
+	
+	# setinput
+	rs.function void:setinput(i:.type.num|.type.string)
+	{
+		.if .get_type(i)==.type.string;
+			.gotodw string;
+		var uint:n=.length(i);
+		.if !n;
+			.exit delete n;
+		root.var uint:input[n];
+		.while n;
+			n-=1:
+			i[n]@root.input[n];
+		root.reset();
+		delete n;
+		
+		#string;
+		var int:n=.length(i);
+		.if n;
+			.exit delete n;
+		n=.strlen(i);
+		.if n<=0;
+			.exit delete n;
+		root.var uint:input[n];
+		.while n;
+			n-=1:
+			.strbyte(i,n)@root.input[n];
+		delete n;
+	};
+	rs.setinput.var refer:root=rs;
+	
+	# type
+	rs.var string:type;
+	rs.type=type;
+};
+randseq.init.var refer:(type=randseq.type,default=randseq.default);
+
+randseq.function long:check(rs:.type.object)
+{
+	.if !rs.exist("type",.type.string);
+		.exit 0@_ret_;
+	.if !(rs.type==type);
+		.exit 0@_ret_;
+	1@_ret_;
+};
+randseq.check.var refer:type=randseq.type;
+
+randseq.function void:loop(rs:.type.object,n:.type.num)
+{
+	.if !check(rs);
+		.exit ;
+	var long:i=n;
+	.while i>0;
+	rs.get():
+	i-=1;
+};
+randseq.loop.var refer:check=randseq.check;
+
