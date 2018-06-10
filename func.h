@@ -25,6 +25,8 @@ extern var *_pt_sbuf;
 extern var *_pt_kill;
 extern var *_pt_error;
 extern var *_pt_buerr;
+// 引用池
+extern var *_refpool;
 // 限制
 extern var *_lim_array_max;
 extern var *_lim_sbuf_base;

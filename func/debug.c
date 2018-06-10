@@ -3,7 +3,7 @@
 char* get_type(u32 type)
 {
 	static char *t[(tlog_max+1)*2]={"null","void","byte","word","int","long","float","string",
-		"vlist","vmat",NULL,"ubyte","uword","uint","ulong"};
+		"vlist","vmat","refer",NULL,"ubyte","uword","uint","ulong"};
 	u32 i;
 	if _oF(type&type_spe)
 	{
@@ -29,30 +29,44 @@ char* get_type(u32 type)
 void print_vlist(vlist *vl, u32 tab)
 {
 	u32 r;
+	var *vp;
+	vlist vt={0};
 	char *s,buffer[16];
 	print("%*s",tab,"");
-	if _oT(vl->v)
+	vp=vl->v;
+	if _oT(vp)
 	{
+		if _oF(vp->type&type_refer)
+		{
+			vp=refer_check(vp);
+			if _oF(!vp) vp=vl->v;
+		}
 		// auth
-		r=vl->v->mode;
+		r=vp->mode;
 		print("%c%c%c%c%c%c", (r&auth_retype)?'s':(r&auth_relength?'S':'-'), (r&auth_read)?'r':'-', (r&auth_write)?'w':'-',
 			(r&auth_link)?'l':'-', (r&auth_run)?'f':'-', (r&auth_key)?'k':'-');
 		// type
 		print("%8s", get_type(vl->v->type));
-		// length
-		if _oF(vl->v->length) print("[%6u]", vl->v->length);
+		// length or refer
+		if _oF((vl->v->type&type_refer)&&(vl->v!=vp))
+		{
+			print("->");
+			print("%6s",get_type(vp->type));
+		}
+		else if _oF(vp->length) print("[%6u]", vp->length);
 		else print("        ");
 		// inode
-		print("  %6u", (tab==0&&vl->v->inode>0)?(vl->v->inode-1):vl->v->inode);
+		print("  %6u", (tab==0&&vp->inode>0)?(vp->inode-1):vp->inode);
 		// value
-		if _oF((vl->v->length==leng_no)&&(vl->v->type&type_string)&&vl->v->v.v_string)
+		vt.v=vp;
+		if _oF((vp->length==leng_no)&&(vp->type&type_string)&&vp->v.v_string)
 		{
-			s=vl->v->v.v_string;
+			s=vp->v.v_string;
 			for(r=0;r<14;r++) if _oF(s[r]==0||s[r]=='\n'||s[r]=='\t'||s[r]=='\v'||s[r]=='\r') break;
 			sprintf(buffer,"\"%%-.%ds\"",r);
-			sbuf_sprintf(buffer, vl);
+			sbuf_sprintf(buffer, &vt);
 		}
-		else sbuf_sprintf("%?", vl);
+		else sbuf_sprintf("%?", &vt);
 		print("  %16s  ", sbuf_get()->v.v_string);
 		// name
 		print("%s\n",vl->name);

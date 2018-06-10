@@ -180,6 +180,12 @@ void var_free(var *vp)
 	if _oT(vp->inode>1)
 	{
 		vp->inode--;
+		// 当变量实体仅被引用时，将彻底删除该变量，并使所有引用该变量者失效
+		if _oF((vp->inode==1)&&refer_get((u64)vp))
+		{
+			refer_free((u64)vp);
+			if _oT(!refer_get((u64)vp)) var_free(vp);
+		}
 		return ;
 	}
 	else
@@ -200,6 +206,9 @@ void var_free(var *vp)
 						break;
 					case type_vmat:
 						vmat_free(vp->v.v_vmat);
+						break;
+					case type_refer:
+						refer_unset(vp);
 						break;
 				}
 			}
@@ -841,7 +850,6 @@ void ptvar_alloc(var *object)
 	goto End;
 }
 
-
 void ptvar_free(var *object)
 {
 	u64 pthid;
@@ -851,12 +859,11 @@ void ptvar_free(var *object)
 	if _oT(object->type&type_vmat) vl=object->v.v_vmat->vl[pthid&0xff];
 	else if _oT(object->type&type_vlist) vl=object->v.v_vlist;
 	else goto End;
-	while(vl&&(vl->head!=pthid))
-	{
-		if (vl->head>pthid) vl=vl->l;
-		else vl=vl->r;
-	}
+	
 	if _oF(!vl) goto End;
+	if _oT(vl->head<pthid) while(vl->r&&vl->r->head<=pthid) vl=vl->r;
+	else if _oT(vl->head>pthid) while(vl->l&&vl->l->head>=pthid) vl=vl->l;
+	if _oF(vl->head!=pthid) goto End;
 	vl0=vl;
 	if _oT(vl->l)
 	{
@@ -889,13 +896,12 @@ var* ptvar_get(var *object)
 	if _oT(object->type&type_vmat) vl=object->v.v_vmat->vl[pthid&0xff];
 	else if _oT(object->type&type_vlist) vl=object->v.v_vlist;
 	else return NULL;
-	while(vl&&(vl->head!=pthid))
-	{
-		if (vl->head>pthid) vl=vl->l;
-		else vl=vl->r;
-	}
+	
 	if _oF(!vl) return NULL;
-	return vl->v;
+	if _oT(vl->head<pthid) while(vl->r&&vl->r->head<=pthid) vl=vl->r;
+	else if _oT(vl->head>pthid) while(vl->l&&vl->l->head>=pthid) vl=vl->l;
+	if _oT(vl->head==pthid) return vl->v;
+	else return NULL;
 }
 
 vlist* ptvar_vlist(var *object)
@@ -929,6 +935,154 @@ var* ptvar_replace(var *object, var *value)
 	vl->v=value;
 	vl->mode|=free_pointer;
 	return bak_value;
+}
+
+void refer_alloc(u64 id)
+{
+	vlist *vl,*vl0;
+	u32 idgen;
+	vl=vlist_alloc(NULL);
+	if _oF(!vl) return ;
+	
+	vl->head=id;
+	idgen=(id>>4)&0xff;
+	// 线程独占操作，加锁
+	vl0=_refpool->v.v_vmat->vl[idgen];
+	if _oF(!vl0) ;
+	else if _oT(vl0->head<id)
+	{
+		while(vl0->r&&vl0->r->head<=id) vl0=vl0->r;
+		if _oF(vl0->head==id) goto Err;
+		vl->l=vl0;
+		vl->r=vl0->r;
+		vl0->r=vl;
+		if _oT(vl->r) vl->r->l=vl;
+	}
+	else if _oT(vl0->head>id)
+	{
+		while(vl0->l&&vl0->l->head>=id) vl0=vl0->l;
+		if _oF(vl0->head==id) goto Err;
+		vl->r=vl0;
+		vl->l=vl0->l;
+		vl0->l=vl;
+		if _oT(vl->l) vl->l->r=vl;
+	}
+	else goto Err;
+	_refpool->v.v_vmat->vl[idgen]=vl;
+	End:
+	// 解锁，退出
+	return ;
+	Err:
+	free(vl);
+	goto End;
+}
+
+void refer_free(u64 id)
+{
+	vlist *vl,*vl0;
+	u32 idgen;
+	idgen=(id>>4)&0xff;
+	// 线程独占操作，加锁
+	vl=_refpool->v.v_vmat->vl[idgen];
+	if _oF(!vl) goto End;
+	if _oT(vl->head<id) while(vl->r&&vl->r->head<=id) vl=vl->r;
+	else if _oT(vl->head>id) while(vl->l&&vl->l->head>=id) vl=vl->l;
+	if _oF(vl->head!=id) goto End;
+	vl0=vl;
+	if _oT(vl->l)
+	{
+		vl=vl->l;
+		vl->r=vl0->r;
+		if _oT(vl0->r) vl0->r->l=vl;
+	}
+	else if _oT(vl->r)
+	{
+		vl=vl->r;
+		vl->l=vl0->l;
+		if _oT(vl0->l) vl0->l->r=vl;
+	}
+	else vl=NULL;
+	vl0->l=NULL;
+	vl0->r=NULL;
+	vlist_free(vl0);
+	_refpool->v.v_vmat->vl[idgen]=vl;
+	End:
+	// 解锁，退出
+	return ;
+}
+
+vlist* refer_get(u64 id)
+{
+	vlist *vl;
+	u32 idgen;
+	idgen=(id>>4)&0xff;
+	vl=_refpool->v.v_vmat->vl[idgen];
+	if _oF(!vl) return NULL;
+	if _oT(vl->head<id) while(vl->r&&vl->r->head<=id) vl=vl->r;
+	else if _oT(vl->head>id) while(vl->l&&vl->l->head>=id) vl=vl->l;
+	if _oT(vl->head==id) return vl;
+	else return NULL;
+}
+
+void refer_set(var *rp, var *vp)
+{
+	vlist *vl;
+	if _oT((rp->type&type_refer)&&vp)
+	{
+		if _oF(rp->v.v_void) refer_unset(rp);
+		vl=refer_get((u64)vp);
+		if _oF(!vl)
+		{
+			refer_alloc((u64)vp);
+			vl=refer_get((u64)vp);
+			if _oT(vl) var_save(vp);
+		}
+		if _oT(vl&&(vl->mode<refer_max))
+		{
+			(vl->mode)++;
+			rp->v.v_void=vp;
+			rp->mode|=free_pointer;
+		}
+	}
+}
+
+void refer_unset(var *rp)
+{
+	vlist *vl;
+	var *vp;
+	if _oT((rp->type&type_refer)&&(rp->v.v_void))
+	{
+		vp=(var*)(rp->v.v_void);
+		rp->v.v_void=NULL;
+		rp->mode&=~free_pointer;
+		vl=refer_get((u64)vp);
+		if _oT(vl)
+		{
+			if _oT(vl->mode>0) (vl->mode)--;
+			if _oF(vl->mode==0)
+			{
+				refer_free((u64)vp);
+				var_free(vp);
+			}
+		}
+	}
+}
+
+var* refer_check(var *rp)
+{
+	vlist *vl;
+	if _oT((rp->type&type_refer)&&(rp->v.v_void))
+	{
+		vl=refer_get((u64)(rp->v.v_void));
+		if _oT(vl&&(vl->mode>0)) return (var*)(rp->v.v_void);
+		else
+		{
+			rp->v.v_void=NULL;
+			rp->mode&=~free_pointer;
+			return NULL;
+		}
+	}
+	else return NULL;
 }
 
 

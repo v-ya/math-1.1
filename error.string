@@ -43,6 +43,7 @@ ss(errcl_Var_S)		"变量基类";
 		ss(errid_ArrayLength_S)		"数组长度引用超限";
 		ss(errid_ArrayBuffer_S)		"数组空间意外丢失";
 		ss(errid_VarIsExist_S)		"变量已存在";
+		ss(errid_VarReferFail_S)	"变量引用失败";
 	ss(errty_VarType_S)	"类型类别";
 		ss(errid_VarUnknowType_S)	"未知变量类型";
 		ss(errid_VarNotObject_S)	"变量不是对象";
@@ -129,6 +130,7 @@ static char *errty_VarExist_idA[]={
 	errid_ArrayLength_S,
 	errid_ArrayBuffer_S,
 	errid_VarIsExist_S,
+	errid_VarReferFail_S,
 } ;
 
 static char *errty_VarType_idA[]={

@@ -12,6 +12,7 @@ u32 get_tlog(char *type)
 		float float[]
 		string string[]
 		vlist vmat
+		refer
 	*/
 	// get type
 	switch(type[0])
@@ -27,6 +28,9 @@ u32 get_tlog(char *type)
 			else return tlog_max;
 		case 'l':
 			if _oF(strcmp(type,"long")==0) return tlog_long;
+			else return tlog_max;
+		case 'r':
+			if _oF(strcmp(type,"refer")==0) return tlog_refer;
 			else return tlog_max;
 		case 's':
 			if _oF(strcmp(type,"string")==0) return tlog_string;
@@ -124,7 +128,7 @@ var* var_define(char *exp, char **expp, var *root)
 		while(is_space(*exp)) exp++;
 	}
 	else length=0;
-	if _oF(length&&(tlog==tlog_vlist||tlog==tlog_vmat)) goto Err_nottype;
+	if _oF(length&&(tlog==tlog_vlist||tlog==tlog_vmat||tlog==tlog_refer)) goto Err_nottype;
 	// check length
 	if _oF(length>_lim_array_max->v.v_long) goto Err_notlength;
 	// alloc var
@@ -141,7 +145,7 @@ var* var_define(char *exp, char **expp, var *root)
 	// var link
 	vlist_link(vl,vp);
 	// get [value]
-	if _oF((vp->type&(type_num|type_string))&&*exp=='=')
+	if _oF((vp->type&(type_num|type_string|type_refer))&&*exp=='=')
 	{
 		exp++;
 		while(is_space(*exp)) exp++;
@@ -264,7 +268,7 @@ var* var_define(char *exp, char **expp, var *root)
 				 vl->v->v.v_float=get_float(exp,&exp,&vp);
 				 if _oF(vp) goto End;
 			}
-			else
+			else if _oF(vp->type&type_string)
 			{
 				if _oT(*exp=='\"')
 				{
@@ -275,6 +279,28 @@ var* var_define(char *exp, char **expp, var *root)
 				{
 					vp->v.v_string=get_code(exp,&exp);
 					vp->mode|=free_pointer;
+				}
+			}
+			else
+			{
+				var *rv;
+				rv=cal(exp,&exp);
+				if _oF(rv->type&type_spe)
+				{
+					vp=rv;
+					goto End;
+				}
+				if _oT(rv->mode&auth_link)
+				{
+					if _oF(rv->type&type_refer) goto Err_refer;
+					refer_set(vp,rv);
+					var_free(rv);
+					if _oF(!refer_check(vp)) goto Err_refer;
+				}
+				else
+				{
+					var_free(rv);
+					goto Err_notlink;
 				}
 			}
 		}
@@ -322,6 +348,12 @@ var* var_define(char *exp, char **expp, var *root)
 	goto End;
 	Err_notrelength:
 	vp=get_error(errid_VarNotRelength,label);
+	goto End;
+	Err_refer:
+	vp=get_error(errid_VarReferFail,label);
+	goto End;
+	Err_notlink:
+	vp=get_error(errid_VarNotLink,label);
 	goto End;
 }
 

@@ -51,6 +51,7 @@
 		#define errid_ArrayLength	(errty_VarExist|0x03)
 		#define errid_ArrayBuffer	(errty_VarExist|0x04)
 		#define errid_VarIsExist	(errty_VarExist|0x05)
+		#define errid_VarReferFail	(errty_VarExist|0x06)
 	// Var Type
 	#define errty_VarType	errcl_Var|0x0200
 		#define errid_VarUnknowType	(errty_VarType|0x01)

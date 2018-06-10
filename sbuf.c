@@ -70,7 +70,7 @@ var* sbuf_sprintf(char *format, vlist *vl)
 	static char *label="sbuf_sprintf";
 	static char *type_name_void="(void)",*type_name_vlist="(vlist)",*type_name_vmat="(vmat)",*type_name_unknow="(unknow)";
 	static char *type_array_name[tlog_max*2]={"(void[])","(byte[])","(word[])","(int[])","(long[])","(float[])","(string[])",
-		"(vlist[])","(vmat[])",NULL,"(ubyte[])","(uword[])","(uint[])","(ulong[])"};
+		"(vlist[])","(vmat[])",NULL,NULL,"(ubyte[])","(uword[])","(uint[])","(ulong[])"};
 	var *sbuf,*vp;
 	char fix[16],*buffer;
 	u32 n,nm,mode;

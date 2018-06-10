@@ -48,6 +48,9 @@
 		_pt_error	-export	.thread.error
 		_pt_buerr	-export	.thread.buerr
 	}
+	// 引用池
+	refpool	vmat	0	-
+	_refpool	-export	.refpool
 	// 系统相关
 	sys	vmat	0	r	{
 		// 版本号

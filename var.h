@@ -16,9 +16,12 @@ struct VMAT;
 #define tlog_string	6
 #define tlog_vlist	7
 #define tlog_vmat	8
+#define tlog_refer	9
 
-#define tlog_max	9
+#define tlog_max	10
 
+// refer var max number
+#define refer_max	0xffff
 // type normal
 #define type_tlog(t)	(1<<t)
 #define type_null	0x00000000
@@ -31,6 +34,7 @@ struct VMAT;
 #define type_string	0x00000040
 #define type_vlist	0x00000080
 #define type_vmat	0x00000100
+#define type_refer	0x00000200
 // unsigned type, only used by byte, word, int, long
 #define type_unsign	0x01000000
 // only used at check_varlist
@@ -169,6 +173,13 @@ void ptvar_free(var *object);
 var* ptvar_get(var *object);
 vlist* ptvar_vlist(var *object);
 var* ptvar_replace(var *object, var *value);
+// refer
+void refer_alloc(u64 id);
+void refer_free(u64 id);
+vlist* refer_get(u64 id);
+void refer_set(var *rp, var *vp);
+void refer_unset(var *rp);
+var* refer_check(var *rp);
 
 #endif
 

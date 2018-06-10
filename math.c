@@ -384,6 +384,11 @@ var* get_var(char *exp, char **expp, int *array_n)
 		else goto Err_notname;
 	}
 	if _oF(!vp) goto Err_notfind;
+	if _oF(vp->type==type_refer)
+	{
+		vp=refer_check(vp);
+		if _oF(!vp) goto Err_notrefer;
+	}
 	LoopEntra:
 	while(is_space(*exp)) exp++;
 	if _oF(!(vp->mode&auth_read)) goto Err_notread;
@@ -543,6 +548,9 @@ var* get_var(char *exp, char **expp, int *array_n)
 	goto Err;
 	Err_notfind:
 	vp=get_error(errid_VarNotFind,label);
+	goto Err;
+	Err_notrefer:
+	vp=get_error(errid_VarReferFail,label);
 	goto Err;
 	Err_notread:
 	vp=get_error(errid_VarNotRead,label);
