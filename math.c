@@ -509,7 +509,7 @@ var* get_var(char *exp, char **expp, int *array_n)
 			}
 	}
 	End:
-	if _oF(isstring(vp)&&vp->v.v_string)
+	if _oF(isstring(vp)&&vp->v.v_string&&(vp==temp_get()))
 	{
 		root=vp;
 		vp=var_alloc(tlog_string,leng_no);

@@ -149,6 +149,9 @@
 		// 字符串处理库
 		sprint	fun	0	r	addr_fun(sprint)
 		s	-link	.sprint
+		strlen	fun	0	r	addr_fun(strlen)
+		strbyte fun	0	r	addr_fun(strbyte)
+		strarray key	0	r	addr_key(strarray)
 	// 常数表
 	const	vmat	0	r	{
 		e	float	0	r	M_E
@@ -161,7 +164,7 @@
 		pi_4	float	0	r	M_PI_4
 		_1_pi	float	0	r	M_1_PI
 		_2_pi	float	0	r	M_2_PI
-		_2_sqrtpi	float	0	r	M_2_SQRTPI
+		_2_sqrtpi float	0	r	M_2_SQRTPI
 		sqrt2	float	0	r	M_SQRT2
 		sqrt1_2	float	0	r	M_SQRT1_2
 	}
@@ -187,14 +190,16 @@
 	}
 	// try 处理错误函数
 	try	vlist	0	r	{
-		errid	fun	0	r	addr_fun(try_errid)
+		errid		fun	0	r	addr_fun(try_errid)
 		errstr_cl	fun	0	r	addr_fun(try_errstr_cl)
 		errstr_ty	fun	0	r	addr_fun(try_errstr_ty)
 		errstr_id	fun	0	r	addr_fun(try_errstr_id)
 		errstr_text	fun	0	r	addr_fun(try_errstr_text)
 		errstr_label	fun	0	r	addr_fun(try_errstr_label)
-		errnext	fun	0	r	addr_fun(try_errnext)
+		errnext		fun	0	r	addr_fun(try_errnext)
 	}
+	// include 相关信息
+	include	vmat	0	rw
 	// 调试相关
 	debug	vlist	0	r	{
 		list	fun	0	r	addr_fun(debug_list)

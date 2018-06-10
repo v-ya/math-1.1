@@ -5,6 +5,9 @@
 #ifndef __nosym__
 
 func(sprint);
+func(strlen);
+func(strbyte);
+keyword(strarray);
 
 #endif
 
