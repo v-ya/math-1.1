@@ -36,7 +36,7 @@ func(round);
 func(abs);
 
 func(hypot);
-func(ldexp);
+func(ftol);
 
 
 #endif

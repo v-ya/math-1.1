@@ -36,6 +36,7 @@ static u64 _head_vlist;
 static u64 _head_vmat;
 static u64 _head_key;
 static u64 _head_fun;
+static u64 _head_fvlist;
 
 #define Max_length	16
 
@@ -245,7 +246,6 @@ var* make_vm_one(var *root,char **exp)
 	}
 	length=atoi(val[2]);
 	if (length<0||length>Max_length) err("length err");
-	if (length!=0) err("not support array");
 	mode=get_mode(val[3]);
 	head=vname_head(val[1]);
 	
@@ -264,18 +264,27 @@ var* make_vm_one(var *root,char **exp)
 	else if (head==_head_vmat) vp=bcvar(root,val[0],tlog_vmat,length);
 	else if (head==_head_key)
 	{
+		if (length>0) err("not support key array");
 		vp=bcvar(root,val[0],tlog_void,length);
 		mode|=auth_key;
 	}
 	else if (head==_head_fun)
 	{
+		if (length>0) err("not support fun array");
 		vp=bcvar(root,val[0],tlog_void,length);
+		mode|=auth_run;
+	}
+	else if (head==_head_fvlist)
+	{
+		if (length>0) err("not support function array");
+		vp=bcvar(root,val[0],tlog_vlist,length);
 		mode|=auth_run;
 	}
 	else err("unknow type");
 	if (!vp) err("bcvar err");
 	vp->mode=mode;
 	if ((vp->type&type_znum)&&*(val[1])=='u') vp->type|=type_unsign;
+	if ((vp->length>0)&&(!(vp->type&(type_void|type_snum)))) err("not support this array");
 	if (vn>4) get_v(vp,exp);
 	return vp;
 }
@@ -290,6 +299,34 @@ char* make_vm(char *exp, var *root)
 	}
 }
 
+void put_vp_array(var *vp)
+{
+	u32 type,length;
+	char *value;
+	if ((vp->length>0)&&(vp->type&(type_snum|type_void))&&(vp->mode&free_name))
+	{
+		type=vp->type;
+		length=vp->length;
+		value=vp->v.v_string;
+		if (type&type_void) fprintf(outfile,"static void*	_sv_ar_%p[%u] = %s;\n",vp,length,value);
+		else if (type&type_string) fprintf(outfile,"static char*	_sv_ar_%p[%u] = %s;\n",vp,length,value);
+		else if (type&type_unsign)
+		{
+			if (type&type_byte) fprintf(outfile,"static u8	_sv_ar_%p[%u] = %s;\n",vp,length,value);
+			else if (type&type_word) fprintf(outfile,"static u16	_sv_ar_%p[%u] = %s;\n",vp,length,value);
+			else if (type&type_int) fprintf(outfile,"static u32	_sv_ar_%p[%u] = %s;\n",vp,length,value);
+			else if (type&type_long) fprintf(outfile,"static u64	_sv_ar_%p[%u] = %s;\n",vp,length,value);
+		}
+		else
+		{
+			if (type&type_byte) fprintf(outfile,"static s8	_sv_ar_%p[%u] = %s;\n",vp,length,value);
+			else if (type&type_word) fprintf(outfile,"static s16	_sv_ar_%p[%u] = %s;\n",vp,length,value);
+			else if (type&type_int) fprintf(outfile,"static s32	_sv_ar_%p[%u] = %s;\n",vp,length,value);
+			else if (type&type_long) fprintf(outfile,"static s64	_sv_ar_%p[%u] = %s;\n",vp,length,value);
+		}
+	}
+}
+
 void put_vp(var *vp)
 {
 	void put_vl(vlist *vl);
@@ -297,6 +334,7 @@ void put_vp(var *vp)
 	int i;
 	// 对于 inode>1 的变量，通过破坏结构来表示
 	if (vp==NULL||vp->inode==0) return ;
+	put_vp_array(vp);
 	if (vp->type&type_vmat) fprintf(outfile,"static vmat\t_sv_vm_%p;\n",vp->v.v_vmat);
 	fprintf(outfile,"static var	_sv_vp_%p = {\n",vp);
 	fprintf(outfile,"\t.type\t\t=0x%08x,\n",vp->type);
@@ -319,7 +357,11 @@ void put_vp(var *vp)
 			break;
 		default:
 			l:
-			if (vp->mode&free_name)
+			if ((vp->length>0)&&(vp->type&(type_snum|type_void))&&(vp->mode&free_name))
+			{
+				fprintf(outfile,"\t.v.v_void\t=&_sv_ar_%p\n};\n",vp);
+			}
+			else if (vp->mode&free_name)
 			{
 				switch(vp->type)
 				{
@@ -387,6 +429,7 @@ void init(void)
 	_head_vmat	=	vname_head("vmat");
 	_head_key	=	vname_head("key");
 	_head_fun	=	vname_head("fun");
+	_head_fvlist	=	vname_head("fvlist");
 }
 
 int main(int argc, char *argv[])

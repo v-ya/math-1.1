@@ -334,3 +334,17 @@ func(abs)
 }
 
 
+func(ftol)
+{
+	static char *label=".ftol";
+	var *vp;
+	double f;
+	if _oF((argc!=1)||check_varlist(argv,1,t_f)) return get_error(errid_FunArgvType,label);
+	vp=argv->v;
+	f=vpntof(vp);
+	ret->type=type_long|type_unsign;
+	ret->v.v_long=*((u64*)(&f));
+	return ret;
+}
+
+

@@ -173,4 +173,16 @@ func(remove)
 	else return ret;
 }
 
+func(issame)
+{
+	static char *label=".issame";
+	var *vp;
+	if _oF(argc<2) return get_error(errid_FunArgvType,label);
+	ret->type=type_long;
+	vp=argv->v;
+	for(argv=argv->r;argv&&(vp==argv->v);argv=argv->r) ;
+	ret->v.v_long=argv?0:1;
+	return ret;
+}
+
 

@@ -1,0 +1,97 @@
+# random
+
+.if .include.inc("random");
+	.exit ;
+
+.include.include "randseq";
+
+random.var string:type="random";
+random.function void:init(rdm:.type.object, method:.type.string|.type.void)
+{
+	# rs
+	rdm.var vlist:rs;
+	.include.randseq.init(rdm.rs,method);
+	rdm.rs.loop(16);
+	
+	# rand
+	rdm.function void:rand(i:.type.num|.type.void)
+	{
+		t=.get_type(i);
+		.if t==.type.void;
+			.gotodw void;
+		.if t&.type.num&&!.length(i);
+			.gotodw number;
+		
+		#void;
+		var uint:_ret_=rs.get();
+		.exit ;
+		
+		#number;
+		.if t==.type.float;
+			.gotodw float;
+		var long:_ret_;
+		rs.get()@.float/(2**32)*i@_ret_;
+		.exit ;
+		
+		#float;
+		var float:_ret_=rs.get();
+		_ret_/(2**32)*i@_ret_;
+		.exit ;
+		
+	} ;
+	rdm.rand.var refer:rs=rdm.rs,uint:t;
+	
+	# srand
+	rdm.function void:srand(i:.type.snum|.type.void)
+	{
+		t=.get_type(i);
+		.if t==.type.void;
+			.gotodw time;
+		.if t==.type.string?(.strlen(i)>0):0;
+			.gotodw string;
+		.if t&.type.num&&!.length(i);
+			.gotodw number;
+		.if t&.type.num&&.length(i);
+			.gotodw array;
+		.exit ;
+		
+		#time;
+		rs.set(.time.stamp()^.time.clock());
+		.exit ;
+		
+		#number;
+		.if t==.type.long;
+			.gotodw long;
+		.if t==.type.float;
+			.gotodw float;
+		rs.set(i);
+		.exit ;
+		#long;
+		rs.set(i/(2**32)^i&0xffffffff);
+		.exit ;
+		#float;
+		rs.set(.ftol(i)/(2**32)^.ftol(i)&0xffffffff);
+		.exit ;
+		
+		#string;
+		rs.setinput(i);
+		rs.mode("LoopInput");
+		.if rs.curmode=="LoopInput"; rs.loop(.strlen(i));
+		rs.setinput();
+		.exit ;
+		
+		#array;
+		rs.setinput(i);
+		rs.mode("LoopInput");
+		.if rs.curmode=="LoopInput"; rs.loop(.length(i));
+		rs.setinput();
+		.exit ;
+	} ;
+	rdm.srand.var refer:rs=rdm.rs,uint:t;
+	
+	# type
+	rdm.var string:type;
+	rdm.type=type;
+} ;
+random.init.var refer:type=random.type;
+

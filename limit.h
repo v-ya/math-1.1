@@ -6,8 +6,8 @@
 
 // 版本号
 	#define	VERSION_major		1
-	#define VERSION_minor		3
-	#define VERSION_revision	2
+	#define VERSION_minor		4
+	#define VERSION_revision	0
 
 // 限制
 	// 自定义数组最大长度
@@ -33,5 +33,10 @@
 	// 数据文件的默认储存路径
 	#define PATH_data		NULL
 
+// 头文件
+	// .include.inc -- 字符串代码，执行头文件添加操作
+	#define INCLUDE_inc_text	".include.exist(n)@_ret_;.if !_ret_;.include.run .sprint(\"var vlist:%s;\",n);.if !.issame(_caller_,.include);_caller_.run .sprint(\"var refer:%s=.include.%s;\",n,n);"
+	#define INCLUDE_inc_vn		{"n"}
+	#define INCLUDE_inc_vt		{type_string}
 #endif
 

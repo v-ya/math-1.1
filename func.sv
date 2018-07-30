@@ -21,6 +21,7 @@
 		_vn_	void	0	r
 		_text_	void	0	r
 		_ret_	void	0	r
+		_caller_ void	0	r
 		_type_	string	0	r	"null"
 		_type_null	-export	.gobj._type_
 	}
@@ -107,6 +108,7 @@
 	this	fun	0	r	addr_fun(this)
 	get_type fun	0	r	addr_fun(get_type)
 	remove	fun	0	r	addr_fun(remove)
+	issame	fun	0	r	addr_fun(issame)
 		// 数学库
 		srand	fun	0	r	addr_fun(srand)
 		rand	fun	0	r	addr_fun(rand)
@@ -135,6 +137,7 @@
 		floor	fun	0	r	addr_fun(floor)
 		round	fun	0	r	addr_fun(round)
 		abs	fun	0	r	addr_fun(abs)
+		ftol	fun	0	r	addr_fun(ftol)
 		// 类型转换临时变量
 		void	void	0	r
 		sbyte	sbyte	0	rw
@@ -188,8 +191,14 @@
 		snum	uint	0	r	type_snum
 		object	uint	0	r	type_object
 		func	uint	0	r	type_void|type_vlist
+		all	uint	0	r	type_all
 		// 特殊类型
 		unsign	uint	0	r	type_unsign
+	}
+	// 时间相关
+	time	vlist	0	r	{
+		stamp	fun	0	r	addr_fun(stamp)
+		clock	fun	0	r	addr_fun(clock)
 	}
 	// try 处理错误函数
 	try	vlist	0	r	{
@@ -202,7 +211,14 @@
 		errnext		fun	0	r	addr_fun(try_errnext)
 	}
 	// include 相关信息
-	include	vmat	0	rw
+	include	vmat	0	rw	{
+		inc	fvlist	0	r	{
+			_ret_	slong	0	rw
+			_text_	string	0	r	INCLUDE_inc_text
+			_vn_	string	1	r	INCLUDE_inc_vn
+			_vt_	uint	1	r	INCLUDE_inc_vt
+		}
+	}
 	// 调试相关
 	debug	vlist	0	r	{
 		list	fun	0	r	addr_fun(debug_list)

@@ -148,10 +148,10 @@ char* run_key(char *exp, var *root, var **function)
 var* run_fun_vlist(var *func, int argc, vlist *argv)
 {
 	static char *label="run_fun_vlist";
-	var *ret,*pt_text,*_vn_;
+	var *ret,*pt_text,*_vn_,*caller;
 	u32 *vt,i;
 	char **vn;
-	vlist *vl,*vl1;
+	vlist *vl,*vl1,*vc;
 	// get _vt_, _vn_, _text_
 	ret=var_find(func,"_vt_");
 	if _oF(!ret) goto Err_func;
@@ -163,6 +163,8 @@ var* run_fun_vlist(var *func, int argc, vlist *argv)
 	vn=_vn_->v.vp_string;
 	pt_text=var_find(func,"_text_");
 	if _oF(!pt_text) goto Err_func;
+	// get caller
+	caller=ptvar_get(_pt_this);
 	// check var list type
 	vl=argv;
 	for(i=0;i<argc;i++)
@@ -170,6 +172,16 @@ var* run_fun_vlist(var *func, int argc, vlist *argv)
 		if _oF(!(vt[i]&vl->v->type)) goto Err_argv;
 		vl=vl->r;
 	}
+	// link caller
+	vc=vlist_find(func->v.v_vlist,"_caller_");
+	if _oF(!vc)
+	{
+		vc=var_insert(func,"_caller_",tlog_max,leng_no);
+		if _oF(!vc) goto Err_malloc;
+		func->v.v_vlist=vc;
+		vc->mode|=free_pointer;
+	}
+	if _oT(caller) vlist_link(vc,caller);
 	// link argv to .*
 	vl1=argv;
 	for(i=0;i<argc;i++)
@@ -191,6 +203,11 @@ var* run_fun_vlist(var *func, int argc, vlist *argv)
 	ret=run_script(pt_text,func);
 	if _oT(!ret) ret=var_find(func,"_ret_");
 	// unlink .*
+	if _oT(vc&&vc->v)
+	{
+		var_free(vc->v);
+		vc->v=NULL;
+	}
 	vl1=argv;
 	for(i=0;i<argc;i++)
 	{

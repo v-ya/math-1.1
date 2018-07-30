@@ -382,7 +382,7 @@ keyword(include)
 {
 	static char *label="[object].include";
 	char *path;
-	var *vp,code={.type=type_string,.inode=1,.mode=auth_tmpvar|free_temp,.length=leng_no};
+	var *vp,*code;
 	if _oF(!call) return get_error(errid_IntError,label);
 	if _oF(!(call->type&type_object)) return get_error(errid_VarNotObject,label);
 	
@@ -395,24 +395,32 @@ keyword(include)
 	}
 	if _oT(isstring(vp))
 	{
+		// alloc code
+		code=var_alloc(tlog_string,leng_no);
+		if _oF(!code)
+		{
+			var_free(vp);
+			return get_error(errid_MemLess,label);
+		}
 		// get path
 		path=vp->v.v_string;
 		if _oF(_path_include->v.v_string&&path&&path[0]!=_path_incutup->v.v_byte)
 		{
 			path=get_path(_path_include->v.v_string,path);
-			code.v.v_string=load_string(path);
+			code->v.v_string=load_string(path);
 			free(path);
 		}
-		else code.v.v_string=load_string(path);
+		else code->v.v_string=load_string(path);
 		var_free(vp);
-		if _oF(!code.v.v_string)
+		if _oF(!code->v.v_string)
 		{
+			var_free(code);
 			vp=ptvar_get(_pt_error);
 			if _oF(vp) return vp;
 			else return get_error(errid_SysFileNotLoad,label);
 		}
-		vp=run_script(&code,call);
-		free(code.v.v_string);
+		else code->mode|=free_pointer;
+		vp=run_script(code,call);
 		return vp;
 	}
 	else

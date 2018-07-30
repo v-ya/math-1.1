@@ -1,0 +1,137 @@
+# randseq
+
+.if .include.inc("randseq");
+	.exit ;
+
+randseq.var string:type="randseq";
+randseq.var string:default="m0x1n";
+randseq.function void:init(rs:.type.object, method:.type.string|.type.void)
+{
+	# rs.set
+	var string:(m,sf),uint:(i,n);
+	m=method;
+	.if !m;
+		m=default;
+	rs.function uint:set(x:.type.num);
+	rs.set._text_="x@i@_ret_";
+	.strarray m;
+		#loop;
+		.if !m[i]; .gotodw end;
+		m[i]@.ubyte;
+		i+=1;
+		.if .ubyte=='m';
+			"*"@sf:
+			.gotodw next;
+		.if .ubyte=='a';
+			"+"@sf:
+			.gotodw next;
+		.if .ubyte=='x';
+			"^"@sf:
+			.gotodw next;
+		.if .ubyte=='n';
+			rs.set._text_+"@_ret_:~_ret_"@rs.set._text_:
+			.gotoup loop;
+		.gotoup loop;
+		#next;
+		m[i]@.ubyte;
+		.if !.ubyte;
+			.gotoup loop;
+		.if (.ubyte<'0')||(.ubyte>'9');
+			rs.set._text_+sf+"i"@rs.set._text_:
+			.gotoup loop;
+		i+=1;
+		.ubyte-='0';
+		.ubyte>n?.ubyte@n;
+		rs.set._text_+sf+.sprint(.ubyte?"r[a+n-%d%%n]":"r[a]",.ubyte)@rs.set._text_;
+		.gotoup loop;
+		#end;
+	rs.set._text_+"@_ret_:a+=1>=n?0@a::_ret_@r[a];"@rs.set._text_;
+	n+=1;
+	rs.set.var uint:(i,a,n=n,r[n]);
+	delete m,sf,i,n;
+	
+	# reset
+	rs.function void:reset()
+	{
+		var uint:n=.length(root.set.r);
+		root.set.var uint:(i,a,n=n,r[n]);
+		root.get.var uint:a;
+		delete n;
+	};
+	rs.reset.var refer:root=rs;
+	
+	# mode
+	rs.var string:curmode;
+	rs.function uint:get(x:.type.void|.type.num);
+	rs.function void:mode(m:.type.string)
+	{
+		.if m=="None";
+			None@root.get._text_:
+			m@root.curmode;
+		.if m=="Loop";
+			Loop@root.get._text_:
+			m@root.curmode;
+		.if m=="LoopInput"&&root.exist("input",.type.znum&~.type.long);
+			LoopInput@root.get._text_:
+			m@root.curmode;
+	};
+	rs.get.var refer:root=rs;
+	rs.get.var uint:a;
+	rs.mode.var refer:root=rs;
+	rs.mode.var string:None={
+		root.set(x?x:0)@_ret_;
+	},string:Loop={
+		root.set(root.set.r[root.set.a])@_ret_;
+	},string:LoopInput={
+		root.set(root.input[a])@_ret_;
+		a+=1>=.length(root.input)?0@a;
+	};
+	rs.mode("Loop");
+	
+	# setinput
+	rs.function void:setinput(i:.type.num|.type.string|.type.void)
+	{
+		t=.get_type(i);
+		.if t==.type.void;
+			root.curmode=="LoopInput"?root.mode("Loop")::
+			.exit root.delete input;
+		.if t==.type.string?((.strlen(i)@.sint<0?0:.sint)@n):0;
+			.gotodw string;
+		.if t&.type.num?(.length(i)@n):0;
+			.gotodw array;
+		.exit ;
+		
+		#array;
+		root.var uint:input[n];
+		.while n;
+			n-=1:
+			i[n]@root.input[n];
+		.exit ;
+		
+		#string;
+		root.var uint:input[n];
+		.while n;
+			n-=1:
+			.strbyte(i,n)@root.input[n];
+		.exit ;
+	};
+	rs.setinput.var refer:root=rs;
+	rs.setinput.var uint:(t,n);
+	
+	# loop
+	rs.function void:loop(n:.type.num)
+	{
+		n@i;
+		.while i>0;
+			root.get():
+			i-=1;
+	} ;
+	rs.loop.var refer:root=rs,long:i;
+	
+	# type
+	rs.var string:type;
+	rs.type=type;
+};
+randseq.init.var refer:(type=randseq.type,default=randseq.default);
+
+
