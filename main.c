@@ -65,7 +65,11 @@ int main(int argc, char *argv[])
 {
 	char *exp;
 	var pt_text={0};
-	if (argc<2) return 0;
+	if (argc<2)
+	{
+		printf("%s v%d.%d.%d\n\t%s <script-file>\n",argv[0],VERSION_major,VERSION_minor,VERSION_revision,argv[0]);
+		return 0;
+	}
 	exp=get_exp(argv[1]);
 	if (!exp)
 	{
