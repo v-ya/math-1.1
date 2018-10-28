@@ -52,12 +52,13 @@ ss(errcl_Var_S)		"变量基类";
 		ss(errid_VarNotFun_S)		"变量不是函数";
 		ss(errid_VarNotString_S)	"变量不是字符串";
 		ss(errid_VarNotNumber_S)	"变量不是数字";
+		ss(errid_VarNotIndex_S)		"变量不是索引类型(String|Number)";
 		ss(errid_VarUnknowFun_S)	"未知函数类型";
 	ss(errty_VarAuth_S)	"权限类别";
 		ss(errid_VarNotRetype_S)	"无权重置变量类型";
 		ss(errid_VarNotRead_S)		"无权读取变量";
 		ss(errid_VarNotWrite_S)		"无权写入变量";
-		ss(errid_VarNotLink_S)		"无权链接变量";
+		ss(errid_VarNotLink_S)		"无权链接删除变量";
 		ss(errid_VarNotRun_S)		"无权运行变量";
 		ss(errid_VarNotRelength_S)	"无权重置变量长度";
 
@@ -142,6 +143,7 @@ static char *errty_VarType_idA[]={
 	errid_VarNotFun_S,
 	errid_VarNotString_S,
 	errid_VarNotNumber_S,
+	errid_VarNotIndex_S,
 	errid_VarUnknowFun_S,
 } ;
 

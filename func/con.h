@@ -12,6 +12,9 @@ func(get_type);
 func(import);
 func(remove);
 func(issame);
+func(add);
+func(replace);
+func(sub);
 
 #endif
 

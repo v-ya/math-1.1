@@ -97,7 +97,7 @@ var* var_define(char *exp, char **expp, var *root)
 	{
 		// check var's auth
 		vp=vl->v;
-		if _oF(!(vp->mode&auth_retype))
+		if _oF(vp && !(vp->mode&auth_retype))
 		{
 			if _oT(vp->type^(1<<tlog)^(buffer[0]=='u'?type_unsign:0)) goto Err_notretype;
 			else if _oF(!(vp->mode&auth_relength)) goto Err_notrelength;
@@ -290,7 +290,7 @@ var* var_define(char *exp, char **expp, var *root)
 					vp=rv;
 					goto End;
 				}
-				if _oT(rv->mode&auth_link)
+				if _oT(rv->mode&auth_read)
 				{
 					if _oF(rv->type&type_refer) goto Err_refer;
 					refer_set(vp,rv);

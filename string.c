@@ -22,6 +22,15 @@ u32 vname_gen(unsigned char *name)
 	return ngen;
 }
 
+u32 vhead_gen(u64 head)
+{
+	u32 ngen=0;
+	for(;head>0;head>>=8)
+		ngen+=head&0xff;
+	ngen&=0xff;
+	return ngen;
+}
+
 u64 vname_head(unsigned char *name)
 {
 	u32 i;

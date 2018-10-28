@@ -15,6 +15,9 @@
 		run	key	0	r	addr_key(run)
 		try	key	0	r	addr_key(try)
 		include	key	0	r	addr_key(include)
+		add	fun	0	r	addr_fun(add)
+		replace	fun	0	r	addr_fun(replace)
+		sub	fun	0	r	addr_fun(sub)
 		
 		// 占位符
 		_vt_	void	0	r
@@ -33,13 +36,13 @@
 	_package	-export	.package
 	// 线程相关
 	thread	vlist	0	r	{
-		this	vmat	0	-
-		text	vmat	0	-
-		temp	vmat	0	-
-		sbuf	vmat	0	-
-		kill	vlist	0	-
-		error	vlist	0	-
-		buerr	vlist	0	-
+		this	vmat	0	r
+		text	vmat	0	r
+		temp	vmat	0	r
+		sbuf	vmat	0	r
+		kill	vlist	0	r
+		error	vlist	0	r
+		buerr	vlist	0	r
 		
 		_pt_this	-export	.thread.this
 		_pt_text	-export	.thread.text
@@ -50,7 +53,7 @@
 		_pt_buerr	-export	.thread.buerr
 	}
 	// 引用池
-	refpool	vmat	0	-
+	refpool	vmat	0	r
 	_refpool	-export	.refpool
 	// 系统相关
 	sys	vmat	0	r	{
@@ -151,7 +154,7 @@
 		int	-link	.sint
 		long	slong	0	rw
 		float	float	0	rw
-		string	string	NULL	rw
+		string	string	0	rw
 		// 字符串处理库
 		sprint	fun	0	r	addr_fun(sprint)
 		s	-link	.sprint

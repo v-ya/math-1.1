@@ -24,7 +24,7 @@ struct VMAT;
 #define refer_max	0xffff
 // type normal
 #define type_tlog(t)	(1<<t)
-#define type_null	0x00000000
+#define type_null	0x00800000
 #define type_void	0x00000001
 #define type_byte	0x00000002
 #define type_word	0x00000004
@@ -61,7 +61,7 @@ struct VMAT;
 #define auth_relength	0x00000040
 
 #define auth_all	0x0000ffff
-#define auth_normal	0x0000000f
+#define auth_normal	0x0000004f
 #define auth_tmpvar	0x00000002
 #define auth_sysfun	0x00000012
 #define auth_syskey	0x00000022
@@ -77,7 +77,7 @@ struct VMAT;
 #define leng_no		0
 
 #define vpntof(vp)	(((vp)->type&type_znum)?((vp)->v.v_long):((vp)->v.v_float))
-#define vpbool(vp)	(((vp)->type&type_void)?0:(((vp)->type&type_float)?(((vp)->v.v_float!=0)?1:0):(((vp)->v.v_long)?1:0)))
+#define vpbool(vp)	(((vp)->type&(type_void|type_null))?0:(((vp)->type&type_float)?(((vp)->v.v_float!=0)?1:0):(((vp)->v.v_long)?1:0)))
 #define isstring(vp)	(((vp)->type&type_string)&&(!(vp)->length))
 
 #define _kw_(p,n)	var* p##n(var *call, char **expp)
@@ -112,6 +112,7 @@ typedef union VALUE {
 	// special
 	key v_key;
 	fun v_fun;
+	struct VAR *v_var;
 	struct ERROR_INFO *v_error;
 } value;
 
@@ -126,7 +127,7 @@ typedef struct VAR {
 typedef struct VLIST {
 	char* name;
 	u32 mode;
-	// 快速比较位 head: name[0-7]
+	// 快速比较位 head: name[0-7] | 变量组索引位 index
 	u64 head;
 	struct VAR *v;
 	struct VLIST *l;
@@ -138,28 +139,38 @@ typedef struct VMAT {
 } vmat;
 
 #ifndef __nosym__
-
+// static var
+extern var *_var_null;
+var* get_null(void);
 // alloc && free
 vmat* vmat_alloc(void);
 void vmat_free(vmat *vm);
 vlist* vlist_alloc(char *name);
+vlist* vlist_alloc_index(u64 head);
 void vlist_free(vlist *vl);
 var* var_alloc(u32 tlog, u32 length);
 void var_free(var *vp);
 // insert && find && delete
 vlist* vlist_insert(vlist *vl, vlist *v);
 vlist* vlist_find(vlist *vl, char *name);
+vlist* vlist_find_index(vlist *vl, u64 head);
 vlist* vlist_delete(vlist *vl, char *name);
+vlist* vlist_delete_index(vlist *vl, u64 head);
 void vmat_insert(vmat *vm, vlist *v);
 vlist* vmat_find(vmat *vm, char *name);
+vlist* vmat_find_index(vmat *vm, u64 head);
 void vmat_delete(vmat *vm, char *name);
+void vmat_delete_index(vmat *vm, u64 head);
 // vlist && var 's fun
 void var_save(var *vp);
 void vlist_link(vlist *vl, var *v);
 vlist* v_find(var *obj, char *name);
+vlist* v_find_index(var *obj, u64 head);
 var* var_find(var *obj, char *name);
+var* var_find_index(var *obj, u64 head);
 vlist* var_insert(var *obj, char *name, u32 tlog, u32 length);
 void var_delete(var *obj, char *name);
+void var_delete_index(var *obj, u64 head);
 var* var_replace(var *obj, char *name, u32 tlog, u32 length);
 var* var_set(var *obj, char *name, u32 tlog, u32 length, u32 mode, value *v);
 var* var_link(var *obj, char *name, var *v);

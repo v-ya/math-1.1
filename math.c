@@ -250,7 +250,7 @@ char* run_fun(char *exp, var *root, var **function)
 	static char *label="run_fun";
 	int argc;
 	vlist *argv;
-	var v={.length=0,.inode=0,.mode=auth_tmpvar};
+	var v={.type=type_null,.length=0,.inode=0,.mode=auth_tmpvar|free_temp};
 	if _oF(*exp!='(') return exp;
 	exp++;
 	v.v.v_void=get_varlist(&exp,&argc,&argv);
@@ -268,10 +268,10 @@ char* run_fun(char *exp, var *root, var **function)
 	if _oT((*function)->type&type_void)
 	{
 		// 指针函数，系统内设函数
-		v.type=root->type;
-		v.mode=root->mode;
-		v.v.v_void=root->v.v_void;
+		v.v.v_var=root;
+		var_save(root);
 		*function=(*((*function)->v.v_fun))(&v,argc,argv);
+		var_free(root);
 		if _oT(*function==&v)
 		{
 			*function=temp_get();
@@ -365,14 +365,16 @@ var* get_var(char *exp, char **expp, int *array_n)
 		while(is_space(*exp)) exp++;
 		vp=cal(exp,&exp);
 		if _oF(vp->type&type_err) goto Err;
-		if _oF((!(vp->type&type_string))||(vp->v.v_string==NULL))
+		if _oF(!(vp->type&type_znum)&&(!(vp->type&type_string)||vp->v.v_string==NULL))
 		{
 			var_free(vp);
-			goto Err_notstring;
+			goto Err_notindex;
 		}
 		func=vp;
-		vp=var_find(root,func->v.v_string);
-		if _oF(!vp) vp=var_find(_vm_gobj,func->v.v_string);
+		if _oT(func->type&type_string) vp=var_find(root,func->v.v_string);
+		else vp=var_find_index(root,func->v.v_long);
+		if _oF(!vp && func->type&type_string) vp=var_find(_vm_gobj,func->v.v_string);
+		if _oF(!vp) vp=_var_null;
 		var_free(func);
 		if _oF(*exp!=']') goto Err_notbra;
 		exp++;
@@ -401,12 +403,12 @@ var* get_var(char *exp, char **expp, int *array_n)
 		else goto Err_notname;
 	}
 	if _oF(!vp) goto Err_notfind;
+	LoopEntra:
 	if _oF(vp->type==type_refer)
 	{
 		vp=refer_check(vp);
-		if _oF(!vp) goto Err_notrefer;
+		if _oF(!vp) vp=_var_null;
 	}
-	LoopEntra:
 	while(is_space(*exp)) exp++;
 	if _oF(!(vp->mode&auth_read)) goto Err_notread;
 	if _oF((vp->mode&auth_key))
@@ -566,9 +568,6 @@ var* get_var(char *exp, char **expp, int *array_n)
 	Err_notfind:
 	vp=get_error(errid_VarNotFind,label);
 	goto Err;
-	Err_notrefer:
-	vp=get_error(errid_VarReferFail,label);
-	goto Err;
 	Err_notread:
 	vp=get_error(errid_VarNotRead,label);
 	goto Err;
@@ -578,8 +577,8 @@ var* get_var(char *exp, char **expp, int *array_n)
 	Err_notrun:
 	vp=get_error(errid_VarNotRun,label);
 	goto Err;
-	Err_notstring:
-	vp=get_error(errid_VarNotString,label);
+	Err_notindex:
+	vp=get_error(errid_VarNotIndex,label);
 	goto Err;
 	Err_notbra:
 	vp=get_error(errid_GraBraMismatch,label);
@@ -735,8 +734,8 @@ var* cal(char *exp, char **expp)
 		['%']=&&GraAddr_Divr,		// 求余		%, %=
 		['=']=&&GraAddr_Equ,		// 相等，赋值	==, =
 		['!']=&&GraAddr_Not,		// 非		!=
-		['<']=&&GraAddr_Lss,		// 小于		<, <=
-		['>']=&&GraAddr_Gtr,		// 大于		>, >=
+		['<']=&&GraAddr_Lss,		// 小于		<, <=, <<
+		['>']=&&GraAddr_Gtr,		// 大于		>, >=, >>
 		['&']=&&GraAddr_And,		// 且		&, &=, &&
 		['|']=&&GraAddr_Or,		// 或		|, |=, ||
 		['^']=&&GraAddr_Xor,		// 异或		^, ^=, ^^
@@ -1215,7 +1214,33 @@ var* cal(char *exp, char **expp)
 			goto Err_unknowsym;
 		}
 	GraAddr_Lss:
-		if _oF(*exp=='=')
+		if _oF(*exp=='<')
+		{
+			// <<
+			exp++;
+			if _oF(r!=&real)
+			{
+				if _oF(r->length) goto Err_nottype;
+				real.type=r->type;
+				real.v.v_long=r->v.v_long;
+				var_free(r);
+			}
+			RetAddr=&&GraAddr_Lss_Lshift;
+			goto FuncGetVar;
+			GraAddr_Lss_Lshift:
+			if _oF(r->length) goto Err_nottype;
+			t=(real.type|r->type)&type_all;
+			if _oT(!(t&~type_znum))
+			{
+				real.v.v_long=real.v.v_long << r->v.v_long;
+				real.type=type_long;
+			}
+			else goto Err_nottype;
+			var_free(r);
+			r=&real;
+			goto LoopEntra;
+		}
+		else if _oF(*exp=='=')
 		{
 			// <=
 			exp++;
@@ -1267,7 +1292,33 @@ var* cal(char *exp, char **expp)
 			goto LoopEntra;
 		}
 	GraAddr_Gtr:
-		if _oF(*exp=='=')
+		if _oF(*exp=='>')
+		{
+			// >>
+			exp++;
+			if _oF(r!=&real)
+			{
+				if _oF(r->length) goto Err_nottype;
+				real.type=r->type;
+				real.v.v_long=r->v.v_long;
+				var_free(r);
+			}
+			RetAddr=&&GraAddr_Gtr_Rshift;
+			goto FuncGetVar;
+			GraAddr_Gtr_Rshift:
+			if _oF(r->length) goto Err_nottype;
+			t=(real.type|r->type)&type_all;
+			if _oT(!(t&~type_znum))
+			{
+				real.v.v_long=real.v.v_long >> r->v.v_long;
+				real.type=type_long;
+			}
+			else goto Err_nottype;
+			var_free(r);
+			r=&real;
+			goto LoopEntra;
+		}
+		else if _oF(*exp=='=')
 		{
 			// >=
 			exp++;

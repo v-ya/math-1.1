@@ -114,7 +114,7 @@ keyword(function)
 	while(is_space(*exp)) exp++;
 	vl=var_insert(root,"_text_",tlog_string,leng_no);
 	if _oF(!vl) goto Err_malloc;
-	vl->v->mode&=~(auth_retype|auth_link);
+	vl->v->mode&=auth_read|auth_write;
 	if _oT(*exp=='{') {
 		vl->v->v.v_string=get_code(exp,&exp);
 		if _oF(!vl->v->v.v_string) goto Err_malloc;

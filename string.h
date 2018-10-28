@@ -10,6 +10,7 @@
 
 u32 vname_check(char *name);
 u32 vname_gen(unsigned char *name);
+u32 vhead_gen(u64 head);
 u64 vname_head(unsigned char *name);
 char* skip_string(char *exp);
 char* get_string(char *exp, char **pexp);

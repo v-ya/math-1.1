@@ -5,6 +5,7 @@ typedef struct Interface_Base {
 	// string.h
 	u32	(*vname_check)		(char *name);
 	u32	(*vname_gen)		(unsigned char *name);
+	u32	(*vhead_gen)		(u64 head);
 	u64	(*vname_head)		(unsigned char *name);
 	char*	(*skip_string)		(char *exp);
 	char*	(*get_string)		(char *exp, char **pexp);
@@ -19,24 +20,33 @@ typedef struct Interface_Base {
 	u32	(*cmp_label)		(char *exp, char *label);
 	char*	(*skip_note)		(char *exp);
 	// var.h
+	var*	(*get_null)		(void);
 	vmat*	(*vmat_alloc)		(void);
 	void	(*vmat_free)		(vmat *vm);
 	vlist*	(*vlist_alloc)		(char *name);
+	vlist*	(*vlist_alloc_index)	(u64 head);
 	void	(*vlist_free)		(vlist *vl);
 	var*	(*var_alloc)		(u32 tlog, u32 length);
 	void	(*var_free)		(var *vp);
 	vlist*	(*vlist_insert)		(vlist *vl, vlist *v);
 	vlist*	(*vlist_find)		(vlist *vl, char *name);
+	vlist*	(*vlist_find_index)	(vlist *vl, u64 head);
 	vlist*	(*vlist_delete)		(vlist *vl, char *name);
+	vlist*	(*vlist_delete_index)	(vlist *vl, u64 head);
 	void	(*vmat_insert)		(vmat *vm, vlist *v);
 	vlist*	(*vmat_find)		(vmat *vm, char *name);
+	vlist*	(*vmat_find_index)	(vmat *vm, u64 head);
 	void	(*vmat_delete)		(vmat *vm, char *name);
+	void	(*vmat_delete_index)	(vmat *vm, u64 head);
 	void	(*var_save)		(var *vp);
 	void	(*vlist_link)		(vlist *vl, var *v);
 	vlist*	(*v_find)		(var *obj, char *name);
+	vlist*	(*v_find_index)		(var *obj, u64 head);
 	var*	(*var_find)		(var *obj, char *name);
+	var*	(*var_find_index)	(var *obj, u64 head);
 	vlist*	(*var_insert)		(var *obj, char *name, u32 tlog, u32 length);
 	void	(*var_delete)		(var *obj, char *name);
+	void	(*var_delete_index)	(var *obj, u64 head);
 	var*	(*var_replace)		(var *obj, char *name, u32 tlog, u32 length);
 	var*	(*var_set)		(var *obj, char *name, u32 tlog, u32 length, u32 mode, value *v);
 	var*	(*var_link)		(var *obj, char *name, var *v);
