@@ -318,6 +318,7 @@ var *_func__add(char *label, var *root, var *index, var *vt, var *argv, u32 isre
 	// link
 	vlist_link(vl,vp);
 	End:
+	vp->type|=u?type_unsign:0;
 	if _oF(vp->type==type_refer)
 	{
 		if _oT(argv)
