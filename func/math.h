@@ -37,7 +37,7 @@ func(abs);
 
 func(hypot);
 func(ftol);
-
+func(ltof);
 
 #endif
 

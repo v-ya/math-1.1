@@ -145,6 +145,7 @@
 		round	fun	0	r	addr_fun(round)
 		abs	fun	0	r	addr_fun(abs)
 		ftol	fun	0	r	addr_fun(ftol)
+		ltof	fun	0	r	addr_fun(ltof)
 		// 类型转换临时变量
 		void	void	0	r
 		sbyte	sbyte	0	rw

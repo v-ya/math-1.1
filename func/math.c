@@ -347,4 +347,22 @@ func(ftol)
 	return ret;
 }
 
+func(ltof)
+{
+	static char *label=".ltof";
+	var *vp;
+	if _oF(argc!=1) return get_error(errid_FunArgvType,label);
+	vp=argv->v;
+	ret->type=type_float;
+	switch(vp->type&type_all)
+	{
+		case type_int:
+			ret->v.v_float=*((float*)&(vp->v.v_int));
+			return ret;
+		case type_long:
+			ret->v.v_float=*((double*)&(vp->v.v_long));
+			return ret;
+	}
+	return get_error(errid_FunArgvType,label);
+}
 
