@@ -206,6 +206,12 @@
 		stamp	fun	0	r	addr_fun(stamp)
 		clock	fun	0	r	addr_fun(clock)
 	}
+	// 文件相关
+	file	vlist	0	r	{
+		size	fun	0	r	addr_fun(file_size)
+		read	fun	0	r	addr_fun(file_read)
+		// write	fun	0	r	addr_fun(file_write)
+	}
 	// try 处理错误函数
 	try	vlist	0	r	{
 		errid		fun	0	r	addr_fun(try_errid)
