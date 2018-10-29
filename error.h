@@ -63,6 +63,7 @@
 		#define errid_VarNotNumber	(errty_VarType|0x07)
 		#define errid_VarNotIndex	(errty_VarType|0x08)
 		#define errid_VarUnknowFun	(errty_VarType|0x09)
+		#define errid_VarNotBytesArray	(errty_VarType|0x0a)
 	// Var Auth
 	#define errty_VarAuth	errcl_Var|0x0300
 		#define errid_VarNotRetype	(errty_VarAuth|0x01)

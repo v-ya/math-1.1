@@ -8,6 +8,7 @@ func(sprint);
 func(strlen);
 func(strbyte);
 keyword(strarray);
+keyword(arrstring);
 
 #endif
 

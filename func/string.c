@@ -97,4 +97,33 @@ keyword(strarray)
 	}
 }
 
+keyword(arrstring)
+{
+	static char *label=".arrstring";
+	var *vp;
+	vp=cal(*expp,expp);
+	if _oF(vp->type&type_spe) return vp;
+	if _oF(**expp!=';')
+	{
+		var_free(vp);
+		return get_error(errid_GraLackSem,label);
+	}
+	if _oF(!vp->length || !(vp->type&type_byte))
+	{
+		var_free(vp);
+		return get_error(errid_VarNotBytesArray,label);
+	}
+	if _oT(vp->mode&auth_retype)
+	{
+		vp->v.vp_byte[vp->length-1]=0;
+		vp->length=leng_no;
+		vp->type=type_string;
+		return NULL;
+	}
+	else
+	{
+		var_free(vp);
+		return get_error(errid_VarNotRetype,label);
+	}
+}
 

@@ -54,6 +54,7 @@ ss(errcl_Var_S)		"变量基类";
 		ss(errid_VarNotNumber_S)	"变量不是数字";
 		ss(errid_VarNotIndex_S)		"变量不是索引类型(String|Number)";
 		ss(errid_VarUnknowFun_S)	"未知函数类型";
+		ss(errid_VarNotBytesArray_S)	"变量不是 Byte[]";
 	ss(errty_VarAuth_S)	"权限类别";
 		ss(errid_VarNotRetype_S)	"无权重置变量类型";
 		ss(errid_VarNotRead_S)		"无权读取变量";
@@ -146,6 +147,7 @@ static char *errty_VarType_idA[]={
 	errid_VarNotNumber_S,
 	errid_VarNotIndex_S,
 	errid_VarUnknowFun_S,
+	errid_VarNotBytesArray_S,
 } ;
 
 static char *errty_VarAuth_idA[]={

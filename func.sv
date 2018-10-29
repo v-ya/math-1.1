@@ -165,6 +165,7 @@
 		strlen	fun	0	r	addr_fun(strlen)
 		strbyte fun	0	r	addr_fun(strbyte)
 		strarray key	0	r	addr_key(strarray)
+		arrstring key	0	r	addr_key(arrstring)
 	// 常数表
 	const	vmat	0	r	{
 		e	float	0	r	M_E
