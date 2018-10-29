@@ -51,6 +51,7 @@ extern var *_type_null;
 #include "func/string.h"
 #include "func/time.h"
 #include "func/try.h"
+#include "func/thread.h"
 #include "func/debug.h"
 
 #endif

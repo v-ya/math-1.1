@@ -435,7 +435,7 @@ var* get_var(char *exp, char **expp, int *array_n)
 			if _oF(!(vp->mode&auth_run)) goto Err_notrun;
 			func=vp;
 			mode=func->mode;
-			func->mode&=~auth_retype;
+			func->mode&=~(auth_retype|auth_relength);
 			var_save(func);
 			// unlock
 			exp=run_fun(exp,root,&vp);
@@ -476,7 +476,7 @@ var* get_var(char *exp, char **expp, int *array_n)
 			exp++;
 			root=vp;
 			mode=root->mode;
-			root->mode&=~(auth_retype|auth_write);
+			root->mode&=~(auth_retype|auth_relength|auth_write);
 			var_save(root);
 			// unlock
 			length=get_int(exp,&exp,&vp);
@@ -1921,8 +1921,8 @@ var* run_script(var *pt_text, var *pt_this)
 	v.length=0;
 	v.mode=auth_tmpvar;
 	mode=pt_text->mode;
-	// 清除 pt_text 的权限，计算过程中会更改 pt_text 内容
-	pt_text->mode=0;
+	// 清除 pt_text 的权限
+	pt_text->mode=auth_read;
 	script=pt_text->v.v_string;
 	// 保留原有的 pt_this, pt_text
 	var_save(pt_text);

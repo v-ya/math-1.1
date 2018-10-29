@@ -2,12 +2,14 @@
 export	CC		= gcc #-pie -fPIE
 export	MAKEFLAGS	= --no-print-directory
 obj	= main.o string.o var.o error.o math.o sbuf.o file.o BaseFunction.o package.o func.o exfun.o
-func	= func/function.o func/key.o func/con.o func/math.o func/string.o func/time.o func/try.o func/debug.o
+func	= func/function.o func/key.o func/con.o func/math.o func/string.o func/time.o func/try.o func/thread.o func/debug.o
 
 all: math package/package
 
 math: ${obj} ${func}
 	${CC} ${obj} ${func} -lm -ldl -o $@
+
+error.o: error.c error.h error.string
 
 func.c: func.sv limit.h tool/sv-build
 	./tool/sv-build func.sv $@

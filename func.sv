@@ -51,6 +51,9 @@
 		_pt_kill	-export .thread.kill
 		_pt_error	-export	.thread.error
 		_pt_buerr	-export	.thread.buerr
+		
+		// 线程相关函数
+		self	fun	0	r	addr_fun(thread_self)
 	}
 	// 引用池
 	refpool	vmat	0	rc
