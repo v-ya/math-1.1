@@ -7,7 +7,7 @@
 // 版本号
 	#define	VERSION_major		1
 	#define VERSION_minor		5
-	#define VERSION_revision	0
+	#define VERSION_revision	1
 
 // 限制
 	// 自定义数组最大长度
@@ -26,12 +26,21 @@
 	#define PATH_cutup		':'
 	// path 内的分割符
 	#define PATH_incutup		'/'
-	// package 的默认储存路径
-	#define PATH_import		NULL
-	// 脚本文件的默认储存路径
-	#define PATH_include		NULL
-	// 数据文件的默认储存路径
-	#define PATH_data		NULL
+	// 内置环境目录路径
+	//#define PATH_root		"/usr/lib/math"
+	#ifdef PATH_root
+		// package 的默认储存路径
+		#define PATH_import		PATH_root"/import"
+		// 脚本文件的默认储存路径
+		#define PATH_include		PATH_root"/include"
+		// 数据文件的默认储存路径
+		#define PATH_data		PATH_root"/data"
+	#else
+		#define PATH_import		NULL
+		#define PATH_include		NULL
+		#define PATH_data		NULL
+	#endif
+		
 
 // 头文件
 	// .include.inc -- 字符串代码，执行头文件添加操作
