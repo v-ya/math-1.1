@@ -82,7 +82,7 @@ void print_vlist(vlist *vl, u32 tab, void *rp)
 		print("  %16s  ", sbuf_get()->v.v_string);
 		// name
 		if _oT(vl->name) print("(%s)\n",vl->name);
-		else print("(%llu)\n",vl->head);
+		else print("[%llu]\n",vl->head);
 	}
 	else
 	{
