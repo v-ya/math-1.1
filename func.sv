@@ -65,6 +65,7 @@
 			major	ubyte	0	r	VERSION_major
 			minor	ubyte	0	r	VERSION_minor
 			rev	ubyte	0	r	VERSION_revision
+			value	uint	0	r	VERSION_value
 		}
 		// 限制
 		limit	vlist	0	r	{
