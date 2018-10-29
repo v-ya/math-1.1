@@ -966,14 +966,15 @@ void var_fixvalue(var *vp)
 
 void ptvar_alloc(var *object)
 {
-	u64 pthid;
+	u64 pthid,mix;
 	vlist *vl,*vl0;
 	pthid=pthread_self();
 	vl=vlist_alloc(NULL);
 	if _oF(!vl) return ;
 	vl->head=pthid;
+	mix=vhead_gen(pthid);
 	// 线程独占操作，加锁
-	if _oT(object->type&type_vmat) vl0=object->v.v_vmat->vl[pthid&0xff];
+	if _oT(object->type&type_vmat) vl0=object->v.v_vmat->vl[mix];
 	else if _oT(object->type&type_vlist) vl0=object->v.v_vlist;
 	else goto Err;
 	if _oF(!vl0) ;
@@ -996,7 +997,7 @@ void ptvar_alloc(var *object)
 		if _oT(vl->l) vl->l->r=vl;
 	}
 	else goto Err;
-	if _oT(object->type&type_vmat) object->v.v_vmat->vl[pthid&0xff]=vl;
+	if _oT(object->type&type_vmat) object->v.v_vmat->vl[mix]=vl;
 	else if _oT(object->type&type_vlist) object->v.v_vlist=vl;
 	End:
 	// 解锁，退出
@@ -1008,11 +1009,12 @@ void ptvar_alloc(var *object)
 
 void ptvar_free(var *object)
 {
-	u64 pthid;
+	u64 pthid,mix;
 	vlist *vl,*vl0;
 	pthid=pthread_self();
+	mix=vhead_gen(pthid);
 	// 线程独占操作，加锁
-	if _oT(object->type&type_vmat) vl=object->v.v_vmat->vl[pthid&0xff];
+	if _oT(object->type&type_vmat) vl=object->v.v_vmat->vl[mix];
 	else if _oT(object->type&type_vlist) vl=object->v.v_vlist;
 	else goto End;
 	
@@ -1037,7 +1039,7 @@ void ptvar_free(var *object)
 	vl0->l=NULL;
 	vl0->r=NULL;
 	vlist_free(vl0);
-	if _oT(object->type&type_vmat) object->v.v_vmat->vl[pthid&0xff]=vl;
+	if _oT(object->type&type_vmat) object->v.v_vmat->vl[mix]=vl;
 	else if _oT(object->type&type_vlist) object->v.v_vlist=vl;
 	End:
 	// 解锁，退出
@@ -1049,7 +1051,7 @@ var* ptvar_get(var *object)
 	u64 pthid;
 	vlist *vl;
 	pthid=pthread_self();
-	if _oT(object->type&type_vmat) vl=object->v.v_vmat->vl[pthid&0xff];
+	if _oT(object->type&type_vmat) vl=object->v.v_vmat->vl[vhead_gen(pthid)];
 	else if _oT(object->type&type_vlist) vl=object->v.v_vlist;
 	else return NULL;
 	
@@ -1065,7 +1067,7 @@ vlist* ptvar_vlist(var *object)
 	u64 pthid;
 	vlist *vl;
 	pthid=pthread_self();
-	if _oT(object->type&type_vmat) vl=object->v.v_vmat->vl[pthid&0xff];
+	if _oT(object->type&type_vmat) vl=object->v.v_vmat->vl[vhead_gen(pthid)];
 	else if _oT(object->type&type_vlist) vl=object->v.v_vlist;
 	else return NULL;
 	while(vl&&(vl->head!=pthid))
@@ -1101,7 +1103,7 @@ void refer_alloc(u64 id)
 	if _oF(!vl) return ;
 	
 	vl->head=id;
-	idgen=(id>>4)&0xff;
+	idgen=vhead_gen(id);
 	// 线程独占操作，加锁
 	vl0=_refpool->v.v_vmat->vl[idgen];
 	if _oF(!vl0) ;
@@ -1137,7 +1139,7 @@ void refer_free(u64 id)
 {
 	vlist *vl,*vl0;
 	u32 idgen;
-	idgen=(id>>4)&0xff;
+	idgen=vhead_gen(id);
 	// 线程独占操作，加锁
 	vl=_refpool->v.v_vmat->vl[idgen];
 	if _oF(!vl) goto End;
@@ -1171,7 +1173,7 @@ vlist* refer_get(u64 id)
 {
 	vlist *vl;
 	u32 idgen;
-	idgen=(id>>4)&0xff;
+	idgen=vhead_gen(id);
 	vl=_refpool->v.v_vmat->vl[idgen];
 	if _oF(!vl) return NULL;
 	if _oT(vl->head<id) while(vl->r&&vl->r->head<=id) vl=vl->r;

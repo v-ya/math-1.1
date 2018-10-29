@@ -36,13 +36,13 @@
 	_package	-export	.package
 	// 线程相关
 	thread	vlist	0	r	{
-		this	vmat	0	r
-		text	vmat	0	r
-		temp	vmat	0	r
-		sbuf	vmat	0	r
-		kill	vlist	0	r
-		error	vlist	0	r
-		buerr	vlist	0	r
+		this	vmat	0	rc
+		text	vmat	0	rc
+		temp	vmat	0	rc
+		sbuf	vmat	0	rc
+		kill	vlist	0	rc
+		error	vlist	0	rc
+		buerr	vlist	0	rc
 		
 		_pt_this	-export	.thread.this
 		_pt_text	-export	.thread.text
@@ -53,7 +53,7 @@
 		_pt_buerr	-export	.thread.buerr
 	}
 	// 引用池
-	refpool	vmat	0	r
+	refpool	vmat	0	rc
 	_refpool	-export	.refpool
 	// 系统相关
 	sys	vmat	0	r	{

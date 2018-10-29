@@ -110,6 +110,7 @@ func(import)
 	if _oF(argc!=2) return get_error(errid_FunArgvType,label);
 	else if _oF(check_varlist(argv,2,type_2)) return get_error(errid_FunArgvType,label);
 	root=ret->v.v_var;
+	if _oF(root->mode&auth_system) return get_error(errid_VarIsSystem,label);
 	// 判断 root 是否可写
 	if _oF(!(root->mode&auth_write)) goto Err_write;
 	// 空 vlist 不可写
@@ -192,6 +193,8 @@ var *_func__add(char *label, var *root, var *index, var *vt, var *argv, u32 isre
 	vlist *vl;
 	void *array;
 	
+	// check auth_system
+	if _oF(root->mode&auth_system) return get_error(errid_VarIsSystem,label);
 	// get type
 	if _oT(vt->type&type_string)
 	{
@@ -411,6 +414,7 @@ func(sub)
 	
 	index=argv->v;
 	root=ret->v.v_var;
+	if _oF(root->mode&auth_system) return get_error(errid_VarIsSystem,label);
 	if _oT(index->type&type_string) vp=var_find(root,index->v.v_string);
 	else vp=var_find_index(root,index->v.v_long);
 	if _oT(vp)

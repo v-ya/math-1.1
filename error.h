@@ -71,6 +71,7 @@
 		#define errid_VarNotLink	(errty_VarAuth|0x04)
 		#define errid_VarNotRun		(errty_VarAuth|0x05)
 		#define errid_VarNotRelength	(errty_VarAuth|0x06)
+		#define errid_VarIsSystem	(errty_VarAuth|0x07)
 
 typedef struct ERROR_INFO {
 	u32 errid;

@@ -5,6 +5,7 @@ keyword(var)
 	static char *label="[object].var";
 	var *vp;
 	if _oF(!call) return get_error(errid_IntError,label);
+	if _oF(call->mode&auth_system) return get_error(errid_VarIsSystem,label);
 	if _oF(!(call->type&type_object)) return get_error(errid_VarNotObject,label);
 	Loop:
 	switch(**expp)
@@ -29,6 +30,7 @@ keyword(delete)
 	char *name;
 	var *vp;
 	if _oF(!call) return get_error(errid_IntError,label);
+	if _oF(call->mode&auth_system) return get_error(errid_VarIsSystem,label);
 	if _oF(!(call->type&type_object)) return get_error(errid_VarNotObject,label);
 	Loop:
 	switch(**expp)
@@ -62,6 +64,7 @@ keyword(function)
 	char *exp,*name=NULL,*type=NULL,*s;
 	u32 tlog;
 	if _oF(!call) return get_error(errid_IntError,label);
+	if _oF(call->mode&auth_system) return get_error(errid_VarIsSystem,label);
 	if _oF(!(call->type&type_object)) return get_error(errid_VarNotObject,label);
 	if _oF(!(call->mode&auth_write)) return get_error(errid_VarNotWrite,label);
 	exp=*expp;

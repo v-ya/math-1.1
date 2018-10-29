@@ -59,6 +59,7 @@ struct VMAT;
 #define auth_run	0x00000010
 #define auth_key	0x00000020
 #define auth_relength	0x00000040
+#define auth_system	0x00008000
 
 #define auth_all	0x0000ffff
 #define auth_normal	0x0000004f

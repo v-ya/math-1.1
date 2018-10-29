@@ -46,21 +46,28 @@ void print_vlist(vlist *vl, u32 tab, void *rp)
 			if _oF(!vp) vp=vl->v;
 		}
 		// auth
-		r=vp->mode;
-		print("%c%c%c%c%c%c", (r&auth_retype)?'s':(r&auth_relength?'S':'-'), (r&auth_read)?'r':'-', (r&auth_write)?'w':'-',
-			(r&auth_link)?'l':'-', (r&auth_run)?'f':'-', (r&auth_key)?'k':'-');
+		r=vl->v->mode;
+		print("%c%c%c%c%c%c", (r&auth_retype)?'s':(r&auth_relength?'S':'-'), (r&auth_read)?(r&auth_system?'R':'r'):'-',
+			(r&auth_write)?'w':'-', (r&auth_link)?'l':'-', (r&auth_run)?'f':'-', (r&auth_key)?'k':'-');
+		if _oF((vl->v->type&type_refer)&&(vl->v!=vp))
+		{
+			r=vp->mode;
+			print("=>%c%c%c%c%c%c", (r&auth_retype)?'s':(r&auth_relength?'S':'-'), (r&auth_read)?(r&auth_system?'R':'r'):'-',
+				(r&auth_write)?'w':'-', (r&auth_link)?'l':'-', (r&auth_run)?'f':'-', (r&auth_key)?'k':'-');
+		}
+		else print("        ");
 		// type
 		print("%8s", get_type(vl->v->type,vl->v->mode));
 		// length or refer
 		if _oF((vl->v->type&type_refer)&&(vl->v!=vp))
 		{
-			print("->");
+			print("=>");
 			print("%6s",get_type(vp->type,vp->mode));
 		}
 		else if _oF(vp->length) print("[%6u]", vp->length);
 		else print("        ");
 		// inode
-		if _oF((vl->v->type&type_refer)&&(vl->v!=vp)) print("  %2u->%6u", (vl->v==rp&&vl->v->inode>0)?(vl->v->inode-1):vl->v->inode, (vp==rp&&vp->inode>0)?(vp->inode-1):vp->inode);
+		if _oF((vl->v->type&type_refer)&&(vl->v!=vp)) print("  %4u=>%4u", (vl->v==rp&&vl->v->inode>0)?(vl->v->inode-1):vl->v->inode, (vp==rp&&vp->inode>0)?(vp->inode-1):vp->inode);
 		else print("      %6u", (tab==0&&vp->inode>0)?(vp->inode-1):vp->inode);
 		// value
 		vt.v=vp;
@@ -79,8 +86,8 @@ void print_vlist(vlist *vl, u32 tab, void *rp)
 	}
 	else
 	{
-		if _oT(vl->name) print("......  unknow %016llx %016llx  (%s)\n",(u64)vl->mode,(u64)vl->v,vl->name);
-		else print("......  unknow %016llx %016llx  [%016llx]\n",(u64)vl->mode,(u64)vl->v,vl->head);
+		if _oT(vl->name) print("......          unknow m=%016llx v=%016llx  (%s)\n",(u64)vl->mode,(u64)vl->v,vl->name);
+		else print("......          unknow m=%016llx v=%016llx  [%016llx]\n",(u64)vl->mode,(u64)vl->v,vl->head);
 	}
 }
 
