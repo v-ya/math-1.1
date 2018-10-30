@@ -347,6 +347,19 @@ func(ftol)
 	return ret;
 }
 
+func(ftoi)
+{
+	static char *label=".ftoi";
+	var *vp;
+	float f;
+	if _oF((argc!=1)||check_varlist(argv,1,t_f)) return get_error(errid_FunArgvType,label);
+	vp=argv->v;
+	f=vpntof(vp);
+	ret->type=type_int|type_unsign;
+	ret->v.v_long=*((u32*)(&f));
+	return ret;
+}
+
 func(ltof)
 {
 	static char *label=".ltof";
