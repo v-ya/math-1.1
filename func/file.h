@@ -6,6 +6,7 @@
 
 func(file_size);
 func(file_read);
+func(file_write);
 
 #endif
 

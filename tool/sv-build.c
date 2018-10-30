@@ -18,6 +18,7 @@ static char *val[8];	// 缓存行指针
 static int vn;		// 行内读取数
 static FILE *infile=NULL;
 static FILE *outfile=NULL;
+static int isdebug;
 static var *_vm_root;
 
 // head
@@ -40,7 +41,8 @@ static u64 _head_fvlist;
 
 #define Max_length	16
 
-#define	err(s)	_err(__func__, s)
+#define	err(s)		_err(__func__, s)
+#define debug(fm, ...)	if (isdebug) fprintf(stdout,"%s " fm "\n",__func__, ##__VA_ARGS__)
 void _err(const char *func, char *info)
 {
 	fprintf(stderr,"[error] %s: %s\n",func,info);
@@ -110,6 +112,7 @@ int get_mode(char *mode)
 		case 0:
 			return m;
 		default:
+			debug("unknow %c",*mode);
 			err("unknow auth");
 	}
 }
@@ -118,6 +121,7 @@ var* bcvar(var *root, char *name, u32 tlog, u32 length)
 {
 	vlist *vl=NULL;
 	var *vp=NULL;
+	debug("create %s ...",name);
 	if (root)
 	{
 		if (root->type&type_object)
@@ -149,6 +153,7 @@ var* bcvar(var *root, char *name, u32 tlog, u32 length)
 void bclink(var *root, char *name, var *vp)
 {
 	vlist *vl=NULL;
+	debug("link %s ...",name);
 	if (root)
 	{
 		if (root->type&type_object)
@@ -173,6 +178,7 @@ var* get_var(var *root, char *lname)
 {
 	var *vp;
 	char c,*sc,*name;
+	debug("get %s ...",lname);
 	vp=root;
 	sc=lname;
 	if (*sc=='.') sc++;
@@ -444,10 +450,12 @@ int main(int argc, char *argv[])
 	
 	init();
 	
-	if (argc<3) fprintf(stderr,"sv-build <infile> <outfile>\n");
+	if (argc<3) fprintf(stderr,"sv-build <infile> <outfile> [--debug]\n");
 	infile=fopen(argv[1],"r");
 	outfile=fopen(argv[2],"w");
 	if (infile==NULL||outfile==NULL) err("open file fail");
+	if (argc>3) isdebug=strcmp(argv[3],"--debug")?0:1;
+	else isdebug=0;
 	// read infile
 	fseek(infile,0,2);
 	size=ftell(infile);

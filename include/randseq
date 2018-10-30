@@ -1,6 +1,6 @@
 # randseq
 
-.if .include.inc("randseq");
+.if .include.inc("randseq",.type.vlist);
 	.exit ;
 
 randseq.var string:type="randseq";

@@ -1,6 +1,6 @@
 # random
 
-.if .include.inc("random");
+.if .include.inc("random",.type.vlist);
 	.exit ;
 
 .include.include "randseq";
