@@ -7,6 +7,7 @@
 func(sprint);
 func(strlen);
 func(strbyte);
+func(compress_code);
 keyword(strarray);
 keyword(arrstring);
 

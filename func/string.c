@@ -62,6 +62,32 @@ func(strbyte)
 	return ret;
 }
 
+func(compress_code)
+{
+	static char *label=".compress_code";
+	static u32 type_1[1]={type_string};
+	var *vp;
+	char *code;
+	if _oF(argc!=1) return get_error(errid_FunArgvType,label);
+	else if _oF(check_varlist(argv,1,type_1)) return get_error(errid_FunArgvType,label);
+	code=argv->v->v.v_string;
+	if _oT(code)
+	{
+		code=compress_code(code);
+		if _oF(!code) return get_error(errid_MemLess,label);
+	}
+	vp=var_alloc(tlog_string,leng_no);
+	if _oF(!vp)
+	{
+		if _oT(code) free(code);
+		return get_error(errid_MemLess,label);
+	}
+	vp->v.v_string=code;
+	vp->mode=auth_read;
+	if _oT(code) vp->mode|=free_pointer;
+	return vp;
+}
+
 keyword(strarray)
 {
 	static char *label=".strarray";

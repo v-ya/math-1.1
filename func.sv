@@ -248,6 +248,8 @@
 		strbyte fun	0	r	addr_fun(strbyte)
 			// ubyte .strbyte(string,num);
 			// 'e' <= .strbyte("Hello",1);
+		cpcode	fun	0	r	addr_fun(compress_code)
+			// string cpcode(string);
 		strarray key	0	r	addr_key(strarray)
 			// .strarray exp(string);
 			// string => ubyte[]
@@ -350,18 +352,7 @@
 			// void .try.errnext();
 	}
 	// include 相关信息
-	include	vmat	0	rw	{
-		inc	fvlist	0	r	{
-			// 内嵌自定义函数，用来确保 文件只被运行一次
-			// 如要使用，请在文件开头加上如下字段
-			// .if .include.inc("only-label",.type.type);
-			//	.exit ;
-			_ret_	slong	0	rw
-			_text_	string	0	r	INCLUDE_inc_text
-			_vn_	string	2	r	INCLUDE_inc_vn
-			_vt_	uint	2	r	INCLUDE_inc_vt
-		}
-	}
+	include	vmat	0	rw
 	// 调试相关
 	debug	vlist	0	r	{
 		list	fun	0	r	addr_fun(debug_list)

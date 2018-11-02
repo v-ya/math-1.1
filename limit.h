@@ -6,8 +6,8 @@
 
 // 版本号
 	#define	VERSION_major		1
-	#define VERSION_minor		5
-	#define VERSION_revision	7
+	#define VERSION_minor		6
+	#define VERSION_revision	0
 	#define VERSION_value		(VERSION_major<<16|VERSION_minor<<8|VERSION_revision)
 
 // 限制
@@ -43,12 +43,5 @@
 		#define PATH_include		"." PATH_cutup_s "include"
 		#define PATH_data		"." PATH_cutup_s "data"
 	#endif
-		
-
-// 头文件
-	// .include.inc -- 字符串代码，执行头文件添加操作
-	#define INCLUDE_inc_text	".include.exist(n,t)@_ret_;.if !_ret_;.include.replace(n,t);.if !.issame(_caller_,.include);_caller_.add(n,.type.refer,.include[n]);"
-	#define INCLUDE_inc_vn		{"n","t"}
-	#define INCLUDE_inc_vt		{type_string,type_znum}
 #endif
 

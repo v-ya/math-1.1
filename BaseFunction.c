@@ -11,6 +11,7 @@ interface_base BaseFunction = {
 	&get_ascii,
 	&skip_code,
 	&get_code,
+	&compress_code,
 	&get_nextcol,
 	&get_nextsem,
 	&skip_string_last,

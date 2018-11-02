@@ -1,10 +1,12 @@
-obj	= sv-build.o ../var.o ../string.o
+tool: sv-build init-makec
+	echo >$@
 
-all: sv-build
+sv-build: sv-build.o ../var.o ../string.o
+	${CC} $^ -lm -ldl -o $@
 
-sv-build: ${obj}
-	${CC} ${obj} -lm -ldl -o $@
+init-makec: init-makec.o ../string.o
+	${CC} $^ -lm -ldl -o $@
 
 clear:
-	rm -f sv-build *.o
+	rm -f tool sv-build init-makec *.o
 

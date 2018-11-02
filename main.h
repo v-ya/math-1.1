@@ -22,6 +22,7 @@
 #include "BaseFunction.h"
 #include "package.h"
 #include "func.h"
+#include "init.h"
 
 // 定义 RAND_MAX_L
 #define RAND_MAX_L (1ull+RAND_MAX)

@@ -490,6 +490,105 @@ char* get_code(char *exp, char **pexp)
 	}
 }
 
+char* compress_code(char *s)
+{
+	char *code,*s0,*s2,c1,c2;
+	s32 size=1024,len=0;
+	if _oF(!s) return NULL;
+	s0=s;
+	code=malloc(size);
+	while(*s)
+	{
+		switch(*s)
+		{
+			case '\"':
+			case '\'':
+				s2=skip_string(s);
+				if _oF((len+(u32)(s2-s))>=size)
+				{
+					do
+					{
+						size<<=1;
+						if _oF(size<=0) goto Err;
+					} while ((len+(u32)(s2-s))>=size);
+					code=realloc(code,size);
+					if _oF(!code) goto Err;
+				}
+				memcpy(code+len,s,s2-s);
+				len+=s2-s;
+				s=s2;
+				while(is_space(*s)) s++;
+				continue;
+			case '#':
+				// ### ... ### 块注释
+				if _oF(s[1]=='#'&&s[2]=='#') s=skip_note(s);
+				else if _oF(is_Name(s[1]))
+				{
+					// #N... 有可能为标签，保留该行
+					s2=s;
+					while(*s2 && *s2!='\n') s2++;
+					if _oT(*s2=='\n') s2++;
+					if _oF((len+(u32)(s2-s))>=size)
+					{
+						do
+						{
+							size<<=1;
+							if _oF(size<=0) goto Err;
+						} while ((len+(u32)(s2-s))>=size);
+						code=realloc(code,size);
+						if _oF(!code) goto Err;
+					}
+					memcpy(code+len,s,s2-s);
+					len+=s2-s;
+					s=s2;
+				}
+				// # ... 行注释
+				else s=skip_note(s);
+				while(is_space(*s)) s++;
+				continue;
+			case ' ':
+			case '\t':
+			case '\n':
+			case '\r':
+				if _oT(s>s0) c1=*(s-1);
+				else c1=0;
+				while(is_space(*s)) s++;
+				c2=*s;
+				if _oF(is_name(c1)&&is_name(c2))
+				{
+					// 关键字内部识别
+					// ex: var void:v;
+					code[len++]=' ';
+					if _oF(len>=size)
+					{
+						size<<=1;
+						if _oF(size<=0) goto Err;
+						code=realloc(code,size);
+						if _oF(!code) goto Err;
+					}
+				}
+				continue;
+			default:
+				code[len++]=*(s++);
+				if _oF(len>=size)
+				{
+					size<<=1;
+					if _oF(size<=0) goto Err;
+					code=realloc(code,size);
+					if _oF(!code) goto Err;
+				}
+				continue;
+		}
+	}
+	End:
+	code[len++]=0;
+	code=realloc(code,len);
+	return code;
+	Err:
+	if _oF(code) free(code);
+	return NULL;
+}
+
 char* get_nextcol(char *exp)
 {
 	u32 b1=0,b2=0;

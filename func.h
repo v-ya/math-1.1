@@ -53,6 +53,7 @@ extern var *_type_null;
 #include "func/file.h"
 #include "func/try.h"
 #include "func/thread.h"
+#include "func/init.h"
 #include "func/debug.h"
 
 #endif

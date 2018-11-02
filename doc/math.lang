@@ -1,0 +1,422 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<language id="math" name="Math" version="2.0" _section="Script">
+	<metadata>
+		<property name="mimetypes">text/x-math;application/x-math;</property>
+		<property name="globs">*.math</property>
+	</metadata>
+	
+	<styles>
+		<style id="comment" name="Comment" map-to="def:comment"/>
+		<style id="label" name="Label" map-to="def:constant"/>
+		<style id="string" name="String" map-to="def:string"/>
+		<style id="char" name="Character" map-to="def:character"/>
+		<style id="e-char" name="Escaped Character" map-to="def:special-char"/>
+		<style id="float" name="Float" map-to="def:floating-point"/>
+		<style id="dec" name="Decimal number" map-to="def:decimal"/>
+		<style id="hex" name="Hexadecimal number" map-to="def:base-n-integer"/>
+		<style id="oper" name="Operators" map-to="def:operator"/>
+		<style id="var" name="Var" map-to="def:preprocessor"/>
+		<style id="key" name="Keyword" map-to="def:note"/>
+		<style id="fun" name="Function" map-to="def:builtin"/>
+		<style id="cv" name="Constant Var" map-to="def:type"/>
+		<style id="error" name="Error" map-to="def:error"/>
+	</styles>
+	
+	<definitions>
+		<context id="error" style-ref="error" class="error">
+			<match>[^,;]</match>
+		</context>
+		<context id="error-cend" style-ref="error" class="error">
+			<match>;</match>
+		</context>
+		<context id="error-code" style-ref="error" class="error">
+			<match>[^\},]</match>
+		</context>
+		<context id="error-calc" style-ref="error" class="error">
+			<match>[^;,\)\]\}]</match>
+		</context>
+		<context id="error-argvlist" style-ref="error" class="error">
+			<match>[^\)]</match>
+		</context>
+		<context id="error-arrayindex" style-ref="error" class="error">
+			<match>[^\]]</match>
+		</context>
+		<context id="block-comment" style-ref="comment" class="comment" class-disabled="no-spell-check">
+			<start>###</start>
+			<end>###</end>
+		</context>
+		<context id="def-label" style-ref="label" class="comment" class-disabled="no-spell-check">
+			<match>#[A-Za-z_][A-Za-z0-9_]*;</match>
+		</context>
+		<context id="line-comment" style-ref="comment" end-at-line-end="true" class="comment" class-disabled="no-spell-check">
+			<start>#</start>
+		</context>
+		<context id="e-char" style-ref="e-char">
+			<match extended="true">
+			\\(                   # leading backslash
+			[\\\"\'nrbtfav\?] |   # escaped character
+			[0-7]{1,3} |          # one, two, or three octal digits
+			x[0-9A-Fa-f]+         # 'x' followed by hex digits
+			)
+			</match>
+    		</context>
+		<context id="string" style-ref="string" class="string" class-disabled="no-spell-check">
+			<start>"</start>
+			<end>"</end>
+			<include>
+				<context ref="e-char"/>
+			</include>
+		</context>
+		<context id="char" style-ref="char" class="string" class-disabled="no-spell-check">
+			<start>'</start>
+			<end>'</end>
+			<include>
+				<context ref="e-char"/>
+			</include>
+		</context>
+		<context id="float" style-ref="float" class-disabled="no-spell-check">
+			<match extended="true">(?&lt;![\w\.])[\+\-]?[0-9]+\.[0-9]*([eE][0-9]+)?(?![\w\.])</match>
+		</context>
+		<context id="hex" style-ref="hex" class-disabled="no-spell-check">
+			<match extended="true">(?&lt;![\w\.])0x[0-9A-Fa-f][0-9A-Fa-f_]*(?![\w\.])</match>
+		</context>
+		<context id="oct" style-ref="hex" class-disabled="no-spell-check">
+			<match extended="true">(?&lt;![\w\.])0o?[0-8][0-8_]*(?![\w\.])</match>
+		</context>
+		<context id="bin" style-ref="hex" class-disabled="no-spell-check">
+			<match extended="true">(?&lt;![\w\.])0b[01][01_]*(?![\w\.])</match>
+		</context>
+		<context id="dec" style-ref="dec" class-disabled="no-spell-check">
+			<match extended="true">(?&lt;![\w\.])[\+\-]?(0|[1-9][0-9]*([eE][0-9]+)?)(?![\w\.])</match>
+		</context>
+		<context id="code" class="no-spell-check">
+			<start>\{</start>
+			<end>\}</end>
+			<include>
+				<context ref="block-comment"/>
+				<context ref="def-label"/>
+				<context ref="line-comment"/>
+				<context ref="calc"/>
+				<context ref="cend"/>
+				<context ref="error-code"/>
+			</include>
+		</context>
+		<context id="space" class="no-spell-check">
+			<match>[ \t\n\r]+</match>
+		</context>
+		<context id="oper" style-ref="oper" class-disabled="no-spell-check">
+			<match extended="true">[\+\-\*/~\!@\$\%\^\&amp;\|&gt;&lt;=\?:]</match>
+		</context>
+		<context id="dot" style-ref="oper" class-disabled="no-spell-check">
+			<match extended="true">,</match>
+		</context>
+		<context id="cend" style-ref="oper" class-disabled="no-spell-check">
+			<match extended="true">;</match>
+		</context>
+		<context id="var" style-ref="var" class-disabled="no-spell-check">
+			<match extended="true">\.?([A-Za-z_][A-Za-z0-9_]*)?</match>
+		</context>
+		<context id="argvlist" class="no-spell-check">
+			<start>\(</start>
+			<end>\)</end>
+			<include>
+				<context ref="dot"/>
+				<context ref="error-cend"/>
+				<context ref="calc"/>
+				<context ref="error-argvlist"/>
+			</include>
+		</context>
+		<context id="arrayindex" class="no-spell-check">
+			<start>\[</start>
+			<end>\]</end>
+			<include>
+				<context ref="error-cend"/>
+				<context ref="calc"/>
+				<context ref="error-arrayindex"/>
+			</include>
+		</context>
+		
+		<context id="key_a" style-ref="key">
+			<prefix>(?&lt;!\w)\.</prefix>
+			<keyword>goto</keyword>
+			<keyword>gotodw</keyword>
+			<keyword>gotoup</keyword>
+			<keyword>if</keyword>
+			<keyword>while</keyword>
+			<keyword>exit</keyword>
+			<keyword>strarray</keyword>
+			<keyword>arrstring</keyword>
+		</context>
+		<context id="key_g" style-ref="key">
+			<prefix>\.?</prefix>
+			<keyword>var</keyword>
+			<keyword>delete</keyword>
+			<keyword>function</keyword>
+			<keyword>run</keyword>
+			<keyword>try</keyword>
+			<keyword>include</keyword>
+		</context>
+		<context id="fun_a" style-ref="fun">
+			<prefix>(?&lt;!\w)\.</prefix>
+			<keyword>echo</keyword>
+			<keyword>print</keyword>
+			<keyword>length</keyword>
+			<keyword>this</keyword>
+			<keyword>get_type</keyword>
+			<keyword>remove</keyword>
+			<keyword>issame</keyword>
+			<keyword>srand</keyword>
+			<keyword>rand</keyword>
+			<keyword>sin</keyword>
+			<keyword>cos</keyword>
+			<keyword>tan</keyword>
+			<keyword>asin</keyword>
+			<keyword>acos</keyword>
+			<keyword>atan</keyword>
+			<keyword>sinh</keyword>
+			<keyword>cosh</keyword>
+			<keyword>tanh</keyword>
+			<keyword>asinh</keyword>
+			<keyword>acosh</keyword>
+			<keyword>atanh</keyword>
+			<keyword>atan2</keyword>
+			<keyword>acot2</keyword>
+			<keyword>hypot</keyword>
+			<keyword>exp</keyword>
+			<keyword>sqrt</keyword>
+			<keyword>ln</keyword>
+			<keyword>log10</keyword>
+			<keyword>log2</keyword>
+			<keyword>log</keyword>
+			<keyword>ceil</keyword>
+			<keyword>floor</keyword>
+			<keyword>round</keyword>
+			<keyword>ftol</keyword>
+			<keyword>ftoi</keyword>
+			<keyword>ltof</keyword>
+			<keyword>sprint</keyword>
+			<keyword>s</keyword>
+			<keyword>strlen</keyword>
+			<keyword>strbyte</keyword>
+			<keyword>cpcode</keyword>
+		</context>
+		<context id="fun_g" style-ref="fun">
+			<prefix>\.?</prefix>
+			<keyword>exist</keyword>
+			<keyword>import</keyword>
+			<keyword>add</keyword>
+			<keyword>replace</keyword>
+			<keyword>sub</keyword>
+		</context>
+		<context id="fun_thread" style-ref="fun">
+			<prefix>(?&lt;!\w)\.thread\.</prefix>
+			<keyword>self</keyword>
+		</context>
+		<context id="fun_time" style-ref="fun">
+			<prefix>(?&lt;!\w)\.time\.</prefix>
+			<keyword>stamp</keyword>
+			<keyword>clock</keyword>
+		</context>
+		<context id="fun_file" style-ref="fun">
+			<prefix>(?&lt;!\w)\.file\.</prefix>
+			<keyword>size</keyword>
+			<keyword>read</keyword>
+			<keyword>write</keyword>
+		</context>
+		<context id="fun_try" style-ref="fun">
+			<prefix>(?&lt;!\w)\.try\.</prefix>
+			<keyword>errid</keyword>
+			<keyword>errstr_cl</keyword>
+			<keyword>errstr_ty</keyword>
+			<keyword>errstr_id</keyword>
+			<keyword>errstr_text</keyword>
+			<keyword>errstr_label</keyword>
+			<keyword>errnext</keyword>
+		</context>
+		<context id="fun_debug" style-ref="fun">
+			<prefix>(?&lt;!\w)\.debug\.</prefix>
+			<keyword>list</keyword>
+		</context>
+		<context id="cv_a" style-ref="cv">
+			<prefix>(?&lt;!\w)\.</prefix>
+			<keyword>user</keyword>
+			<keyword>gobj</keyword>
+			<keyword>package</keyword>
+			<keyword>thread</keyword>
+			<keyword>refpool</keyword>
+			<keyword>sys</keyword>
+			<keyword>void</keyword>
+			<keyword>sbyte</keyword>
+			<keyword>ubyte</keyword>
+			<keyword>byte</keyword>
+			<keyword>sword</keyword>
+			<keyword>uword</keyword>
+			<keyword>word</keyword>
+			<keyword>sint</keyword>
+			<keyword>uint</keyword>
+			<keyword>int</keyword>
+			<keyword>slong</keyword>
+			<keyword>ulong</keyword>
+			<keyword>long</keyword>
+			<keyword>float</keyword>
+			<keyword>string</keyword>
+			<keyword>const</keyword>
+			<keyword>type</keyword>
+			<keyword>time</keyword>
+			<keyword>file</keyword>
+			<keyword>try</keyword>
+			<keyword>include</keyword>
+			<keyword>debug</keyword>
+		</context>
+		<context id="cv_g" style-ref="cv">
+			<prefix>\.?</prefix>
+			<keyword>_vt_</keyword>
+			<keyword>_vn_</keyword>
+			<keyword>_text_</keyword>
+			<keyword>_ret_</keyword>
+			<keyword>_caller_</keyword>
+			<keyword>_type_</keyword>
+		</context>
+		<context id="cv_thread" style-ref="cv">
+			<prefix>(?&lt;!\w)\.thread\.</prefix>
+			<keyword>this</keyword>
+			<keyword>text</keyword>
+			<keyword>temp</keyword>
+			<keyword>sbuf</keyword>
+			<keyword>kill</keyword>
+			<keyword>error</keyword>
+			<keyword>buerr</keyword>
+		</context>
+		<context id="cv_sys" style-ref="cv">
+			<prefix>(?&lt;!\w)\.sys\.</prefix>
+			<keyword>version</keyword>
+			<keyword>limit</keyword>
+			<keyword>path</keyword>
+			<keyword>info</keyword>
+		</context>
+		<context id="cv_sys_version" style-ref="cv">
+			<prefix>(?&lt;!\w)\.sys\.version\.</prefix>
+			<keyword>major</keyword>
+			<keyword>minor</keyword>
+			<keyword>rev</keyword>
+			<keyword>value</keyword>
+		</context>
+		<context id="cv_sys_limit" style-ref="cv">
+			<prefix>(?&lt;!\w)\.sys\.limit\.</prefix>
+			<keyword>array_max</keyword>
+			<keyword>sbuf_base</keyword>
+			<keyword>sbuf_max</keyword>
+			<keyword>fargc_max</keyword>
+			<keyword>file_str_size</keyword>
+		</context>
+		<context id="cv_sys_path" style-ref="cv">
+			<prefix>(?&lt;!\w)\.sys\.path\.</prefix>
+			<keyword>cutup</keyword>
+			<keyword>incutup</keyword>
+			<keyword>import</keyword>
+			<keyword>include</keyword>
+			<keyword>data</keyword>
+		</context>
+		<context id="cv_sys_info" style-ref="cv">
+			<prefix>(?&lt;!\w)\.sys\.info\.</prefix>
+			<keyword>rand_max</keyword>
+		</context>
+		<context id="cv_const" style-ref="cv">
+			<prefix>(?&lt;!\w)\.const\.</prefix>
+			<keyword>e</keyword>
+			<keyword>log2e</keyword>
+			<keyword>log10e</keyword>
+			<keyword>ln2</keyword>
+			<keyword>ln10</keyword>
+			<keyword>pi</keyword>
+			<keyword>pi_2</keyword>
+			<keyword>pi_4</keyword>
+			<keyword>_1_pi</keyword>
+			<keyword>_2_pi</keyword>
+			<keyword>_2_sqrtpi</keyword>
+			<keyword>sqrt2</keyword>
+			<keyword>sqrt1_2</keyword>
+		</context>
+		<context id="cv_type" style-ref="cv">
+			<prefix>(?&lt;!\w)\.type\.</prefix>
+			<keyword>void</keyword>
+			<keyword>sbyte</keyword>
+			<keyword>ubyte</keyword>
+			<keyword>byte</keyword>
+			<keyword>sword</keyword>
+			<keyword>uword</keyword>
+			<keyword>word</keyword>
+			<keyword>sint</keyword>
+			<keyword>uint</keyword>
+			<keyword>int</keyword>
+			<keyword>slong</keyword>
+			<keyword>ulong</keyword>
+			<keyword>long</keyword>
+			<keyword>float</keyword>
+			<keyword>string</keyword>
+			<keyword>vlist</keyword>
+			<keyword>vmat</keyword>
+			<keyword>refer</keyword>
+			<keyword>znum</keyword>
+			<keyword>num</keyword>
+			<keyword>snum</keyword>
+			<keyword>object</keyword>
+			<keyword>func</keyword>
+			<keyword>all</keyword>
+			<keyword>unsign</keyword>
+		</context>
+		
+		<context id="calc" class="no-spell-check">
+			<start> ?</start>
+			<end>(?=[;\)\]\},])</end>
+			<include>
+				<context ref="block-comment"/>
+				<context ref="def-label"/>
+				<context ref="line-comment"/>
+				<context ref="space"/>
+				<context ref="string"/>
+				<context ref="char"/>
+				<context ref="code"/>
+				<context ref="float"/>
+				<context ref="hex"/>
+				<context ref="oct"/>
+				<context ref="bin"/>
+				<context ref="dec"/>
+				<context ref="key_a"/>
+				<context ref="key_g"/>
+				<context ref="fun_a"/>
+				<context ref="fun_g"/>
+				<context ref="fun_thread"/>
+				<context ref="fun_time"/>
+				<context ref="fun_file"/>
+				<context ref="fun_try"/>
+				<context ref="fun_debug"/>
+				<context ref="cv_thread"/>
+				<context ref="cv_sys_version"/>
+				<context ref="cv_sys_limit"/>
+				<context ref="cv_sys_path"/>
+				<context ref="cv_sys_info"/>
+				<context ref="cv_sys"/>
+				<context ref="cv_const"/>
+				<context ref="cv_type"/>
+				<context ref="cv_a"/>
+				<context ref="cv_g"/>
+				<context ref="var"/>
+				<context ref="oper"/>
+				<context ref="argvlist"/>
+				<context ref="arrayindex"/>
+				<context ref="error-calc"/>
+			</include>
+		</context>
+		<context id="math" class="no-spell-check">
+			<include>
+				<context ref="block-comment"/>
+				<context ref="def-label"/>
+				<context ref="line-comment"/>
+				<context ref="calc"/>
+				<context ref="cend"/>
+				<context ref="error"/>
+			</include>
+		</context>
+	</definitions>
+</language>

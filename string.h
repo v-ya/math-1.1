@@ -17,6 +17,7 @@ char* get_string(char *exp, char **pexp);
 u64 get_ascii(char *exp, char **pexp);
 char* skip_code(char *exp);
 char* get_code(char *exp, char **pexp);
+char* compress_code(char *s);
 char* get_nextcol(char *exp);
 char* get_nextsem(char *exp);
 char* skip_string_last(char *exp, char *text);

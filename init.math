@@ -1,0 +1,47 @@
+# 初始化脚本，.this()=.
+
+# auth
+$var string:(r="r",rw="rw");
+
+###
+内嵌自定义函数，用来确保文件只被运行一次
+如要使用，请在文件开头加上如下字段
+.if .include.inc("only-label",.type.type);
+	.exit ;
+###
+include.function long:inc(n:.type.string,t:.type.znum) {
+	.include.exist(n,t)@_ret_;
+	.if !_ret_;
+		.include.replace(n,t);
+	.if !.issame(_caller_,.include);
+		_caller_.add(n,.type.refer,.include[n]);
+};
+.init.auth(include.inc,$r);
+.init.auth(include.inc._text_,$r);
+.init.auth(include.inc._ret_,$rw);
+
+
+###
+内嵌自定义函数，用来生成 version
+###
+include.function void:version(v:.type.object,r1:.type.znum,r2:.type.znum,r3:.type.znum) {
+	r1@v.add(s1,.type.ubyte):
+	r2@v.add(s2,.type.ubyte):
+	r3@v.add(s3,.type.ubyte):
+	r1<<8|r2<<8|r3&m@v.add(sv,.type.uint);
+} ;
+include.version.run {
+	var string:(s1="major",s2="minor",s3="rev",sv="value");
+	var uint:m=0xffffff;
+	.init.auth(_text_,$r);
+	.init.auth(_ret_,$r);
+	.init.auth(s1,$r);
+	.init.auth(s2,$r);
+	.init.auth(s3,$r);
+	.init.auth(sv,$r);
+	.init.auth(m,$r);
+} ;
+.init.auth(include.version,$r);
+
+$delete r,rw;
+

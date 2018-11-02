@@ -61,6 +61,25 @@ int init_args(int argc, char *argv[])
 	return 0;
 }
 
+int init_run(void)
+{
+	vlist *vl;
+	var *vp;
+	vl=vlist_alloc("init");
+	if _oF(!vl)
+	{
+		get_error(errid_MemLess,"init_run");
+		return 1;
+	}
+	vlist_link(vl,_vl_init);
+	vmat_insert(_vm_sysm->v.v_vmat,vl);
+	vp=run_script(_init_text,_vm_sysm);
+	vlist_link(vl,NULL);
+	var_delete(_vm_sysm,"init");
+	if _oF(vp) return 1;
+	else return 0;
+}
+
 int main(int argc, char *argv[])
 {
 	char *exp;
@@ -79,11 +98,15 @@ int main(int argc, char *argv[])
 	
 	pt_text.inode=1;
 	pt_text.type=type_string;
-	pt_text.mode=auth_tmpvar;
+	pt_text.mode=auth_read|free_temp;
 	pt_text.v.v_string=exp;
 	
 	if (init_args(argc,argv)) get_error(errid_MemLess,"init_args");
-	else run_script(&pt_text,_vm_user);
+	else 
+	{
+		if _oF(init_run()) printf("error: init.math 初始化失败\n");
+		else run_script(&pt_text,_vm_user);
+	}
 	print_error();
 	clr_error();
 	
