@@ -1,0 +1,501 @@
+# jvmclass_attr
+
+.if .include.inc("jvmclass_attr",.type.vmat);
+	.exit ;
+
+# init
+jvmclass_attr.try {
+	# version
+	var vlist:(limit,version);
+	.include.version(version,1,0,0);
+	.include.version(limit,1,6,0);
+	add(.const.error,.type.string);
+	.if limit.value > .sys.version.value; .exit error="limit version >= "+limit.string;
+} , {
+	.if ![.const.error]; error="try init error";
+} ;
+.if jvmclass_attr[.const.error]; .exit ;
+
+jvmclass_attr.run {
+	# read
+	function ubyte:getb(f:.type.byte,p:.type.znum) {
+		.if p>=.length(f); .exit 0@_ret_;
+		f[p]@_ret_:p+=1;
+	} ;
+	function uword:getw(f:.type.byte,p:.type.znum) {
+		.if p+2>.length(f); .exit 0@_ret_;
+		f[p]<<8|f[p+1]@_ret_:p+=2;
+	} ;
+	function uint:getd(f:.type.byte,p:.type.znum) {
+		.if p+4>.length(f); .exit 0@_ret_;
+		f[p]<<24|f[p+1]<<16|f[p+2]<<8|f[p+3]@_ret_:p+=4;
+	} ;
+	function ulong:getq(f:.type.byte,p:.type.znum) {
+		.if p+8>.length(f); .exit 0@_ret_;
+		f[p]<<56|f[p+1]<<48|f[p+2]<<40|f[p+3]<<32|
+		f[p+4]<<24|f[p+5]<<16|f[p+6]<<8|f[p+7]@_ret_:p+=8;
+	} ;
+	
+	# attr pool
+	add("pool",.type.vmat).add("r",.type.refer,.this()).pool.run {
+		# Code
+		replace("t",.type.refer,add("Code",.type.vlist));
+		t.function void:get(o:.type.object) {
+			add("i",.type.uint)=0;
+			replace("v",.type.refer,o.replace("info",.type.vlist));
+			v.add("max_stack",.type.uword)=r.getw(o.attr,i);
+			v.add("max_locals",.type.uword)=r.getw(o.attr,i);
+			# code
+			v.add("code_length",.type.uint)=r.getd(o.attr,i);
+			add("j",.type.uint)=0;
+			v.add("code",.type.ubyte,v.code_length);
+			.while j<v.code_length;
+				r.getb(o.attr,i)@v.code[j]:
+				j+=1;
+			# exception
+			v.add("exception_table_length",.type.uword)=r.getw(o.attr,i);
+			replace("e",.type.refer,v.add("exception_table",.type.vlist));
+			j=0;
+			.while j<v.exception_table_length;
+				e.add(j,.type.vlist):
+				r.getw(o.attr,i)@e[j].add("start_pc",.type.uword):
+				r.getw(o.attr,i)@e[j].add("end_pc",.type.uword):
+				r.getw(o.attr,i)@e[j].add("handle_pc",.type.uword):
+				r.getw(o.attr,i)@e[j].add("catch_type",.type.uword):
+				j+=1;
+			# attr
+			v.add("attr_count",.type.uword)=r.getw(o.attr,i);
+			.if v.attr_count; r.al_get(v.add("attr",.type.vlist),v.attr_count,o,i);
+			delete v,e;
+		} ;
+		t.get.add("r",.type.refer,r);
+		
+		# Exceptions
+		replace("t",.type.refer,add("Exceptions",.type.vlist));
+		t.function void:get(o:.type.object) {
+			add("i",.type.uint)=0;
+			add("j",.type.uint)=0;
+			replace("v",.type.refer,o.replace("info",.type.vlist));
+			v.add("number",.type.uword)=r.getw(o.attr,i);
+			replace("e",.type.refer,v.add("exception_list",.type.vlist));
+			# exceptions
+			.while j<v.number;
+				e.add(j,.type.vlist):
+				r.getw(o.attr,i)@e[j].add("index_class",.type.uword):
+				r.get.exist("cp",.type.object)?(
+					e[j].add("Class",.type.refer,r.get.cp[e[j].index_class]):
+					e[j]["Class"]?
+						e[j].add("class",.type.refer,e[j].Class.class):
+				)::
+				j+=1;
+			delete v,e;
+		} ;
+		t.get.add("r",.type.refer,r);
+		
+		# LineNumberTable
+		replace("t",.type.refer,add("LineNumberTable",.type.vlist));
+		t.function void:get(o:.type.object) {
+			add("i",.type.uint)=0;
+			add("j",.type.uint)=0;
+			replace("v",.type.refer,o.replace("info",.type.vlist));
+			v.add("number",.type.uword)=r.getw(o.attr,i);
+			replace("e",.type.refer,v.add("linenumber_list",.type.vlist));
+			# linenumber_list
+			.while j<v.number;
+				e.add(j,.type.vlist):
+				r.getw(o.attr,i)@e[j].add("start_pc",.type.uword):
+				r.getw(o.attr,i)@e[j].add("line_number",.type.uword):
+				j+=1;
+			delete v,e;
+		} ;
+		t.get.add("r",.type.refer,r);
+		
+		# LocalVariableTable
+		replace("t",.type.refer,add("LocalVariableTable",.type.vlist));
+		t.function void:get(o:.type.object) {
+			add("i",.type.uint)=0;
+			add("j",.type.uint)=0;
+			replace("v",.type.refer,o.replace("info",.type.vlist));
+			v.add("number",.type.uword)=r.getw(o.attr,i);
+			replace("e",.type.refer,v.add("localvariable_list",.type.vlist));
+			# localvariable_list
+			.while j<v.number;
+				e.add(j,.type.vlist):
+				r.getw(o.attr,i)@e[j].add("start_pc",.type.uword):
+				r.getw(o.attr,i)@e[j].add("length",.type.uword):
+				r.getw(o.attr,i)@e[j].add("index_name",.type.uword):
+				r.getw(o.attr,i)@e[j].add("index_des",.type.uword):
+				r.getw(o.attr,i)@e[j].add("local_at",.type.uword):
+				r.get.exist("cp",.type.object)?(
+					e[j].add("name",.type.refer,r.get.cp[e[j].index_name].value):
+					e[j].add("des",.type.refer,r.get.cp[e[j].index_des].value)
+				)::
+				j+=1;
+			delete v,e;
+		} ;
+		t.get.add("r",.type.refer,r);
+		
+		# LocalVariableTypeTable
+		replace("t",.type.refer,add("LocalVariableTypeTable",.type.vlist));
+		t.function void:get(o:.type.object) {
+			add("i",.type.uint)=0;
+			add("j",.type.uint)=0;
+			replace("v",.type.refer,o.replace("info",.type.vlist));
+			v.add("number",.type.uword)=r.getw(o.attr,i);
+			replace("e",.type.refer,v.add("localvariabletype_list",.type.vlist));
+			# localvariable_list
+			.while j<v.number;
+				e.add(j,.type.vlist):
+				r.getw(o.attr,i)@e[j].add("start_pc",.type.uword):
+				r.getw(o.attr,i)@e[j].add("length",.type.uword):
+				r.getw(o.attr,i)@e[j].add("index_name",.type.uword):
+				r.getw(o.attr,i)@e[j].add("index_signature",.type.uword):
+				r.getw(o.attr,i)@e[j].add("local_at",.type.uword):
+				r.get.exist("cp",.type.object)?(
+					e[j].add("name",.type.refer,r.get.cp[e[j].index_name].value):
+					e[j].add("signature",.type.refer,r.get.cp[e[j].index_signature].value)
+				)::
+				j+=1;
+			delete v,e;
+		} ;
+		t.get.add("r",.type.refer,r);
+		
+		# SourceFile
+		replace("t",.type.refer,add("SourceFile",.type.vlist));
+		t.function void:get(o:.type.object) {
+			add("i",.type.uint)=0;
+			replace("v",.type.refer,o.replace("info",.type.vlist));
+			v.add("index_source",.type.uword)=r.getw(o.attr,i);
+			.if r.get.exist("cp",.type.object);
+				v.add("source",.type.refer,r.get.cp[v.index_source].value);
+			delete v;
+		} ;
+		t.get.add("r",.type.refer,r);
+		
+		# ConstantValue
+		replace("t",.type.refer,add("ConstantValue",.type.vlist));
+		t.function void:get(o:.type.object) {
+			add("i",.type.uint)=0;
+			replace("v",.type.refer,o.replace("info",.type.vlist));
+			v.add("index_constvalue",.type.uword)=r.getw(o.attr,i);
+			.if r.get.exist("cp",.type.object);
+				r.get.cp[v.index_constvalue]["value"]?
+					v.add("value",.type.refer,r.get.cp[v.index_constvalue].value):
+				r.get.cp[v.index_constvalue]["string"]?
+					v.add("value",.type.refer,r.get.cp[v.index_constvalue].string);
+			delete v;
+		} ;
+		t.get.add("r",.type.refer,r);
+		
+		# InnerClasses
+		replace("t",.type.refer,add("InnerClasses",.type.vlist));
+		t.function void:get(o:.type.object) {
+			add("i",.type.uint)=0;
+			add("j",.type.uint)=0;
+			replace("v",.type.refer,o.replace("info",.type.vlist));
+			v.add("number",.type.uword)=r.getw(o.attr,i);
+			replace("e",.type.refer,v.add("innerclass_list",.type.vlist));
+			# innerclass_list
+			.while j<v.number;
+				e.add(j,.type.vlist):
+				r.getw(o.attr,i)@e[j].add("index_innerclass",.type.uword):
+				r.getw(o.attr,i)@e[j].add("index_outerclass",.type.uword):
+				r.getw(o.attr,i)@e[j].add("index_innername",.type.uword):
+				r.getw(o.attr,i)@e[j].add("inner_access_flags",.type.uword):
+				r.get.exist("cp",.type.object)?(
+					e[j].add("Class_inner",.type.refer,r.get.cp[e[j].index_innerclass]):
+					e[j].add("Class_outer",.type.refer,r.get.cp[e[j].index_outerclass]):
+					e[j].add("innername",.type.refer,r.get.cp[e[j].index_innername].value):
+					e[j]["Class_inner"]?
+						e[j].add("class_inner",.type.refer,e[j].Class_inner.class)::
+					e[j]["Class_outer"]?
+						e[j].add("class_outer",.type.refer,e[j].Class_outer.class):
+				)::
+				j+=1;
+			delete v,e;
+		} ;
+		t.get.add("r",.type.refer,r);
+		
+		# Signature
+		replace("t",.type.refer,add("Signature",.type.vlist));
+		t.function void:get(o:.type.object) {
+			add("i",.type.uint)=0;
+			replace("v",.type.refer,o.replace("info",.type.vlist));
+			v.add("index_signature",.type.uword)=r.getw(o.attr,i);
+			.if r.get.exist("cp",.type.object);
+				v.add("signature",.type.refer,r.get.cp[v.index_signature].value);
+			delete v;
+		} ;
+		t.get.add("r",.type.refer,r);
+		
+		# RuntimeVisibleAnnotations
+		replace("t",.type.refer,add("RuntimeVisibleAnnotations",.type.vlist));
+		t.function void:get(o:.type.object) {
+			add("i",.type.uint)=0;
+			add("j",.type.uint)=0;
+			replace("v",.type.refer,o.replace("info",.type.vlist));
+			v.add("number",.type.uword)=r.getw(o.attr,i);
+			v.add("annotation_list",.type.vlist);
+			# annotation_list
+			.while j<v.number;
+				r.annotation_get(v.annotation_list.add(j,.type.vlist),o,i):
+				j+=1;
+			delete v;
+		} ;
+		t.get.add("r",.type.refer,r);
+		
+		# RuntimeVisibleParameterAnnotations
+		replace("t",.type.refer,add("RuntimeVisibleParameterAnnotations",.type.vlist));
+		t.function void:get(o:.type.object) {
+			add("i",.type.uint)=0;
+			add("j",.type.uint)=0;
+			add("k",.type.uint);
+			replace("v",.type.refer,o.replace("info",.type.vlist));
+			v.add("number",.type.ubyte)=r.getb(o.attr,i);
+			v.add("parameter_list",.type.vlist);
+			.if !v.number;
+				.exit ;
+			# parameter_list
+			#loop;
+			v.parameter_list.add(j,.type.vlist);
+			v.parameter_list[j].add("number",.type.uword)=r.getw(o.attr,i);
+			v.parameter_list[j].add("annotation_list",.type.vlist);
+			k=0;
+			.while k<v.parameter_list[j].number;
+				r.annotation_get(v.parameter_list[j].annotation_list.add(k,.type.vlist),o,i):
+				k+=1;
+			.if j+=1<v.number;
+				.gotoup loop;
+			delete v;
+		} ;
+		t.get.add("r",.type.refer,r);
+		
+		# StackMapTable
+		replace("t",.type.refer,add("StackMapTable",.type.vlist));
+		t.function void:get(o:.type.object) {
+			add("i",.type.uint)=0;
+			add("j",.type.uint)=0;
+			add("k",.type.uint);
+			add("offset_abs",.type.uint)=-1;
+			replace("v",.type.refer,o.replace("info",.type.vlist));
+			v.add("number",.type.uword)=r.getw(o.attr,i);
+			v.add("frame_list",.type.vlist);
+			#loop;
+			.if j>=v.number;
+				.exit delete v,f;
+			replace("f",.type.refer,v.frame_list.add(j,.type.vlist));
+			j+=1;
+			f.add("tag",.type.ubyte)=r.getb(o.attr,i);
+			.if f.tag<64;
+				.gotodw same;
+			.if f.tag<128;
+				.gotodw same_locals_1_stack_item;
+			.if f.tag<247;
+				.exit delete v,f;
+			.if f.tag<248;
+				.gotodw same_locals_1_stack_item_extended;
+			.if f.tag<251;
+				.gotodw chop;
+			.if f.tag<252;
+				.gotodw same_extended;
+			.if f.tag<255;
+				.gotodw append;
+			.gotodw full;
+			
+			#same;
+			f.add("type",.type.string)="same";
+			f.add("offset",.type.uword)=f.tag;
+			f.add("offset_abs",.type.uword)=(offset_abs+=(f.offset+1));
+			.goto loop;
+			
+			#same_locals_1_stack_item;
+			f.add("type",.type.string)="same_locals_1_stack_item";
+			f.add("offset",.type.uword)=f.tag-64;
+			f.add("offset_abs",.type.uword)=(offset_abs+=(f.offset+1));
+			f.add("stack",.type.vlist);
+			vertype_get(f.stack.add(0,.type.vlist),o,i);
+			.goto loop;
+			
+			#same_locals_1_stack_item_extended;
+			f.add("type",.type.string)="same_locals_1_stack_item_extended";
+			f.add("offset",.type.uword)=r.getw(o.attr,i);
+			f.add("offset_abs",.type.uword)=(offset_abs+=(f.offset+1));
+			f.add("stack",.type.vlist);
+			vertype_get(f.stack.add(0,.type.vlist),o,i);
+			.goto loop;
+			
+			#chop;
+			f.add("type",.type.string)="chop";
+			f.add("offset",.type.uword)=r.getw(o.attr,i);
+			f.add("offset_abs",.type.uword)=(offset_abs+=(f.offset+1));
+			f.add("chop",.type.uword)=251-f.tag;
+			.goto loop;
+			
+			#same_extended;
+			f.add("type",.type.string)="same_extended";
+			f.add("offset",.type.uword)=r.getw(o.attr,i);
+			f.add("offset_abs",.type.uword)=(offset_abs+=(f.offset+1));
+			.goto loop;
+			
+			#append;
+			f.add("type",.type.string)="append";
+			f.add("offset",.type.uword)=r.getw(o.attr,i);
+			f.add("offset_abs",.type.uword)=(offset_abs+=(f.offset+1));
+			f.add("append",.type.uword)=f.tag-251;
+			f.add("local",.type.vlist);
+			k=0;
+			.while k<f.append;
+				vertype_get(f.local.add(k,.type.vlist),o,i):
+				k+=1;
+			.goto loop;
+			
+			#full;
+			f.add("type",.type.string)="full";
+			f.add("offset",.type.uword)=r.getw(o.attr,i);
+			f.add("offset_abs",.type.uword)=(offset_abs+=(f.offset+1));
+			f.add("local_number",.type.uword)=r.getw(o.attr,i);
+			k=0;
+			f.add("local",.type.vlist);
+			.while k<f.local_number;
+				vertype_get(f.local.add(k,.type.vlist),o,i):
+				k+=1;
+			f.add("stack_number",.type.uword)=r.getw(o.attr,i);
+			k=0;
+			f.add("stack",.type.vlist);
+			.while k<f.stack_number;
+				vertype_get(f.stack.add(k,.type.vlist),o,i):
+				k+=1;
+			.goto loop;
+		} ;
+		t.get.add("r",.type.refer,r);
+		t.get.function void:vertype_get(v:.type.object,o:.type.object,p:.type.znum) {
+			v.add("tag",.type.ubyte)=r.getb(o.attr,p);
+			v.add("type",.type.string)=type[v.tag];
+			# ITEM_Object
+			.if v.tag==7;
+				r.getw(o.attr,p)@v.add("index_class",.type.uword):
+				r.get.exist("cp",.type.object)?(
+					v.add("Class",.type.refer,r.get.cp[v.index_class]):
+					v["Class"]?
+						v.add("class",.type.refer,v.Class.class):
+				);
+			# ITEM_Uninitialized
+			.if v.tag==8;
+				r.getw(o.attr,p)@v.add("offset_new",.type.uword);
+		} ;
+		t.get.vertype_get.add("r",.type.refer,r);
+		t.get.vertype_get.var string:type[9]=["top","int","float","double","long","null","UninitializedThis","Object","Uninitialized"];
+		
+		# end
+		delete t,r;
+	} ;
+	
+	function void:al_get(v:.type.object,n:.type.znum,o:.type.object,p:.type.znum) {
+		add("i",.type.uint)=0;
+		add("j",.type.uint);
+		#loop;
+		.if i>=n;
+			.exit ;
+		v.add(i,.type.vlist);
+		v[i].add("index_name",.type.uword)=r.getw(o.attr,p);
+		.if r.get.exist("cp",.type.object);
+			v[i].add("name",.type.refer,r.get.cp[v[i].index_name].value);
+		v[i].add("length",.type.uint)=r.getd(o.attr,p);
+		v[i].add("attr",.type.ubyte,v[i].length);
+		j=0;
+		.while j<v[i].length;
+			r.getb(o.attr,p)@v[i].attr[j]:
+			j+=1;
+		i+=1;
+		.goto loop;
+	} ;
+	al_get.add("r",.type.refer,.this());
+	
+	function void:annotation_get(v:.type.object,o:.type.object,p:.type.znum) {
+		r.getw(o.attr,p)@v.add("index_type",.type.uword);
+		r.getw(o.attr,p)@v.add("vp_number",.type.uword);
+		.if r.get.exist("cp",.type.object);
+			v.add("type",.type.refer,r.get.cp[v.index_type]);
+		v.add("vp_list",.type.vlist);
+		.if !v.vp_number;
+			.exit ;
+		
+		z+=1;
+		sv.replace(z,.type.vlist);
+		sv[z].add(0,.type.uint)=0;
+		sv[z].add(1,.type.refer,v);
+		sv[z].add(2,.type.refer,o);
+		sv[z].add(3,.type.refer,p);
+		#loop;
+		sv[z][1].vp_list.add(sv[z][0],.type.vlist);
+		sv[z][1].vp_list[sv[z][0]].add("index_name",.type.uword)=r.getw(sv[z][2].attr,sv[z][3]);
+		.if r.get.exist("cp",.type.object);
+			sv[z][1].vp_list[sv[z][0]].add("name",.type.refer,r.get.cp[sv[z][1].vp_list[sv[z][0]].index_name].value);
+		element_get(sv[z][1].vp_list[sv[z][0]].add("element",.type.vlist),sv[z][2].attr,sv[z][3]);
+		.if sv[z][0]+=1<sv[z][1].vp_number; .gotoup loop;
+		sv.sub(z);
+		z-=1;
+	} ;
+	annotation_get.add("r",.type.refer,.this());
+	annotation_get.var vlist:sv,uint:z;
+	annotation_get.function void:element_get(v:.type.object,o:.type.object,p:.type.znum) {
+		v..add("tag",.type.ubyte)=r.getb(o.attr,p);
+		.if v.vp_list[i].tag=='s'; .gotodw string;
+		.if v.vp_list[i].tag=='e'; .gotodw enum;
+		.if v.vp_list[i].tag=='c'; .gotodw class;
+		.if v.vp_list[i].tag=='@'; .gotodw annotation;
+		.if v.vp_list[i].tag=='['; .gotodw array;
+		#value;
+		v.add("index_value",.type.uword)=r.getw(o.attr,p);
+		.if r.get.exist("cp",.type.object);
+			v.add("value",.type.refer,r.get.cp[v.index_value].value);
+		.exit ;
+		#string;
+		v.add("index_value",.type.uword)=r.getw(o.attr,p);
+		.if r.get.exist("cp",.type.object);
+			v.add("value",.type.refer,r.get.cp[v.index_value].string);
+		.exit ;
+		#enum;
+		v.add("index_enumtype",.type.uword)=r.getw(o.attr,p);
+		v.add("index_enumname",.type.uword)=r.getw(o.attr,p);
+		.if r.get.exist("cp",.type.object);
+			v.add("enumtype",.type.refer,r.get.cp[v.index_enumtype].value):
+			v.add("enumname",.type.refer,r.get.cp[v.index_enumname].value);
+		.exit ;
+		#class;
+		v.add("index_class",.type.uword)=r.getw(o.attr,p);
+		.if r.get.exist("cp",.type.object);
+			v.add("Class",.type.refer,r.get.cp[v.index_class]):
+			v["Class"]?
+				v.add("class",.type.refer,v.Class.class);
+		.exit ;
+		#annotation;
+		.exit r.annotation_get(v.add("annotation",.type.vlist),o,p);
+		#array;
+		v.add("element_number",.type.uword)=r.getw(o.attr,p);
+		v.add("element_list",.type.vlist);
+		z+=1;
+		sv.replace(z,.type.vlist);
+		sv[z].add(0,.type.uint)=0;
+		sv[z].add(1,.type.refer,v);
+		sv[z].add(2,.type.refer,o);
+		sv[z].add(3,.type.refer,p);
+		.while sv[z][0]<sv[z][1].element_list;
+			.this()(sv[z][1].element_list.add(sv[z][0],sv[z][2],sv[z][3])):
+			sv[z][0]+=1;
+		sv.sub(z);
+		z-=1;
+	} ;
+	annotation_get.element_get.add("r",.type.refer,.this());
+	annotation_get.element_get.var vlist:sv,uint:z;
+	
+	function void:get(o:.type.object,cp:.type.object) {
+		.if r.pool[o.name];
+			.exit r.pool[o.name].get(o);
+		.print("[%4d] Not %s\n",sn+=1,o.name);
+	} ;
+	get.add("r",.type.refer,.this());
+	get.var int:sn;
+} ;
+
+

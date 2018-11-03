@@ -3,10 +3,29 @@
 .if .include.inc("random",.type.vlist);
 	.exit ;
 
-.include.include "randseq";
+# init
+random.try {
+	# version
+	var vlist:(limit,version);
+	.include.version(version,1,0,0);
+	.include.version(limit,1,6,0);
+	add(.const.error,.type.string);
+	.if limit.value > .sys.version.value; .exit error="limit version >= "+limit.string;
+	# include
+	try {
+		include "randseq";
+		.if randseq[.const.error]; .exit error="include randseq error";
+	} , {
+		error="include file error";
+	} ;
+} , {
+	.if ![.const.error]; error="try init error";
+} ;
+.if random[.const.error]; .exit ;
 
+# define
 random.var string:type="random";
-random.function void:init(rdm:.type.object, method:.type.string|.type.void)
+random.function void:init_method(rdm:.type.object, method:.type.string|.type.void)
 {
 	# rs
 	rdm.var vlist:rs;
@@ -93,5 +112,9 @@ random.function void:init(rdm:.type.object, method:.type.string|.type.void)
 	rdm.var string:type;
 	rdm.type=type;
 } ;
-random.init.var refer:type=random.type;
+random.init_method.var refer:type=random.type;
+random.function void:init(rdm:.type.object) {
+	init_method(rdm,.void);
+} ;
+random.init.var refer:init_method=random.init_method;
 

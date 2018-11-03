@@ -1,0 +1,837 @@
+# jvmclass
+
+.if .include.inc("jvmclass",.type.vmat);
+	.exit ;
+
+# init
+jvmclass.try {
+	# version
+	var vlist:(limit,version);
+	.include.version(version,1,0,2);
+	.include.version(limit,1,6,0);
+	add(.const.error,.type.string);
+	.if limit.value > .sys.version.value; .exit error="limit version >= "+limit.string;
+	# include
+	try {
+		include "jvmclass_attr";
+		.if jvmclass_attr[.const.error]; .exit error="include jvmclass_attr error";
+	} , {
+		error="include file error";
+	} ;
+} , {
+	.if ![.const.error]; error="try init error";
+} ;
+.if jvmclass[.const.error]; .exit ;
+
+# define
+
+jvmclass.run {
+	
+	function string:newfile(obj:.type.object, path:.type.string) {
+		obj.replace("size",.type.ulong)=.file.size(path);
+		obj.replace("file",.type.ubyte,obj.size);
+		obj.size=.file.read(path,obj.file);
+		obj.replace("pos",.type.ulong);
+		_ret_=.length(obj.file)==obj.size?"load "+path+" ok":"load "+path+" fail";
+	} ;
+	
+	function string:writefile(obj:.type.object, path:.type.string) {
+		.file.write(path,obj.file);
+		_ret_=.length(obj.file)==obj.size?"write "+path+" ok":"load "+path+" fail";
+	} ;
+	
+	function ubyte:getb(obj:.type.object) {
+		.if obj.pos>=obj.size; .exit 0@_ret_;
+		obj.file[obj.pos]@_ret_:obj.pos+=1;
+	} ;
+	
+	function uword:getw(obj:.type.object) {
+		.if obj.pos+2>obj.size; .exit 0@_ret_;
+		obj.file[obj.pos]<<8|obj.file[obj.pos+1]@_ret_:obj.pos+=2;
+	} ;
+	
+	function uint:getd(obj:.type.object) {
+		.if obj.pos+4>obj.size; .exit 0@_ret_;
+		obj.file[obj.pos]<<24|(obj.file[obj.pos+1]<<16)|
+		(obj.file[obj.pos+2]<<8)|obj.file[obj.pos+3]@_ret_:obj.pos+=4;
+	} ;
+	
+	function ulong:getq(obj:.type.object) {
+		.if obj.pos+8>obj.size; .exit 0@_ret_;
+		obj.file[obj.pos]<<56|(obj.file[obj.pos+1]<<48)|
+		(obj.file[obj.pos+2]<<40)|(obj.file[obj.pos+3]<<32)|
+		(obj.file[obj.pos+4]<<24)|(obj.file[obj.pos+5]<<16)|
+		(obj.file[obj.pos+6]<<8)|obj.file[obj.pos+7]@_ret_:obj.pos+=8;
+	} ;
+	
+	function void:refile(obj:.type.object) {
+		obj.size=1024;
+		obj.sub("file");
+		obj.add("file",.type.ubyte,obj.size);
+		obj.pos=0;
+	} ;
+	
+	function void:exfile(obj:.type.object) {
+		obj.size=obj.pos|0x3ff+1;
+		obj.replace("file",.type.ubyte,obj.size);
+	} ;
+	
+	function void:endfile(obj:.type.object) {
+		obj.size=obj.pos;
+		obj.replace("file",.type.ubyte,obj.size);
+		obj.pos=0;
+	} ;
+	
+	function void:setb(obj:.type.object,v:.type.byte) {
+		.if obj.pos+=1>obj.size; exfile(obj);
+		v@obj.file[obj.pos-1];
+	} ;
+	setb.add("exfile",.type.refer,exfile);
+	
+	function void:setw(obj:.type.object,v:.type.word) {
+		.if obj.pos+=2>obj.size; exfile(obj);
+		v@obj.file[obj.pos-1]:
+		v>>8@obj.file[obj.pos-2];
+	} ;
+	setw.add("exfile",.type.refer,exfile);
+	
+	function void:setd(obj:.type.object,v:.type.int) {
+		.if obj.pos+=4>obj.size; exfile(obj);
+		v@obj.file[obj.pos-1]:
+		v>>8@obj.file[obj.pos-2]:
+		v>>16@obj.file[obj.pos-3]:
+		v>>24@obj.file[obj.pos-4];
+	} ;
+	setd.add("exfile",.type.refer,exfile);
+	
+	function void:setq(obj:.type.object,v:.type.long) {
+		.if obj.pos+=8>obj.size; exfile(obj);
+		v@obj.file[obj.pos-1]:
+		v>>8@obj.file[obj.pos-2]:
+		v>>16@obj.file[obj.pos-3]:
+		v>>24@obj.file[obj.pos-4]:
+		v>>32@obj.file[obj.pos-5]:
+		v>>40@obj.file[obj.pos-6]:
+		v>>48@obj.file[obj.pos-7]:
+		v>>56@obj.file[obj.pos-8];
+	} ;
+	setq.add("exfile",.type.refer,exfile);
+	
+	# 注册常量池信息
+	replace("cptag",.type.vmat);
+	replace("vname",.type.vmat);
+		# init vname
+		vname.run {
+			add("sign",.type.string)="sign";
+			add("type",.type.string)="type";
+			add("des",.type.string)="des";
+			add("root",.type.string)="r";
+			add("this",.type.string)="this";
+			add("tag",.type.string)="tag";
+			add("length",.type.string)="length";
+			add("value",.type.string)="value";
+		} ;
+		
+		# 1 => utf8 UTF-8编码字符串
+		replace("tr",.type.refer,cptag.add(1,.type.vlist));
+		tr.add(vname.sign,.type.ubyte)=1;
+		tr.add(vname.type,.type.string)="utf8";
+		tr.add(vname.des,.type.string)="UTF-8编码字符串";
+		tr.function void:file_get(o:.type.object,c:.type.object,index:.type.word) {
+			add("i",.type.uword)=0;
+			c.add("index",.type.uword)=index;
+			c.add("tag",.type.refer,this);
+			c.add("length",.type.uword)=r.getw(o);
+			c.add("value",.type.ubyte,c.length+1);
+			.while i<c.length;
+				r.getb(o)@c.value[i]:
+				i+=1;
+			.arrstring c.value;
+			index+=1;
+			o.cpool_type.utf8.add(o.cpool_type.utf8.N,.type.refer,c);
+			o.cpool_type.utf8.N+=1;
+		} ;
+		tr.file_get.add(vname.root,.type.refer,.this());
+		tr.file_get.add(vname.this,.type.refer,tr);
+		tr.function void:file_set(o:.type.object,c:.type.object,index:.type.word) {
+			add("i",.type.uword)=0;
+			replace("s",.type.string)=c.value;
+			.strarray s;
+			r.setw(o,c.length);
+			.while i<c.length;
+				r.setb(o,s[i]):
+				i+=1;
+			index+=1;
+			sub("s");
+		} ;
+		tr.file_set.add(vname.root,.type.refer,.this());
+		tr.file_set.add(vname.this,.type.refer,tr);
+		
+		# 3 => integer 整型字面量
+		replace("tr",.type.refer,cptag.add(3,.type.vlist));
+		tr.add(vname.sign,.type.ubyte)=3;
+		tr.add(vname.type,.type.string)="integer";
+		tr.add(vname.des,.type.string)="整型字面量";
+		tr.function void:file_get(o:.type.object,c:.type.object,index:.type.word) {
+			c.add("index",.type.uword)=index;
+			c.add("tag",.type.refer,this);
+			c.add("value",.type.uint)=r.getd(o);
+			index+=1;
+			o.cpool_type.integer.add(o.cpool_type.integer.N,.type.refer,c);
+			o.cpool_type.integer.N+=1;
+		} ;
+		tr.file_get.add(vname.root,.type.refer,.this());
+		tr.file_get.add(vname.this,.type.refer,tr);
+		tr.function void:file_set(o:.type.object,c:.type.object,index:.type.word) {
+			r.setd(o,c.value);
+			index+=1;
+		} ;
+		tr.file_set.add(vname.root,.type.refer,.this());
+		tr.file_set.add(vname.this,.type.refer,tr);
+		
+		# 4 => float 浮点型字面量
+		replace("tr",.type.refer,cptag.add(4,.type.vlist));
+		tr.add(vname.sign,.type.ubyte)=4;
+		tr.add(vname.type,.type.string)="float";
+		tr.add(vname.des,.type.string)="浮点型字面量";
+		tr.function void:file_get(o:.type.object,c:.type.object,index:.type.word) {
+			c.add("index",.type.uword)=index;
+			c.add("tag",.type.refer,this);
+			c.add("value",.type.float)=.ltof(r.getd(o));
+			index+=1;
+			o.cpool_type.float.add(o.cpool_type.float.N,.type.refer,c);
+			o.cpool_type.float.N+=1;
+		} ;
+		tr.file_get.add(vname.root,.type.refer,.this());
+		tr.file_get.add(vname.this,.type.refer,tr);
+		tr.function void:file_set(o:.type.object,c:.type.object,index:.type.word) {
+			r.setd(o,.ftoi(c.value));
+			index+=1;
+		} ;
+		tr.file_set.add(vname.root,.type.refer,.this());
+		tr.file_set.add(vname.this,.type.refer,tr);
+		
+		# 5 => long 长整型字面量
+		replace("tr",.type.refer,cptag.add(5,.type.vlist));
+		tr.add(vname.sign,.type.ubyte)=5;
+		tr.add(vname.type,.type.string)="long";
+		tr.add(vname.des,.type.string)="长整型字面量";
+		tr.function void:file_get(o:.type.object,c:.type.object,index:.type.word) {
+			c.add("index",.type.uword)=index;
+			c.add("tag",.type.refer,this);
+			c.add("value",.type.ulong)=r.getq(o);
+			index+=2;
+			o.cpool_type.long.add(o.cpool_type.long.N,.type.refer,c);
+			o.cpool_type.long.N+=1;
+		} ;
+		tr.file_get.add(vname.root,.type.refer,.this());
+		tr.file_get.add(vname.this,.type.refer,tr);
+		tr.function void:file_set(o:.type.object,c:.type.object,index:.type.word) {
+			r.setq(o,c.value);
+			index+=2;
+		} ;
+		tr.file_set.add(vname.root,.type.refer,.this());
+		tr.file_set.add(vname.this,.type.refer,tr);
+		
+		# 6 = > double 双精度浮点型字面量
+		replace("tr",.type.refer,cptag.add(6,.type.vlist));
+		tr.add(vname.sign,.type.ubyte)=6;
+		tr.add(vname.type,.type.string)="double";
+		tr.add(vname.des,.type.string)="双精度浮点型字面量";
+		tr.function void:file_get(o:.type.object,c:.type.object,index:.type.word) {
+			c.add("index",.type.uword)=index;
+			c.add("tag",.type.refer,this);
+			c.add("value",.type.float)=.ltof(r.getq(o));
+			index+=2;
+			o.cpool_type.double.add(o.cpool_type.double.N,.type.refer,c);
+			o.cpool_type.double.N+=1;
+		} ;
+		tr.file_get.add(vname.root,.type.refer,.this());
+		tr.file_get.add(vname.this,.type.refer,tr);
+		tr.function void:file_set(o:.type.object,c:.type.object,index:.type.word) {
+			r.setq(o,.ftol(c.value));
+			index+=2;
+		} ;
+		tr.file_set.add(vname.root,.type.refer,.this());
+		tr.file_set.add(vname.this,.type.refer,tr);
+			
+		# 7 => class 类或接口的符号引用
+		replace("tr",.type.refer,cptag.add(7,.type.vlist));
+		tr.add(vname.sign,.type.ubyte)=7;
+		tr.add(vname.type,.type.string)="class";
+		tr.add(vname.des,.type.string)="类或接口的符号引用";
+		tr.function void:file_get(o:.type.object,c:.type.object,index:.type.word) {
+			c.add("index",.type.uword)=index;
+			c.add("tag",.type.refer,this);
+			c.add("index_class",.type.uword)=r.getw(o);
+			index+=1;
+			o.cpool_type.class.add(o.cpool_type.class.N,.type.refer,c);
+			o.cpool_type.class.N+=1;
+		} ;
+		tr.file_get.add(vname.root,.type.refer,.this());
+		tr.file_get.add(vname.this,.type.refer,tr);
+		tr.function void:file_set(o:.type.object,c:.type.object,index:.type.word) {
+			r.setw(o,c.index_class);
+			index+=1;
+		} ;
+		tr.file_set.add(vname.root,.type.refer,.this());
+		tr.file_set.add(vname.this,.type.refer,tr);
+		tr.function void:cp_exp1(cp:.type.object,c:.type.object) {
+			.if c.index_class; c.add("class",.type.refer,cp[c.index_class].value);
+		} ;
+		tr.cp_exp1.add(vname.root,.type.refer,.this());
+		
+		# 8 => string 字符串类型字面量
+		replace("tr",.type.refer,cptag.add(8,.type.vlist));
+		tr.add(vname.sign,.type.ubyte)=8;
+		tr.add(vname.type,.type.string)="string";
+		tr.add(vname.des,.type.string)="字符串类型字面量";
+		tr.function void:file_get(o:.type.object,c:.type.object,index:.type.word) {
+			c.add("index",.type.uword)=index;
+			c.add("tag",.type.refer,this);
+			c.add("index_string",.type.uword)=r.getw(o);
+			index+=1;
+			o.cpool_type.string.add(o.cpool_type.string.N,.type.refer,c);
+			o.cpool_type.string.N+=1;
+		} ;
+		tr.file_get.add(vname.root,.type.refer,.this());
+		tr.file_get.add(vname.this,.type.refer,tr);
+		tr.function void:file_set(o:.type.object,c:.type.object,index:.type.word) {
+			r.setw(o,c.index_string);
+			index+=1;
+		} ;
+		tr.file_set.add(vname.root,.type.refer,.this());
+		tr.file_set.add(vname.this,.type.refer,tr);
+		tr.function void:cp_exp1(cp:.type.object,c:.type.object) {
+			.if c.index_string; c.add("string",.type.refer,cp[c.index_string].value);
+		} ;
+		tr.cp_exp1.add(vname.root,.type.refer,.this());
+		
+		# 9 => fieldref 字段的符号引用
+		replace("tr",.type.refer,cptag.add(9,.type.vlist));
+		tr.add(vname.sign,.type.ubyte)=9;
+		tr.add(vname.type,.type.string)="fieldref";
+		tr.add(vname.des,.type.string)="字段的符号引用";
+		tr.function void:file_get(o:.type.object,c:.type.object,index:.type.word) {
+			c.add("index",.type.uword)=index;
+			c.add("tag",.type.refer,this);
+			c.add("index_class",.type.uword)=r.getw(o);
+			c.add("index_nt",.type.uword)=r.getw(o);
+			index+=1;
+			o.cpool_type.fieldref.add(o.cpool_type.fieldref.N,.type.refer,c);
+			o.cpool_type.fieldref.N+=1;
+		} ;
+		tr.file_get.add(vname.root,.type.refer,.this());
+		tr.file_get.add(vname.this,.type.refer,tr);
+		tr.function void:file_set(o:.type.object,c:.type.object,index:.type.word) {
+			r.setw(o,c.index_class);
+			r.setw(o,c.index_nt);
+			index+=1;
+		} ;
+		tr.file_set.add(vname.root,.type.refer,.this());
+		tr.file_set.add(vname.this,.type.refer,tr);
+		tr.function void:cp_exp2(cp:.type.object,c:.type.object) {
+			.if c.index_class; c.add("Class",.type.refer,cp[c.index_class]);
+			.if c.index_nt; c.add("NameAndType",.type.refer,cp[c.index_nt]);
+			.if c["Class"];
+				c.add("class",.type.refer,c.Class.class);
+			.if c["NameAndType"];
+				c.add("name",.type.refer,c.NameAndType.name):
+				c.add("des",.type.refer,c.NameAndType.des);
+		} ;
+		tr.cp_exp2.add(vname.root,.type.refer,.this());
+		
+		# 10 => methodref 类中方法的符号引用
+		replace("tr",.type.refer,cptag.add(10,.type.vlist));
+		tr.add(vname.sign,.type.ubyte)=10;
+		tr.add(vname.type,.type.string)="methodref";
+		tr.add(vname.des,.type.string)="类中方法的符号引用";
+		tr.function void:file_get(o:.type.object,c:.type.object,index:.type.word) {
+			c.add("index",.type.uword)=index;
+			c.add("tag",.type.refer,this);
+			c.add("index_class",.type.uword)=r.getw(o);
+			c.add("index_nt",.type.uword)=r.getw(o);
+			index+=1;
+			o.cpool_type.methodref.add(o.cpool_type.methodref.N,.type.refer,c);
+			o.cpool_type.methodref.N+=1;
+		} ;
+		tr.file_get.add(vname.root,.type.refer,.this());
+		tr.file_get.add(vname.this,.type.refer,tr);
+		tr.function void:file_set(o:.type.object,c:.type.object,index:.type.word) {
+			r.setw(o,c.index_class);
+			r.setw(o,c.index_nt);
+			index+=1;
+		} ;
+		tr.file_set.add(vname.root,.type.refer,.this());
+		tr.file_set.add(vname.this,.type.refer,tr);
+		tr.function void:cp_exp2(cp:.type.object,c:.type.object) {
+			.if c.index_class; c.add("Class",.type.refer,cp[c.index_class]);
+			.if c.index_nt; c.add("NameAndType",.type.refer,cp[c.index_nt]);
+			.if c["Class"];
+				c.add("class",.type.refer,c.Class.class);
+			.if c["NameAndType"];
+				c.add("name",.type.refer,c.NameAndType.name):
+				c.add("des",.type.refer,c.NameAndType.des);
+		} ;
+		tr.cp_exp2.add(vname.root,.type.refer,.this());
+		
+		# 11 => InterfaceMethodref 接口中方法的符号引用
+		replace("tr",.type.refer,cptag.add(11,.type.vlist));
+		tr.add(vname.sign,.type.ubyte)=11;
+		tr.add(vname.type,.type.string)="InterfaceMethodref";
+		tr.add(vname.des,.type.string)="接口中方法的符号引用";
+		tr.function void:file_get(o:.type.object,c:.type.object,index:.type.word) {
+			c.add("index",.type.uword)=index;
+			c.add("tag",.type.refer,this);
+			c.add("index_class",.type.uword)=r.getw(o);
+			c.add("index_nt",.type.uword)=r.getw(o);
+			index+=1;
+			o.cpool_type.InterfaceMethodref.add(o.cpool_type.InterfaceMethodref.N,.type.refer,c);
+			o.cpool_type.InterfaceMethodref.N+=1;
+		} ;
+		tr.file_get.add(vname.root,.type.refer,.this());
+		tr.file_get.add(vname.this,.type.refer,tr);
+		tr.function void:file_set(o:.type.object,c:.type.object,index:.type.word) {
+			r.setw(o,c.index_class);
+			r.setw(o,c.index_nt);
+			index+=1;
+		} ;
+		tr.file_set.add(vname.root,.type.refer,.this());
+		tr.file_set.add(vname.this,.type.refer,tr);
+		tr.function void:cp_exp2(cp:.type.object,c:.type.object) {
+			.if c.index_class; c.add("Class",.type.refer,cp[c.index_class]);
+			.if c.index_nt; c.add("NameAndType",.type.refer,cp[c.index_nt]);
+			.if c["Class"];
+				c.add("class",.type.refer,c.Class.class);
+			.if c["NameAndType"];
+				c.add("name",.type.refer,c.NameAndType.name):
+				c.add("des",.type.refer,c.NameAndType.des);
+		} ;
+		tr.cp_exp2.add(vname.root,.type.refer,.this());
+		
+		# 12 => NameAndType 字段或方法的部分符号引用
+		replace("tr",.type.refer,cptag.add(12,.type.vlist));
+		tr.add(vname.sign,.type.ubyte)=12;
+		tr.add(vname.type,.type.string)="NameAndType";
+		tr.add(vname.des,.type.string)="字段或方法的部分符号引用";
+		tr.function void:file_get(o:.type.object,c:.type.object,index:.type.word) {
+			c.add("index",.type.uword)=index;
+			c.add("tag",.type.refer,this);
+			c.add("index_name",.type.uword)=r.getw(o);
+			c.add("index_des",.type.uword)=r.getw(o);
+			index+=1;
+			o.cpool_type.NameAndType.add(o.cpool_type.NameAndType.N,.type.refer,c);
+			o.cpool_type.NameAndType.N+=1;
+		} ;
+		tr.file_get.add(vname.root,.type.refer,.this());
+		tr.file_get.add(vname.this,.type.refer,tr);
+		tr.function void:file_set(o:.type.object,c:.type.object,index:.type.word) {
+			r.setw(o,c.index_name);
+			r.setw(o,c.index_des);
+			index+=1;
+		} ;
+		tr.file_set.add(vname.root,.type.refer,.this());
+		tr.file_set.add(vname.this,.type.refer,tr);
+		tr.function void:cp_exp1(cp:.type.object,c:.type.object) {
+			.if c.index_name; c.add("name",.type.refer,cp[c.index_name].value);
+			.if c.index_des; c.add("des",.type.refer,cp[c.index_des].value);
+		} ;
+		tr.cp_exp1.add(vname.root,.type.refer,.this());
+		
+		# 15 => MethodHandle 标识方法句柄
+		replace("tr",.type.refer,cptag.add(15,.type.vlist));
+		tr.add(vname.sign,.type.ubyte)=15;
+		tr.add(vname.type,.type.string)="MethodHandle";
+		tr.add(vname.des,.type.string)="标识方法句柄";
+		tr.function void:file_get(o:.type.object,c:.type.object,index:.type.word) {
+			c.add("index",.type.uword)=index;
+			c.add("tag",.type.refer,this);
+			c.add("kind",.type.ubyte)=r.getb(o);
+			c.add("index_mr",.type.uword)=r.getw(o);
+			index+=1;
+			o.cpool_type.MethodHandle.add(o.cpool_type.MethodHandle.N,.type.refer,c);
+			o.cpool_type.MethodHandle.N+=1;
+		} ;
+		tr.file_get.add(vname.root,.type.refer,.this());
+		tr.file_get.add(vname.this,.type.refer,tr);
+		tr.function void:file_set(o:.type.object,c:.type.object,index:.type.word) {
+			r.setb(o,c.kind);
+			r.setw(o,c.index_mr);
+			index+=1;
+		} ;
+		tr.file_set.add(vname.root,.type.refer,.this());
+		tr.file_set.add(vname.this,.type.refer,tr);
+		tr.function void:cp_exp3(cp:.type.object,c:.type.object) {
+			.if c.index_mr; c.add("Methodref",.type.refer,cp[c.index_mr]);
+			.if c["Methodref"];
+				c.add("Class",.type.refer,c.Methodref.Class):
+				c.add("NameAndType",.type.refer,c.Methodref.NameAndType);
+			.if c["Class"];
+				c.add("class",.type.refer,c.Class.class);
+			.if c["NameAndType"];
+				c.add("name",.type.refer,c.NameAndType.name):
+				c.add("des",.type.refer,c.NameAndType.des);
+		} ;
+		tr.cp_exp3.add(vname.root,.type.refer,.this());
+		
+		# 16 => MethodType 标识方法类型
+		replace("tr",.type.refer,cptag.add(16,.type.vlist));
+		tr.add(vname.sign,.type.ubyte)=16;
+		tr.add(vname.type,.type.string)="MethodType";
+		tr.add(vname.des,.type.string)="标识方法类型";
+		tr.function void:file_get(o:.type.object,c:.type.object,index:.type.word) {
+			c.add("index",.type.uword)=index;
+			c.add("tag",.type.refer,this);
+			c.add("index_des",.type.uword)=r.getw(o);
+			index+=1;
+			o.cpool_type.MethodType.add(o.cpool_type.MethodType.N,.type.refer,c);
+			o.cpool_type.MethodType.N+=1;
+		} ;
+		tr.file_get.add(vname.root,.type.refer,.this());
+		tr.file_get.add(vname.this,.type.refer,tr);
+		tr.function void:file_set(o:.type.object,c:.type.object,index:.type.word) {
+			r.setw(o,c.index_des);
+			index+=1;
+		} ;
+		tr.file_set.add(vname.root,.type.refer,.this());
+		tr.file_set.add(vname.this,.type.refer,tr);
+		tr.function void:cp_exp1(cp:.type.object,c:.type.object) {
+			.if c.index_des; c.add("des",.type.refer,cp[c.index_des].value);
+		} ;
+		tr.cp_exp1.add(vname.root,.type.refer,.this());
+		
+		# 18 InvokeDtnamic 表示一个动态方法调用点
+		replace("tr",.type.refer,cptag.add(18,.type.vlist));
+		tr.add(vname.sign,.type.ubyte)=18;
+		tr.add(vname.type,.type.string)="InvokeDtnamic";
+		tr.add(vname.des,.type.string)="表示一个动态方法调用点";
+		tr.function void:file_get(o:.type.object,c:.type.object,index:.type.word) {
+			c.add("index",.type.uword)=index;
+			c.add("tag",.type.refer,this);
+			c.add("index_bm",.type.uword)=r.getw(o);
+			c.add("index_nt",.type.uword)=r.getw(o);
+			index+=1;
+			o.cpool_type.InvokeDtnamic.add(o.cpool_type.InvokeDtnamic.N,.type.refer,c);
+			o.cpool_type.InvokeDtnamic.N+=1;
+		} ;
+		tr.file_get.add(vname.root,.type.refer,.this());
+		tr.file_get.add(vname.this,.type.refer,tr);
+		tr.function void:file_set(o:.type.object,c:.type.object,index:.type.word) {
+			r.setw(o,c.index_bm);
+			r.setw(o,c.index_nt);
+			index+=1;
+		} ;
+		tr.file_set.add(vname.root,.type.refer,.this());
+		tr.file_set.add(vname.this,.type.refer,tr);
+		tr.function void:cp_exp2(cp:.type.object,c:.type.object) {
+			.if c.index_nt; c.add("NameAndType",.type.refer,cp[c.index_nt]);
+			.if c["NameAndType"];
+				c.add("name",.type.refer,c.NameAndType.name):
+				c.add("des",.type.refer,c.NameAndType.des);
+		} ;
+		tr.cp_exp2.add(vname.root,.type.refer,.this());
+		
+		# end
+		delete tr;
+		
+	function string:class_get(obj:.type.object) {
+		add("i",.type.long)=0;
+		obj.replace("magic",.type.uint)=r.getd(obj);
+		obj.replace("minor",.type.uword)=r.getw(obj);
+		obj.replace("major",.type.uword)=r.getw(obj);
+		obj.replace("cp_count",.type.uword)=r.getw(obj);
+		obj.replace("cpool",.type.vmat).add(0,.type.void);
+		obj.replace("cpool_type",.type.vmat);
+		.while i<=18;
+			r.cptag[i]?
+			0@obj.cpool_type.add(r.cptag[i].type,.type.vmat).add("N",.type.uword)::
+			i+=1;
+		.if _ret_=cp_get(obj); .exit ;
+		obj.replace("access_flags",.type.uword)=r.getw(obj);
+		obj.replace("this_class_index",.type.uword)=r.getw(obj);
+		.if obj.this_class_index;
+			obj.replace("this_class",.type.refer,obj.cpool[obj.this_class_index]):
+			obj.replace("this_class_name",.type.refer,obj.this_class.class);
+		obj.replace("super_class_index",.type.uword)=r.getw(obj);
+		.if obj.super_class_index;
+			obj.replace("super_class",.type.refer,obj.cpool[obj.super_class_index]):
+			obj.replace("super_class_name",.type.refer,obj.super_class.class);
+		obj.replace("interfaces_count",.type.uword)=r.getw(obj);
+		obj.replace("interfaces",.type.vlist);
+		.if obj.interfaces_count;
+			interfaces_get(obj);
+		obj.replace("field_count",.type.uword)=r.getw(obj);
+		obj.replace("field",.type.vmat);
+		.if obj.field_count;
+			field_get(obj);
+		obj.replace("method_count",.type.uword)=r.getw(obj);
+		obj.replace("method",.type.vmat);
+		.if obj.method_count;
+			method_get(obj);
+		obj.replace("attr_count",.type.uword)=r.getw(obj);
+		obj.replace("attr",.type.vmat);
+		.if obj.attr_count;
+			r.al_get(obj,obj.attr,obj.attr_count);
+		_ret_="class expansion ok";
+	} ;
+	class_get.add("r",.type.refer,.this());
+	class_get.function string:cp_get(obj:.type.object) {
+		add("index",.type.uword)=1;
+		add("N",.type.uword);
+		add("tag",.type.ubyte);
+		#loop;
+		tag=r.getb(obj);
+		.if !cptag[tag]; .exit _ret_=.sprint("error cpool: find unknow tag %d at [%d]",tag,index);
+		cptag[tag].file_get(obj,obj.cpool.add(index,.type.vlist),index);
+		.if index>=obj.cp_count; .gotodw cp_exp;
+		.goto loop;
+		#cp_exp;
+		replace("t",.type.refer,obj.cpool_type.class);
+		t.N@N:0@index;
+		.while index<N;
+			r.cptag[7].cp_exp1(obj.cpool,t[index]):
+			index+=1;
+		replace("t",.type.refer,obj.cpool_type.string);
+		t.N@N:0@index;
+		.while index<N;
+			r.cptag[8].cp_exp1(obj.cpool,t[index]):
+			index+=1;
+		replace("t",.type.refer,obj.cpool_type.NameAndType);
+		t.N@N:0@index;
+		.while index<N;
+			r.cptag[12].cp_exp1(obj.cpool,t[index]):
+			index+=1;
+		replace("t",.type.refer,obj.cpool_type.MethodType);
+		t.N@N:0@index;
+		.while index<N;
+			r.cptag[16].cp_exp1(obj.cpool,t[index]):
+			index+=1;
+		replace("t",.type.refer,obj.cpool_type.fieldref);
+		t.N@N:0@index;
+		.while index<N;
+			r.cptag[9].cp_exp2(obj.cpool,t[index]):
+			index+=1;
+		replace("t",.type.refer,obj.cpool_type.methodref);
+		t.N@N:0@index;
+		.while index<N;
+			r.cptag[10].cp_exp2(obj.cpool,t[index]):
+			index+=1;
+		replace("t",.type.refer,obj.cpool_type.InterfaceMethodref);
+		t.N@N:0@index;
+		.while index<N;
+			r.cptag[11].cp_exp2(obj.cpool,t[index]):
+			index+=1;
+		replace("t",.type.refer,obj.cpool_type.InvokeDtnamic);
+		t.N@N:0@index;
+		.while index<N;
+			r.cptag[18].cp_exp2(obj.cpool,t[index]):
+			index+=1;
+		replace("t",.type.refer,obj.cpool_type.MethodHandle);
+		t.N@N:0@index;
+		.while index<N;
+			r.cptag[15].cp_exp3(obj.cpool,t[index]):
+			index+=1;
+		sub("t");
+		.void@_ret_;
+	} ;
+	class_get.cp_get.add("r",.type.refer,.this());
+	class_get.cp_get.add("cptag",.type.refer,cptag);
+	class_get.function void:interfaces_get(obj:.type.object) {
+		add("index",.type.uword)=0;
+		replace("ifs",.type.refer,obj.interfaces);
+		.while index<obj.interfaces_count;
+			r.getw(obj)@
+			replace("v",.type.refer,ifs.add(index,.type.vlist))
+				.add("index",.type.uword):
+			v.add("class",.type.refer,obj.cpool[v.index]):
+			v.add("class_name",.type.refer,v.class.class):
+			index+=1;
+		delete ifs,v;
+	} ;
+	class_get.interfaces_get.add("r",.type.refer,.this());
+	class_get.function void:field_get(obj:.type.object) {
+		add("index",.type.uword)=0;
+		replace("field",.type.refer,obj.field);
+		.while index<obj.field_count;
+			replace("v",.type.refer,field.add(index,.type.vlist)):index+=1:
+			r.getw(obj)@v.add("access_flags",.type.uword):
+			r.getw(obj)@v.add("index_name",.type.uword):
+			r.getw(obj)@v.add("index_des",.type.uword):
+			r.getw(obj)@v.add("attr_count",.type.uword):
+			v.add("name",.type.refer,obj.cpool[v.index_name].value):
+			v.add("des",.type.refer,obj.cpool[v.index_des].value):
+			:v.attr_count?r.al_get(obj,v.add("attr",.type.vlist),v.attr_count);
+		delete field,v;
+	} ;
+	class_get.field_get.add("r",.type.refer,.this());
+	class_get.function void:method_get(obj:.type.object) {
+		add("index",.type.uword)=0;
+		replace("method",.type.refer,obj.method);
+		.while index<obj.method_count;
+			replace("v",.type.refer,method.add(index,.type.vlist)):index+=1:
+			r.getw(obj)@v.add("access_flags",.type.uword):
+			r.getw(obj)@v.add("index_name",.type.uword):
+			r.getw(obj)@v.add("index_des",.type.uword):
+			r.getw(obj)@v.add("attr_count",.type.uword):
+			v.add("name",.type.refer,obj.cpool[v.index_name].value):
+			v.add("des",.type.refer,obj.cpool[v.index_des].value):
+			:v.attr_count?r.al_get(obj,v.add("attr",.type.vlist),v.attr_count);
+		delete method,v;
+	} ;
+	class_get.method_get.add("r",.type.refer,.this());
+	
+	function string:class_set(obj:.type.object) {
+		r.refile(obj);
+		r.setd(obj,obj.magic);
+		r.setw(obj,obj.minor);
+		r.setw(obj,obj.major);
+		r.setw(obj,obj.cp_count);
+		.if _ret_=cp_set(obj); .exit ;
+		r.setw(obj,obj.access_flags);
+		r.setw(obj,obj.this_class_index);
+		r.setw(obj,obj.super_class_index);
+		r.setw(obj,obj.interfaces_count);
+		.if obj.interfaces_count;
+			interfaces_set(obj);
+		r.setw(obj,obj.field_count);
+		.if obj.field_count;
+			field_set(obj);
+		r.setw(obj,obj.method_count);
+		.if obj.method_count;
+			method_set(obj);
+		r.setw(obj,obj.attr_count);
+		.if obj.attr_count;
+			r.al_set(obj,obj.attr,obj.attr_count);
+		r.endfile(obj);
+		_ret_="class set ok";
+	} ;
+	class_set.add("r",.type.refer,.this());
+	class_set.function string:cp_set(obj:.type.object) {
+		add("index",.type.uword)=1;
+		add("tag",.type.ubyte);
+		#loop;
+		tag=obj.cpool[index].tag.sign;
+		.if !cptag[tag]; .exit _ret_=.sprint("error cpool: find unknow tag %d at [%d]",tag,index);
+		r.setb(obj,tag);
+		cptag[tag].file_set(obj,obj.cpool[index],index);
+		.if index>=obj.cp_count; .exit .void@_ret_;
+		.goto loop;
+	} ;
+	class_set.cp_set.add("r",.type.refer,.this());
+	class_set.cp_set.add("cptag",.type.refer,cptag);
+	class_set.function void:interfaces_set(obj:.type.object) {
+		add("index",.type.uword)=0;
+		replace("ifs",.type.refer,obj.interfaces);
+		.while index<obj.interfaces_count;
+			r.setw(obj,ifs[index].index):
+			index+=1;
+		delete ifs;
+	} ;
+	class_set.interfaces_set.add("r",.type.refer,.this());
+	class_set.function void:field_set(obj:.type.object) {
+		add("index",.type.uword)=0;
+		replace("field",.type.refer,obj.field);
+		.while index<obj.field_count;
+			replace("v",.type.refer,field[index]):index+=1:
+			r.setw(obj,v.access_flags):
+			r.setw(obj,v.index_name):
+			r.setw(obj,v.index_des):
+			r.setw(obj,v.attr_count):
+			:v.attr_count?r.al_set(obj,v.attr,v.attr_count);
+		delete field,v;
+	} ;
+	class_set.field_set.add("r",.type.refer,.this());
+	class_set.function void:method_set(obj:.type.object) {
+		add("index",.type.uword)=0;
+		replace("method",.type.refer,obj.method);
+		.while index<obj.method_count;
+			replace("v",.type.refer,method[index]):index+=1:
+			r.setw(obj,v.access_flags):
+			r.setw(obj,v.index_name):
+			r.setw(obj,v.index_des):
+			r.setw(obj,v.attr_count):
+			:v.attr_count?r.al_set(obj,v.attr,v.attr_count);
+		delete method,v;
+	} ;
+	class_set.method_set.add("r",.type.refer,.this());
+	
+	# attr
+	function void:al_get(o:.type.object,v:.type.object,n:.type.znum) {
+		add("i",.type.uword)=0;
+		.while i<n;
+			attr_get(o,v.replace(i,.type.vlist)):
+			v.replace(v[i].name,.type.refer,v[i]):
+			i+=1;
+	} ;
+	al_get.add("r",.type.refer,.this());
+	al_get.function void:attr_get(o:.type.object,v:.type.object) {
+		add("i",.type.uint)=0;
+		v.add("index_name",.type.uword)=r.getw(o);
+		v.add("length",.type.uint)=r.getd(o);
+		v.add("attr",.type.ubyte,v.length);
+		.while i<v.length;
+			r.getb(o)@v.attr[i]:
+			i+=1;
+		v.add("name",.type.refer,o.cpool[v.index_name].value);
+	} ;
+	al_get.attr_get.add("r",.type.refer,.this());
+	
+	function void:al_set(o:.type.object,v:.type.object,n:.type.znum) {
+		add("i",.type.uword)=0;
+		.while i<n;
+			attr_set(o,v[i]):
+			i+=1;
+	} ;
+	al_set.add("r",.type.refer,.this());
+	al_set.function void:attr_set(o:.type.object,v:.type.object) {
+		add("i",.type.uint)=0;
+		r.setw(o,v.index_name);
+		r.setd(o,v.length);
+		.while i<v.length;
+			r.setb(o,v.attr[i]):
+			i+=1;
+	} ;
+	al_set.attr_set.add("r",.type.refer,.this());
+	
+	function void:ex_all_attr(o:.type.object) {
+		replace("obj",.type.refer,o);
+		ex_lal(o.field,o.field_count);
+		ex_lal(o.method,o.method_count);
+		ex_lal.ex_al(o);
+		sub("obj");
+	} ;
+	ex_all_attr.function void:ex_lal(o:.type.object,n:.type.word) {
+		add("i",.type.uword)=0;
+		.while i<n;
+			o.exist(i,.type.object)?
+				ex_al(o[i])::
+			i+=1;
+	} ;
+	ex_all_attr.ex_lal.function void:ex_al(o:.type.object) {
+		z+=1;
+		s.replace(z,.type.vlist);
+		s[z].add(0,.type.refer,o);
+		s[z].add(1,.type.uword)=0;
+		.while s[z][1]<s[z][0].attr_count;
+			attr.get(s[z][0].attr[s[z][1]],ex_all.obj.cpool):
+			info_ex(s[z][0].attr[s[z][1]]):
+			s[z][1]+=1;
+		s.sub(z);
+		z-=1;
+	} ;
+	ex_all_attr.ex_lal.ex_al.add("attr",.type.refer,jvmclass_attr);
+	ex_all_attr.ex_lal.ex_al.add("ex_all",.type.refer,ex_all_attr);
+	ex_all_attr.ex_lal.ex_al.var vlist:s,uint:z;
+	ex_all_attr.ex_lal.ex_al.function void:info_ex(o:.type.object) {
+		.if !o["info"]; .exit ;
+		.if !o.info["attr_count"]; .exit ;
+		add("i",.type.uint)=0;
+		.while i<o.info.attr_count;
+			o.info.attr.add(o.info.attr[i].name,.type.refer,o.info.attr[i]):
+			i+=1;
+		ex_al(o.info);
+	} ;
+	ex_all_attr.ex_lal.ex_al.info_ex.add("ex_al",.type.refer,ex_all_attr.ex_lal.ex_al);
+} ;
+
+

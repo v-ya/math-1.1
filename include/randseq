@@ -3,6 +3,20 @@
 .if .include.inc("randseq",.type.vlist);
 	.exit ;
 
+# init
+randseq.try {
+	# version
+	var vlist:(limit,version);
+	.include.version(version,1,0,0);
+	.include.version(limit,1,6,0);
+	add(.const.error,.type.string);
+	.if limit.value > .sys.version.value; .exit error="limit version >= "+limit.string;
+} , {
+	.if ![.const.error]; error="try init error";
+} ;
+.if randseq[.const.error]; .exit ;
+
+# define
 randseq.var string:type="randseq";
 randseq.var string:default="m0x1n";
 randseq.function void:init(rs:.type.object, method:.type.string|.type.void)
