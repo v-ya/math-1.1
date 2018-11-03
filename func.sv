@@ -271,6 +271,8 @@
 		_2_sqrtpi float	0	r	M_2_SQRTPI
 		sqrt2	float	0	r	M_SQRT2
 		sqrt1_2	float	0	r	M_SQRT1_2
+		// 常用字符串
+		error	string	0	r	"error"
 	}
 	// 变量类型，用于定义函数
 	type	vmat	0	r	{

@@ -336,6 +336,7 @@
 			<keyword>_2_sqrtpi</keyword>
 			<keyword>sqrt2</keyword>
 			<keyword>sqrt1_2</keyword>
+			<keyword>error</keyword>
 		</context>
 		<context id="cv_type" style-ref="cv">
 			<prefix>(?&lt;!\w)\.type\.</prefix>

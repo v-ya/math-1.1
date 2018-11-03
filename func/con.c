@@ -49,8 +49,8 @@ func(this)
 func(exist)
 {
 	static char *label="[object].exist";
-	static u32 type_1[1]={type_string};
-	static u32 type_2[2]={type_string,type_num};
+	static u32 type_1[1]={type_string|type_znum};
+	static u32 type_2[2]={type_string|type_znum,type_num};
 	var *root,*vp;
 	char *path;
 	u32 mask;
@@ -58,19 +58,30 @@ func(exist)
 	{
 		case 1:
 			if _oF(check_varlist(argv,1,type_1)) return get_error(errid_FunArgvType,label);
-			path=argv->v->v.v_string;
 			mask=type_all^type_null;
+			vp=argv->v;
 			break;
 		case 2:
 			if _oF(check_varlist(argv,2,type_2)) return get_error(errid_FunArgvType,label);
-			path=argv->v->v.v_string;
 			vp=argv->r->v;
 			mask=vpntof(vp);
+			vp=argv->v;
 			break;
 		default:
 			return get_error(errid_FunArgvType,label);
 	}
 	root=ret->v.v_var;
+	if _oT(vp->type&type_string) path=vp->v.v_string;
+	else
+	{
+		// index find
+		vp=var_find_index(root,vp->v.v_long);
+		ret->type=type_long;
+		if _oF(vp && (vp->type&type_refer)) vp=refer_check(vp);
+		if _oT(vp) ret->v.v_long=(vp->type&mask)?1:0;
+		else ret->v.v_long=0;
+		return ret;
+	}
 	if (path)
 	{
 		root=ptvar_replace(_pt_this,root);
