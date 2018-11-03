@@ -3,17 +3,18 @@
 func(init_auth)
 {
 	static char *label=".init.auth";
-	static u32 type_2[2]={type_all|type_allowarray,type_string};
+	static u32 mask=~(auth_retype|auth_read|auth_write|auth_link|auth_relength|auth_system);
 	var *vp;
 	char *sa;
 	u32 isplus=1,mode;
-	if _oF(argc!=2) return get_error(errid_FunArgvType,label);
-	else if _oF(check_varlist(argv,2,type_2)) return get_error(errid_FunArgvType,label);
+	if _oF(argc<1) return get_error(errid_FunArgvType,label);
 	vp=argv->v;
-	sa=argv->r->v->v.v_string;
+	argv=argv->r;
+	if _oF(!(vp->type&type_string)) return get_error(errid_FunArgvType,label);
+	sa=vp->v.v_string;
 	ret->type=type_void;
 	if _oF(!sa) return ret;
-	mode=vp->mode&~(auth_all^auth_run^auth_key);
+	mode=0;
 	while(*sa)
 	{
 		switch(*sa)
@@ -39,7 +40,12 @@ func(init_auth)
 		}
 		sa++;
 	}
-	vp->mode=mode;
+	while(argv)
+	{
+		vp=argv->v;
+		argv=argv->r;
+		vp->mode=vp->mode&mask|mode;
+	}
 	return ret;
 }
 

@@ -16,9 +16,8 @@ include.function long:inc(n:.type.string,t:.type.znum) {
 	.if !.issame(_caller_,.include);
 		_caller_.add(n,.type.refer,.include[n]);
 };
-.init.auth(include.inc,$r);
-.init.auth(include.inc._text_,$r);
-.init.auth(include.inc._ret_,$rw);
+.init.auth($r,include.inc,include.inc._text_);
+.init.auth($rw,include.inc._ret_);
 
 
 ###
@@ -28,20 +27,14 @@ include.function void:version(v:.type.object,r1:.type.znum,r2:.type.znum,r3:.typ
 	r1@v.add(s1,.type.ubyte):
 	r2@v.add(s2,.type.ubyte):
 	r3@v.add(s3,.type.ubyte):
+	.s(fm,r1,r2,r3)@v.add(ss,.type.string):
 	r1<<8|r2<<8|r3&m@v.add(sv,.type.uint);
 } ;
 include.version.run {
-	var string:(s1="major",s2="minor",s3="rev",sv="value");
+	var string:(s1="major",s2="minor",s3="rev",sv="value",ss="string",fm="%u.%u.%u");
 	var uint:m=0xffffff;
-	.init.auth(_text_,$r);
-	.init.auth(_ret_,$r);
-	.init.auth(s1,$r);
-	.init.auth(s2,$r);
-	.init.auth(s3,$r);
-	.init.auth(sv,$r);
-	.init.auth(m,$r);
+	.init.auth($r,.this(),_text_,_ret_,s1,s2,s3,sv,ss,fm,m);
 } ;
-.init.auth(include.version,$r);
 
 $delete r,rw;
 

@@ -10,7 +10,7 @@
 	// 在 init.math 中使用
 	_vl_init	-export	.
 	auth	fun	0	r	addr_fun(init_auth)
-		// .init.auth(var,"srwlSc");
+		// .init.auth("srwlSc",var, ...);
 		// s auth_retype
 		// r auth_read
 		// w auth_write
