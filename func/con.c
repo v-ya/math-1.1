@@ -99,6 +99,11 @@ func(exist)
 			var_free(vp);
 		}
 	}
+	else
+	{
+		ret->type=type_long;
+		ret->v.v_long=0;
+	}
 	return ret;
 }
 
