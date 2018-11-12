@@ -65,6 +65,7 @@ void print_vlist(vlist *vl, u32 tab, void *rp)
 			print("%6s",get_type(vp->type,vp->mode));
 		}
 		else if _oF(vp->length) print("[%6u]", vp->length);
+		else if _oF(vp->type&type_vmat) print("(%6u)", vp->v.v_vmat?vp->v.v_vmat->number:0);
 		else print("        ");
 		// inode
 		if _oF((vl->v->type&type_refer)&&(vl->v!=vp)) print("  %4u=>%4u", (vl->v==rp&&vl->v->inode>0)?(vl->v->inode-1):vl->v->inode, (vp==rp&&vp->inode>0)?(vp->inode-1):vp->inode);
@@ -93,9 +94,9 @@ void print_vlist(vlist *vl, u32 tab, void *rp)
 
 func(debug_list)
 {
-	vlist *vl;
-	vmat vm,*vmp;
-	u32 i,j,k;
+	vlist *vl,**avl;
+	vmat *vmp;
+	u32 i,j,k,mask;
 	while(argv)
 	{
 		print_vlist(argv,0,argv->v);
@@ -120,96 +121,98 @@ func(debug_list)
 			}
 			else if _oF(argv->v->type&type_vmat)
 			{
-				// index == string
 				vmp=argv->v->v.v_vmat;
+				mask=vmp->mask;
+				avl=malloc((mask+1)*sizeof(vlist*));
+				// index == string
 				j=0;
-				for(i=0;i<256;i++)
-					if _oT(vmp->vl[i]) vm.vl[j++]=vmp->vl[i];
+				for(i=0;i<=mask;i++)
+					if _oT(vmp->avl[i]) avl[j++]=vmp->avl[i];
 				for(i=0;i<j;i++)
 				{
-					vl=vm.vl[i];
+					vl=avl[i];
 					while(vl->l) vl=vl->l;
-					vm.vl[i]=vl;
+					avl[i]=vl;
 				}
 				while(j)
 				{
 					vl=NULL;
-					k=256;
+					k=mask+1;
 					for(i=0;;i++)
 					{
 						loop_s:
 						if _oF(i>=j) break;
-						while(vm.vl[i] && !vm.vl[i]->name) vm.vl[i]=(vm.vl[i])->r;
-						if _oF(!vm.vl[i])
+						while(avl[i] && !avl[i]->name) avl[i]=(avl[i])->r;
+						if _oF(!avl[i])
 						{
 							j--;
-							vm.vl[i]=vm.vl[j];
-							vm.vl[j]=NULL;
+							avl[i]=avl[j];
+							avl[j]=NULL;
 							goto loop_s;
 						}
-						if (!vl || strcmp(vm.vl[i]->name,vl->name)<0)
+						if (!vl || strcmp(avl[i]->name,vl->name)<0)
 						{
-							vl=vm.vl[i];
+							vl=avl[i];
 							k=i;
 						}
 					}
 					if (vl)
 					{
 						print_vlist(vl,4,argv->v);
-						vm.vl[k]=vl->r;
-						if _oF(!vm.vl[k])
+						avl[k]=vl->r;
+						if _oF(!avl[k])
 						{
 							j--;
-							vm.vl[k]=vm.vl[j];
-							vm.vl[j]=NULL;
+							avl[k]=avl[j];
+							avl[j]=NULL;
 						}
 					}
 				}
 				// index == number
-				vmp=argv->v->v.v_vmat;
 				j=0;
-				for(i=0;i<256;i++)
-					if _oT(vmp->vl[i]) vm.vl[j++]=vmp->vl[i];
+				for(i=0;i<=mask;i++)
+					if _oT(vmp->avl[i]) avl[j++]=vmp->avl[i];
 				for(i=0;i<j;i++)
 				{
-					vl=vm.vl[i];
+					vl=avl[i];
 					while(vl->l) vl=vl->l;
-					vm.vl[i]=vl;
+					avl[i]=vl;
 				}
 				while(j)
 				{
 					vl=NULL;
-					k=256;
+					k=mask+1;
 					for(i=0;;i++)
 					{
 						loop_n:
 						if _oF(i>=j) break;
-						while(vm.vl[i] && vm.vl[i]->name) vm.vl[i]=(vm.vl[i])->r;
-						if _oF(!vm.vl[i])
+						while(avl[i] && avl[i]->name) avl[i]=(avl[i])->r;
+						if _oF(!avl[i])
 						{
 							j--;
-							vm.vl[i]=vm.vl[j];
-							vm.vl[j]=NULL;
+							avl[i]=avl[j];
+							avl[j]=NULL;
 							goto loop_n;
 						}
-						if (!vl || vm.vl[i]->head<vl->head)
+						if (!vl || avl[i]->head<vl->head)
 						{
-							vl=vm.vl[i];
+							vl=avl[i];
 							k=i;
 						}
 					}
 					if (vl)
 					{
 						print_vlist(vl,4,argv->v);
-						vm.vl[k]=vl->r;
-						if _oF(!vm.vl[k])
+						avl[k]=vl->r;
+						if _oF(!avl[k])
 						{
 							j--;
-							vm.vl[k]=vm.vl[j];
-							vm.vl[j]=NULL;
+							avl[k]=avl[j];
+							avl[j]=NULL;
 						}
 					}
 				}
+				free(avl);
 			}
 		}
 		argv=argv->r;

@@ -65,6 +65,10 @@ int init_run(void)
 {
 	vlist *vl;
 	var *vp;
+	// 初始化变量
+	if _oF(!(_refpool->type&type_vmat) || !_refpool->v.v_vmat) return 1;
+	_refpool_vmat=_refpool->v.v_vmat;
+	// init 脚本
 	vl=vlist_alloc("init");
 	if _oF(!vl)
 	{

@@ -30,6 +30,7 @@ run: all
 	./math test.math
 clear:
 	rm -f math *.o func.c init.c init-st.c func/*.o output/*
+	rm -Rf math-root/
 	cd tool && make clear && cd ..
 	cd package && make clear && cd ..
 

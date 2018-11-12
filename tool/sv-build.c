@@ -337,6 +337,24 @@ void put_vp_array(var *vp)
 	}
 }
 
+void put_vp_vmat(var *vp)
+{	
+	vmat *vm;
+	u32 i,mask;
+	if (vp->type&type_vmat)
+	{
+		vm=vp->v.v_vmat;
+		mask=vm->mask;
+		fprintf(outfile,"static vlist*	_sv_avl_%p[%d] = {\n",vm->avl,mask+1);
+		for(i=0;i<=mask;i++)
+			if (vm->avl[i]) fprintf(outfile,"\t[%3d]\t=&_sv_vl_%p,\n",i,vm->avl[i]);
+		fprintf(outfile,"};\nstatic vmat	_sv_vm_%p = {\n",vm);
+		fprintf(outfile,"\t.mask\t=%d\n,",mask);
+		fprintf(outfile,"\t.number\t=%d\n,",vm->number);
+		fprintf(outfile,"\t.avl\t=_sv_avl_%p\n};\n",vm->avl);
+	}
+}
+
 void put_vp(var *vp)
 {
 	void put_vl(vlist *vl);
@@ -345,7 +363,7 @@ void put_vp(var *vp)
 	// 对于 inode>1 的变量，通过破坏结构来表示
 	if (vp==NULL||vp->inode==0) return ;
 	put_vp_array(vp);
-	if (vp->type&type_vmat) fprintf(outfile,"static vmat\t_sv_vm_%p;\n",vp->v.v_vmat);
+	put_vp_vmat(vp);
 	fprintf(outfile,"static var	_sv_vp_%p = {\n",vp);
 	fprintf(outfile,"\t.type\t\t=0x%08x,\n",vp->type);
 	fprintf(outfile,"\t.length\t\t=%u,\n",vp->length);
@@ -359,11 +377,6 @@ void put_vp(var *vp)
 			break;
 		case type_vmat:
 			fprintf(outfile,"\t.v.v_vmat\t=&_sv_vm_%p\n};\n",vp->v.v_vmat);
-			vm=vp->v.v_vmat;
-			fprintf(outfile,"static vmat	_sv_vm_%p = {\n",vm);
-			for(i=0;i<256;i++)
-				if (vm->vl[i]) fprintf(outfile,"\t.vl[%3d]\t=&_sv_vl_%p,\n",i,vm->vl[i]);
-			fprintf(outfile,"};\n");
 			break;
 		default:
 			l:
@@ -396,8 +409,8 @@ void put_vp(var *vp)
 	if (vp->type&type_vmat)
 	{
 		vm=vp->v.v_vmat;
-		for(i=0;i<256;i++)
-			if (vm->vl[i]) put_vl(vm->vl[i]);
+		for(i=0;i<=vm->mask;i++)
+			if (vm->avl[i]) put_vl(vm->avl[i]);
 	}
 	else if (vp->type&type_vlist) put_vl(vp->v.v_vlist);
 }

@@ -7,7 +7,7 @@
 // 版本号
 	#define	VERSION_major		1
 	#define VERSION_minor		6
-	#define VERSION_revision	0
+	#define VERSION_revision	1
 	#define VERSION_value		(VERSION_major<<16|VERSION_minor<<8|VERSION_revision)
 
 // 限制
@@ -30,7 +30,7 @@
 	#define PATH_incutup_c		'/'
 	#define PATH_incutup_s		"/"
 	// 内置环境目录路径
-	//#define PATH_root		"/usr/lib/math"
+	//#define PATH_root		"/usr/local/math"
 	#ifdef PATH_root
 		// package 的默认储存路径
 		#define PATH_import		"." PATH_cutup_s "import" PATH_cutup_s PATH_root PATH_incutup_s "import"

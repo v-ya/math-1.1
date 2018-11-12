@@ -13,21 +13,23 @@ u32 vname_check(char *name)
 	else return 0;
 }
 
-u64 vname_gen(unsigned char *name)
+u32 vname_gen(unsigned char *name)
 {
 	u32 ngen=0;
 	while(*name)
+	{
 		ngen+=*(name++);
-	ngen&=0xff;
+		ngen^=ngen<<1;
+	}
 	return ngen;
 }
 
-u64 vhead_gen(u64 head)
+u32 vhead_gen(u64 head)
 {
-	head=(head>>32)^head;
-	head=(head>>16)^head;
-	head=(head>>8)^head;
-	return head&0xff;
+	head^=head>>32;
+	head^=head>>16;
+	head^=head>>8;
+	return head;
 }
 
 u64 vname_head(unsigned char *name)

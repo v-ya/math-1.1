@@ -77,6 +77,15 @@ struct VMAT;
 // length
 #define leng_no		0
 
+// vmat info
+#define vmat_init_size	256
+
+#define vmat_flag_fvmat	0x00000001
+#define vmat_flag_favl	0x00000002
+#define vmat_flag_notex	0x00000004
+
+#define vmat_flag_free	0x00000003
+
 #define vpntof(vp)	(((vp)->type&type_znum)?((vp)->v.v_long):((vp)->v.v_float))
 #define vpbool(vp)	(((vp)->type&(type_void|type_null))?0:(((vp)->type&type_float)?(((vp)->v.v_float!=0)?1:0):(((vp)->v.v_long)?1:0)))
 #define isstring(vp)	(((vp)->type&type_string)&&(!(vp)->length))
@@ -136,12 +145,16 @@ typedef struct VLIST {
 } vlist;
 
 typedef struct VMAT {
-	struct VLIST *vl[256];
+	u32 mask;
+	u32 number;
+	u64 flag;
+	struct VLIST **avl;
 } vmat;
 
 #ifndef __nosym__
 // static var
 extern var *_var_null;
+extern vmat *_refpool_vmat;
 var* get_null(void);
 // alloc && free
 vmat* vmat_alloc(void);
