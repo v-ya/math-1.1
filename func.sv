@@ -139,7 +139,9 @@
 		// 信息
 		info	vlist	0	r	{
 			rand_max	ulong	0	r	RAND_MAX_L
-			// .rand() 默认返回的上限 [0, rand_max)
+				// .rand() 默认返回的上限 [0, rand_max)
+			clocks_per_sec	ulong	0	r	CLOCKS_PER_SEC
+				// .time.clock() 返回值与时间关系
 		}
 	}
 	// 关键字函数
@@ -258,6 +260,7 @@
 			// ubyte[] => string
 	// 常数表
 	const	vmat	0	r	{
+		// 数学常量
 		e	float	0	r	M_E
 		log2e	float	0	r	M_LOG2E
 		log10e	float	0	r	M_LOG10E
@@ -314,8 +317,10 @@
 	time	vlist	0	r	{
 		stamp	fun	0	r	addr_fun(stamp)
 			// ulong .time.stamp(); => time(NULL)
+			// 自 1970-01-01 经过的秒数
 		clock	fun	0	r	addr_fun(clock)
 			// ulong .time.clock(); => clock()
+			// 自进程开始经历的滴答，单位见 .sys.info.clocks_per_sec
 	}
 	// 文件相关
 	file	vlist	0	r	{

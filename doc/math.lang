@@ -320,6 +320,7 @@
 		<context id="cv_sys_info" style-ref="cv">
 			<prefix>(?&lt;!\w)\.sys\.info\.</prefix>
 			<keyword>rand_max</keyword>
+			<keyword>clocks_per_sec</keyword>
 		</context>
 		<context id="cv_const" style-ref="cv">
 			<prefix>(?&lt;!\w)\.const\.</prefix>
