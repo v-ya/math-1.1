@@ -11,8 +11,6 @@
 
 #define	is_space(c)	(c==' '||c=='\t'||c=='\r')
 
-var *_refpool;		// 通过编译
-
 static char buff[4096];	// 缓存区
 static char *val[8];	// 缓存行指针
 static int vn;		// 行内读取数

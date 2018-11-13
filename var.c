@@ -530,6 +530,8 @@ void vmat_extend(vmat *vm)
 		{
 			v=vl;
 			vl=vl->r;
+			v->l=NULL;
+			v->r=NULL;
 			gen=(v->name?vname_gen(v->name):vhead_gen(v->head))&mask1;
 			avl1[gen]=vlist_insert(avl1[gen],v);
 		}

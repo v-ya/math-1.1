@@ -373,7 +373,6 @@ var* get_var(char *exp, char **expp, int *array_n)
 		func=vp;
 		if _oT(func->type&type_string) vp=var_find(root,func->v.v_string);
 		else vp=var_find_index(root,func->v.v_long);
-		if _oF(!vp && func->type&type_string) vp=var_find(_vm_gobj,func->v.v_string);
 		if _oF(!vp) vp=_var_null;
 		var_free(func);
 		if _oF(*exp!=']') goto Err_notbra;

@@ -78,7 +78,7 @@ struct VMAT;
 #define leng_no		0
 
 // vmat info
-#define vmat_init_size	256
+#define vmat_init_size	16
 
 #define vmat_flag_fvmat	0x00000001
 #define vmat_flag_favl	0x00000002
