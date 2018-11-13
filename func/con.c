@@ -30,6 +30,11 @@ func(length)
 	if _oF(argc!=1) return get_error(errid_FunArgvType,label);
 	ret->type=type_long;
 	ret->v.v_long=argv->v->length;
+	if _oF(argv->v->type&type_vmat)
+	{
+		if _oT(argv->v->v.v_vmat && !argv->v->length)
+			ret->v.v_long=argv->v->v.v_vmat->number;
+	}
 	return ret;
 }
 
