@@ -221,3 +221,14 @@ func(debug_list)
 	ret->v.v_long=0;
 }
 
+func(debug_szvmat)
+{
+	var *vp;
+	vp=argv->v;
+	ret->type=type_long|type_unsign;
+	ret->v.v_long=0;
+	if _oT(vp->type&type_vmat && vp->v.v_vmat) ret->v.v_long=vp->v.v_vmat->mask+1;
+	return ret;
+}
+
+

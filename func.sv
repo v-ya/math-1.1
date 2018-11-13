@@ -363,6 +363,7 @@
 	// 调试相关
 	debug	vlist	0	r	{
 		list	fun	0	r	addr_fun(debug_list)
+		szvmat	fun	0	r	addr_fun(debug_szvmat)
 	}
 }
 

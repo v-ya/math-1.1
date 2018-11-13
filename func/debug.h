@@ -5,6 +5,7 @@
 #ifndef __nosym__
 
 func(debug_list);
+func(debug_szvmat);
 
 #endif
 
