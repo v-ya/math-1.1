@@ -5,6 +5,7 @@
 #ifndef __nosym__
 
 func(init_auth);
+func(init_chenv);
 
 #endif
 

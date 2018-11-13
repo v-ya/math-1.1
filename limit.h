@@ -7,7 +7,7 @@
 // 版本号
 	#define	VERSION_major		1
 	#define VERSION_minor		6
-	#define VERSION_revision	1
+	#define VERSION_revision	2
 	#define VERSION_value		(VERSION_major<<16|VERSION_minor<<8|VERSION_revision)
 
 // 限制
@@ -24,24 +24,10 @@
 
 // 路径
 	// path 的分割符
-	#define PATH_cutup_c		':'
-	#define PATH_cutup_s		":"
+	#define PATH_cutup		':'
 	// path 内的分割符
-	#define PATH_incutup_c		'/'
-	#define PATH_incutup_s		"/"
+	#define PATH_incutup		'/'
 	// 内置环境目录路径
-	//#define PATH_root		"/usr/local/math"
-	#ifdef PATH_root
-		// package 的默认储存路径
-		#define PATH_import		"." PATH_cutup_s "import" PATH_cutup_s PATH_root PATH_incutup_s "import"
-		// 脚本文件的默认储存路径
-		#define PATH_include		"." PATH_cutup_s "include" PATH_cutup_s PATH_root PATH_incutup_s "include"
-		// 数据文件的默认储存路径
-		#define PATH_data		"." PATH_cutup_s "data" PATH_cutup_s PATH_root PATH_incutup_s "data"
-	#else
-		#define PATH_import		"." PATH_cutup_s "import"
-		#define PATH_include		"." PATH_cutup_s "include"
-		#define PATH_data		"." PATH_cutup_s "data"
-	#endif
+	#define PATH_root		"/usr/local/math"
 #endif
 

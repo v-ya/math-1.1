@@ -118,18 +118,20 @@
 		}
 		// 路径
 		path	vlist	0	r	{
-			cutup	sbyte	0	rw	PATH_cutup_c
+			cutup	sbyte	0	rw	PATH_cutup
 				// path 的分割符 path:path || path;path
-			incutup	sbyte	0	rw	PATH_incutup_c
+			incutup	sbyte	0	rw	PATH_incutup
 				// path 内的分割符 dir/dir || dir\dir
 			_path_cutup	-export	.sys.path.cutup
 			_path_incutup	-export	.sys.path.incutup
 			
-			import	string	0	rw	PATH_import
+			root	string	0	rw	PATH_root
+				// 环境目录，应当只包涵唯一一个绝对路径的目录
+			import	string	0	rw	NULL
 				// package 的默认储存路径
-			include	string	0	rw	PATH_include
+			include	string	0	rw	NULL
 				// 脚本文件的默认储存路径
-			data	string	0	rw	PATH_data
+			data	string	0	rw	NULL
 				// 数据文件的默认储存路径(暂时无用 :3)
 			
 			_path_import	-export	.sys.path.import

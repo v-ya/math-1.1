@@ -49,3 +49,15 @@ func(init_auth)
 	return ret;
 }
 
+func(init_chenv)
+{
+	static char *label=".init.chenv";
+	var *vp;
+	if _oF(argc!=1) return get_error(errid_FunArgvType,label);
+	vp=argv->v;
+	if _oF(!(vp->type&type_object)) return get_error(errid_FunArgvType,label);
+	var_save(vp);
+	return ptvar_replace(_pt_this,vp);
+}
+
+

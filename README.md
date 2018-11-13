@@ -9,12 +9,13 @@
 ***
 
 ## <span id="history">版本更新记录</span>
-2018.11.13 v1.6.1
+2018.11.13 v1.6.1 => v1.6.2
 ---
 *	在 `README.md` 添加了一些东西和版本更新历史，让 `README` 变得稍微有那么点价值 :)
 *	新增函数 `.debug.szvmat` 用来获取 `vmat` 的 `avl` 数组大小
 *	函数 `.length` 可以返回 `vmat` 类型变量的子项数量
 *	修复 `vmat` 扩展时有可能导致的变量被重复链接问题， `vmat_init_size` 调整到 `16` ， `object["name"]` 将不会搜索 `.gobj.*`
+*	新增函数 `init.chenv` 用来改变当前变量环境，新增变量 `.sys.path.root` ，`import` `include` `data` 的生成移至 `init.math` => **v1.6.2**
 
 2018.11.12 v1.6.0 => v1.6.1
 ---

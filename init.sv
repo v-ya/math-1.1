@@ -17,5 +17,7 @@
 		// l auth_link
 		// S auth_relength
 		// c auth_system
+	chenv	fun	0	r	addr_fun(init_chenv)
+		// object-old-env = .init.chenv(object-new-env);
 }
 

@@ -9,7 +9,7 @@ $var string:(r="r",rw="rw");
 .if .include.inc("only-label",.type.type);
 	.exit ;
 ###
-include.function long:inc(n:.type.string,t:.type.znum) {
+.include.function long:inc(n:.type.string,t:.type.znum) {
 	.include.exist(n,t)@_ret_;
 	.if !_ret_;
 		.include.replace(n,t);
@@ -23,18 +23,30 @@ include.function long:inc(n:.type.string,t:.type.znum) {
 ###
 内嵌自定义函数，用来生成 version
 ###
-include.function void:version(v:.type.object,r1:.type.znum,r2:.type.znum,r3:.type.znum) {
+.include.function void:version(v:.type.object,r1:.type.znum,r2:.type.znum,r3:.type.znum) {
 	r1@v.add(s1,.type.ubyte):
 	r2@v.add(s2,.type.ubyte):
 	r3@v.add(s3,.type.ubyte):
 	.s(fm,r1,r2,r3)@v.add(ss,.type.string):
 	r1<<8|r2<<8|r3&m@v.add(sv,.type.uint);
 } ;
-include.version.run {
+.init.chenv(.include.version);
 	var string:(s1="major",s2="minor",s3="rev",sv="value",ss="string",fm="%u.%u.%u");
 	var uint:m=0xffffff;
 	.init.auth($r,.this(),_text_,_ret_,s1,s2,s3,sv,ss,fm,m);
-} ;
 
 $delete r,rw;
+
+###
+初始化路径配置
+###
+.init.chenv(.sys.path);
+	.s(".%cimport",cutup)@import;
+	.s(".%cinclude",cutup)@include;
+	.s(".%cdata",cutup)@data;
+	.if root;
+		.s("%s%c%s%cimport",import,cutup,root,incutup)@import:
+		.s("%s%c%s%cinclude",include,cutup,root,incutup)@include:
+		.s("%s%c%s%cdata",data,cutup,root,incutup)@data;
+
 
