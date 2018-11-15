@@ -109,12 +109,18 @@
 				// 自定义函数最大传递参数，如需要更多请尽量用 object : )
 			file_str_size	uint	0	rw	SIZE_ftos
 				// 文本文件转换成字符串的最大大小，主要用于 include ;的限制
+			data_size	uint	0	rw	SIZE_data
+				// 变量树转换成文件的最大大小
+			data_zmax	uword	0	rw	MAX_zdata
+				// 变量树转换成文件允许的最大深度
 			
 			_lim_array_max	-export	.sys.limit.array_max
 			_lim_sbuf_base	-export	.sys.limit.sbuf_base
 			_lim_sbuf_max	-export	.sys.limit.sbuf_max
 			_lim_fargc_max	-export	.sys.limit.fargc_max
 			_lim_ftos_size	-export	.sys.limit.file_str_size
+			_lim_data_fmax	-export	.sys.limit.data_size
+			_lim_data_zmax	-export	.sys.limit.data_zmax
 		}
 		// 路径
 		path	vlist	0	r	{
@@ -178,6 +184,11 @@
 		// .remove("so-name");
 	issame	fun	0	r	addr_fun(issame)
 		// long is-one-var= issame(var, var, ...);
+	store_data fun	0	r	addr_fun(store_data)
+		// store_data("path", var);
+	load_data fun	0	r	addr_fun(load_data)
+		// var = store_data(var, "path");
+	
 		// 数学库
 		srand	fun	0	r	addr_fun(srand)
 			// .srand(); => srand(time(NULL));

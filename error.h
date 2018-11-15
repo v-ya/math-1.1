@@ -32,6 +32,11 @@
 		#define errid_SysPackageDamage	(errty_CodeSys|0x09)
 		#define errid_SysFileNotLoad	(errty_CodeSys|0x0a)
 		#define errid_SysFileStringSize	(errty_CodeSys|0x0b)
+		#define errid_SysFileDataSize	(errty_CodeSys|0x0c)
+		#define errid_SysFileDataZmax	(errty_CodeSys|0x0d)
+		#define errid_SysFileDataError	(errty_CodeSys|0x0e)
+		#define errid_SysFileErrorWrite	(errty_CodeSys|0x0f)
+		#define errid_SysFileErrorRead	(errty_CodeSys|0x10)
 	#define errty_CodeFun	errcl_Code|0x0400
 		#define errid_FunArgvType	(errty_CodeFun|0x01)
 		#define errid_FunNotfindLabel	(errty_CodeFun|0x02)
@@ -41,6 +46,7 @@
 	#define errty_ResMem	errcl_Res|0x0100
 		#define errid_MemLess		(errty_ResMem|0x01)
 		#define errid_ReqOver		(errty_ResMem|0x02)
+		#define errid_StrLength		(errty_ResMem|0x03)
 
 // Var Class
 #define errcl_Var	0x00030000

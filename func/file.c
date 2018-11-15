@@ -226,7 +226,7 @@ func(file_write)
 	else fp=fopen(path,"wb");
 	if _oF(!fp) return get_error(errid_SysFileNotLoad,label);
 	fseek(fp,file_at,SEEK_SET);
-	// read
+	// write
 	switch(vp->type&type_all)
 	{
 		case type_byte:

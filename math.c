@@ -1623,6 +1623,7 @@ var* cal(char *exp, char **expp)
 			r->inode=1;
 			// tran
 			if _oF(r0->length) goto Err_nottype;
+			if _oF(an<0) goto Err_nottype;
 			t=(r0->type|r->type)&type_all;
 			if _oT(!(t&~type_znum)) r->v.v_long = r0->v.v_long;
 			else if _oT(!(t&~type_num))

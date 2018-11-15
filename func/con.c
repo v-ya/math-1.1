@@ -451,4 +451,49 @@ func(sub)
 	return ret;
 }
 
+func(store_data)
+{
+	static char *label=".store_data";
+	var *vp;
+	char *path;
+	if _oF(argc!=2) return get_error(errid_FunArgvType,label);
+	vp=argv->v;
+	if _oF(!(vp->type&type_string) || vp->length) return get_error(errid_FunArgvType,label);
+	path=vp->v.v_string;
+	vp=argv->r->v;
+	vp=store_data(path,vp);
+	if _oF(vp) return vp;
+	else
+	{
+		ret->type=type_void;
+		return ret;
+	}
+}
+
+func(load_data)
+{
+	static char *label=".load_data";
+	var *vp;
+	char *path;
+	if _oF(argc!=2) return get_error(errid_FunArgvType,label);
+	vp=argv->r->v;
+	if _oF(!(vp->type&type_string) || vp->length) return get_error(errid_FunArgvType,label);
+	path=vp->v.v_string;
+	vp=argv->v;
+	if _oF(!(vp->mode&auth_write)) return get_error(errid_VarNotWrite,label);
+	if _oF(_path_data->v.v_string&&path&&path[0]!=_path_incutup->v.v_byte)
+	{
+		path=get_path(_path_data->v.v_string,path);
+		ret=load_data(vp,path);
+		free(path);
+	}
+	else ret=load_data(vp,path);
+	if _oF(ret) return ret;
+	else
+	{
+		var_save(vp);
+		return vp;
+	}
+}
+
 

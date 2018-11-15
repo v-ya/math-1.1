@@ -130,6 +130,7 @@
 			<start>\[</start>
 			<end>\]</end>
 			<include>
+				<context ref="dot"/>
 				<context ref="error-cend"/>
 				<context ref="calc"/>
 				<context ref="error-arrayindex"/>
@@ -165,6 +166,8 @@
 			<keyword>get_type</keyword>
 			<keyword>remove</keyword>
 			<keyword>issame</keyword>
+			<keyword>store_data</keyword>
+			<keyword>load_data</keyword>
 			<keyword>srand</keyword>
 			<keyword>rand</keyword>
 			<keyword>sin</keyword>
@@ -309,11 +312,14 @@
 			<keyword>sbuf_max</keyword>
 			<keyword>fargc_max</keyword>
 			<keyword>file_str_size</keyword>
+			<keyword>data_size</keyword>
+			<keyword>data_zmax</keyword>
 		</context>
 		<context id="cv_sys_path" style-ref="cv">
 			<prefix>(?&lt;!\w)\.sys\.path\.</prefix>
 			<keyword>cutup</keyword>
 			<keyword>incutup</keyword>
+			<keyword>root</keyword>
 			<keyword>import</keyword>
 			<keyword>include</keyword>
 			<keyword>data</keyword>

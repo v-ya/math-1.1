@@ -5,6 +5,8 @@
 
 char* get_path(char *path_list, char *path_short);
 char* load_string(char *path);
+var* store_data(char *path, var *obj);
+var* load_data(var *obj, char *path);
 
 #endif
 

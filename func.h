@@ -33,6 +33,8 @@ extern var *_lim_sbuf_base;
 extern var *_lim_sbuf_max;
 extern var *_lim_fargc_max;
 extern var *_lim_ftos_size;
+extern var *_lim_data_fmax;
+extern var *_lim_data_zmax;
 // 路径
 extern var *_path_cutup;
 extern var *_path_incutup;

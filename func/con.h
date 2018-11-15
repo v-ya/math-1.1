@@ -15,6 +15,8 @@ func(issame);
 func(add);
 func(replace);
 func(sub);
+func(store_data);
+func(load_data);
 
 #endif
 

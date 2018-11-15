@@ -18,6 +18,7 @@ struct VMAT;
 #define tlog_vmat	8
 #define tlog_refer	9
 
+#define tlog_data_max	9
 #define tlog_max	10
 
 // refer var max number
