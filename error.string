@@ -27,9 +27,6 @@ ss(errcl_Code_S)	"代码基类";
 		ss(errid_SysPackageDamage_S)	"被链接包损毁";
 		ss(errid_SysFileNotLoad_S)	"不能载入文件";
 		ss(errid_SysFileStringSize_S)	"文件转换字符串超出大小限制";
-		ss(errid_SysFileDataSize_S)	"变量<=>数据文件超出大小限制";
-		ss(errid_SysFileDataZmax_S)	"变量<=>数据文件嵌套深度超出限制";
-		ss(errid_SysFileDataError_S)	"数据文件出现错误";
 		ss(errid_SysFileErrorWrite_S)	"写文件出错";
 		ss(errid_SysFileErrorRead_S)	"读文件出错/预期外结束";
 	ss(errty_CodeFun_S)	"函数类别";
@@ -70,6 +67,13 @@ ss(errcl_Var_S)		"变量基类";
 		ss(errid_VarNotRelength_S)	"无权重置变量长度";
 		ss(errid_VarIsSystem_S)		"目标是系统内置变量";
 
+ss(errcl_File_S)		"文件基类";
+	ss(errty_FileData_S)	"数据文件类别";
+		ss(errid_FileDataSize_S)	"变量<=>数据文件超出大小限制";
+		ss(errid_FileDataZmax_S)	"变量<=>数据文件嵌套深度超出限制";
+		ss(errid_FileDataError_S)	"数据文件出现错误";
+		ss(errid_FileDataHardlink_S)	"发现内部硬链接";
+
 #undef ss
 
 static char *errty_CodeInt_idA[]={
@@ -104,9 +108,6 @@ static char *errty_CodeSys_idA[]={
 	errid_SysPackageDamage_S,
 	errid_SysFileNotLoad_S,
 	errid_SysFileStringSize_S,
-	errid_SysFileDataSize_S,
-	errid_SysFileDataZmax_S,
-	errid_SysFileDataError_S,
 	errid_SysFileErrorWrite_S,
 	errid_SysFileErrorRead_S,
 } ;
@@ -180,11 +181,25 @@ static char *errty_VarAuth_idA[]={
 		errty_VarAuth_idA,
 	} ;
 
+static char *errty_FileData_idA[]={
+	NULL,
+	errid_FileDataSize_S,
+	errid_FileDataZmax_S,
+	errid_FileDataError_S,
+	errid_FileDataHardlink_S,
+} ;
+
+	static char **errcl_File_idA[]={
+		NULL,
+		errty_FileData_idA,
+	} ;
+
 		static char ***error_idA[]={
 			NULL,
 			errcl_Code_idA,
 			errcl_Res_idA,
 			errcl_Var_idA,
+			errcl_File_idA,
 		} ;
 
 static char *errcl_Code_tyA[]={
@@ -208,11 +223,17 @@ static char *errcl_Var_tyA[]={
 	errty_VarAuth_S,
 } ;
 
+static char *errcl_File_tyA[]={
+	NULL,
+	errty_FileData_S,
+} ;
+
 	static char **error_tyA[]={
 		NULL,
 		errcl_Code_tyA,
 		errcl_Res_tyA,
 		errcl_Var_tyA,
+		errcl_File_tyA,
 	} ;
 
 static char *error_clA[]={
@@ -220,6 +241,7 @@ static char *error_clA[]={
 	errcl_Code_S,
 	errcl_Res_S,
 	errcl_Var_S,
+	errcl_File_S,
 } ;
 
 

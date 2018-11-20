@@ -67,6 +67,8 @@ static u32 data_magic = 0xda0da0da;
 	// data 文件魔数
 /* file struct
 u32 data magic
+u32 refer number
++ u32 refer[]
 info var struct
 */
 
@@ -114,6 +116,12 @@ info var struct[]
 u8 tlog_data_max
 */
 
+typedef struct _load_ds_S {
+	u32 i;
+	vmat *vm;
+	vlist *rl;
+} _load_ds;
+
 #define data_tlog_name		0x10
 #define data_tlog_array		0x20
 #define data_tlog_unsign	0x40
@@ -130,7 +138,7 @@ var* store_uplus(FILE *fp, u32 u, u32 *psize)
 		u>>=7;
 		(*psize)++;
 	} while(u);
-	if _oF(*psize>f_max) return get_error(errid_SysFileDataSize,label);
+	if _oF(*psize>f_max) return get_error(errid_FileDataSize,label);
 	return NULL;
 }
 
@@ -165,7 +173,7 @@ var* load_uplus(FILE *fp, u32 *u, u32 *psize)
 		}
 	}
 	*u=r;
-	if _oF(*psize>f_max) return get_error(errid_SysFileDataSize,label);
+	if _oF(*psize>f_max) return get_error(errid_FileDataSize,label);
 	return NULL;
 }
 
@@ -197,7 +205,7 @@ var* store_head(FILE *fp, vlist *vl, u32 tlog, u32 *psize)
 		if _oF(fwrite(&(vp->length),sizeof(u32),1,fp)!=1) return get_error(errid_SysFileErrorWrite,label);
 		(*psize)+=sizeof(u32);
 	}
-	if _oF(*psize>f_max) return get_error(errid_SysFileDataSize,label);
+	if _oF(*psize>f_max) return get_error(errid_FileDataSize,label);
 	return NULL;
 }
 
@@ -211,7 +219,7 @@ var* load_head(FILE *fp, vlist *vl, u32 *psize)
 	c=fgetc(fp);
 	if _oF(c<0) return get_error(errid_SysFileErrorRead,label);
 	(*psize)++;
-	if _oF((tlog=c&0xf)>=tlog_data_max) return get_error(errid_SysFileDataError,label);
+	if _oF((tlog=c&0xf)>=tlog_data_max) return get_error(errid_FileDataError,label);
 	if _oF(vl->mode&free_temp && vl->v)
 	{
 		// z == 0
@@ -222,7 +230,7 @@ var* load_head(FILE *fp, vlist *vl, u32 *psize)
 			(*psize)+=sizeof(u32);
 		}
 		else length=0;
-		if _oF(length && (tlog==tlog_vlist || tlog==tlog_vmat)) return get_error(errid_SysFileDataError,label);
+		if _oF(length && (tlog==tlog_vlist || tlog==tlog_vmat)) return get_error(errid_FileDataError,label);
 		if _oF((1<<tlog|((c&data_tlog_unsign)?type_unsign:0))!=vp->type)
 		{
 			L_retype:
@@ -309,20 +317,21 @@ var* load_head(FILE *fp, vlist *vl, u32 *psize)
 		}
 		else length=0;
 		if _oF(length>_lim_array_max->v.v_long) return get_error(errid_ReqOver,label);
-		if _oF(length && (tlog==tlog_vlist || tlog==tlog_vmat)) return get_error(errid_SysFileDataError,label);
+		if _oF(length && (tlog==tlog_vlist || tlog==tlog_vmat)) return get_error(errid_FileDataError,label);
 		vl->v=var_alloc(tlog,length);
 		if _oF(!vl->v) return get_error(errid_MemLess,label);
 		vl->mode|=free_pointer;
 		var_save(vl->v);
 		if _oF(c&data_tlog_unsign && vl->v->type&type_znum) vl->v->type|=type_unsign;
 	}
-	if _oF(*psize>f_max) return get_error(errid_SysFileDataSize,label);
+	if _oF(*psize>f_max) return get_error(errid_FileDataSize,label);
 	return NULL;
 }
 
-var* store_var(FILE *fp, vlist *vl, u32 *psize, u32 z)
+var* store_var(FILE *fp, vlist *vl, u32 *psize, u32 z, vmat *pvm)
 {
 	static char *label="store_var";
+	static u32 norefer=0xffffffff;
 	var *err,*vp;
 	vmat *vm;
 	u32 i;
@@ -388,7 +397,7 @@ var* store_var(FILE *fp, vlist *vl, u32 *psize, u32 z)
 				while(vl->l) vl=vl->l;
 				while(vl)
 				{
-					if _oF(err=store_var(fp,vl,psize,z)) return err;
+					if _oF(err=store_var(fp,vl,psize,z,pvm)) return err;
 					vl=vl->r;
 				}
 			}
@@ -406,13 +415,25 @@ var* store_var(FILE *fp, vlist *vl, u32 *psize, u32 z)
 					while(vl->l) vl=vl->l;
 					while(vl)
 					{
-						if _oF(err=store_var(fp,vl,psize,z)) return err;
+						if _oF(err=store_var(fp,vl,psize,z,pvm)) return err;
 						vl=vl->r;
 					}
 				}
 			}
 			if _oF(fputc(tlog_data_max,fp)<0) return get_error(errid_SysFileErrorWrite,label);
 			(*psize)++;
+			break;
+		case type_refer:
+			if _oF(err=store_head(fp,vl,tlog_refer,psize)) return err;
+			if _oT(vl=vmat_find_index(pvm,(u64)vp))
+			{
+				if _oF(fwrite(&(vl->mode),sizeof(u32),1,fp)!=1) return get_error(errid_SysFileErrorWrite,label);
+			}
+			else
+			{
+				if _oF(fwrite(&norefer,sizeof(u32),1,fp)!=1) return get_error(errid_SysFileErrorWrite,label);
+			}
+			(*psize)+=sizeof(u32);
 			break;
 		default:
 			return NULL;
@@ -472,18 +493,20 @@ var* store_var(FILE *fp, vlist *vl, u32 *psize, u32 z)
 		default:
 			return NULL;
 	}
-	if _oF(*psize>f_max) return get_error(errid_SysFileDataSize,label);
+	if _oF(*psize>f_max) return get_error(errid_FileDataSize,label);
 	return NULL;
 }
 
-var* load_var(FILE *fp, vlist *vl, u32 *psize, u32 z)
+var* load_var(FILE *fp, vlist *vl, u32 *psize, u32 z, _load_ds *ds)
 {
 	static char *label="load_var";
 	var *vp,*err;
 	s32 c;
 	u32 i;
-	if _oF(z>z_max) return get_error(errid_SysFileDataZmax,label);
+	if _oF(z>z_max) return get_error(errid_FileDataZmax,label);
 	if _oF(err=load_head(fp,vl,psize)) return err;
+	if _oF(vp=(var*)vmat_find_index(ds->vm,ds->i)) ((vlist*)vp)->v=vl->v;
+	(ds->i)++;
 	vp=vl->v;
 	if _oT(!vp->length) switch(vp->type&type_all)
 	{
@@ -537,7 +560,7 @@ var* load_var(FILE *fp, vlist *vl, u32 *psize, u32 z)
 				if _oF(ungetc(c,fp)<0) return get_error(errid_SysFileErrorRead,label);
 				vl=vlist_alloc(NULL);
 				if _oF(!vl) return get_error(errid_MemLess,label);
-				if _oF(err=load_var(fp,vl,psize,z)) return err;
+				if _oF(err=load_var(fp,vl,psize,z,ds)) return err;
 				if _oF(vl->name)
 				{
 					if _oF(vlist_find(vp->v.v_vlist,vl->name))
@@ -569,7 +592,7 @@ var* load_var(FILE *fp, vlist *vl, u32 *psize, u32 z)
 				if _oF(ungetc(c,fp)<0) return get_error(errid_SysFileErrorRead,label);
 				vl=vlist_alloc(NULL);
 				if _oF(!vl) return get_error(errid_MemLess,label);
-				if _oF(err=load_var(fp,vl,psize,z)) return err;
+				if _oF(err=load_var(fp,vl,psize,z,ds)) return err;
 				if _oF(vl->name)
 				{
 					if _oF(vmat_find(vp->v.v_vmat,vl->name))
@@ -590,6 +613,18 @@ var* load_var(FILE *fp, vlist *vl, u32 *psize, u32 z)
 				}
 			}
 			(*psize)++;
+			break;
+		case type_refer:
+			vl=vlist_alloc_index((u64)vp);
+			if _oF(!vl) return get_error(errid_MemLess,label);
+			if _oF(fread(&(vl->mode),sizeof(u32),1,fp)!=1) return get_error(errid_SysFileErrorRead,label);
+			(*psize)+=sizeof(u32);
+			if _oT(ds->rl)
+			{
+				ds->rl->r=vl;
+				vl->l=ds->rl;
+			}
+			ds->rl=vl;
 			break;
 	}
 	else switch(vp->type&type_all)
@@ -637,7 +672,162 @@ var* load_var(FILE *fp, vlist *vl, u32 *psize, u32 z)
 		default:
 			return NULL;
 	}
-	if _oF(*psize>f_max) return get_error(errid_SysFileDataSize,label);
+	if _oF(*psize>f_max) return get_error(errid_FileDataSize,label);
+	return NULL;
+}
+
+var* store_get_refer(var *vp, vlist **pvl, vmat *pvm, u32 z)
+{
+	static char *label="store_get_refer";
+	var *err;
+	vlist *vl;
+	vmat *vm;
+	u32 i;
+	
+	if _oF(z>z_max || !vp) return NULL;
+	if _oF((vp->mode&auth_all)!=auth_normal) return NULL;
+	if _oF(vmat_find_index(pvm,(u64)vp)) return get_error(errid_FileDataHardlink,label);
+	vl=vlist_alloc_index((u64)vp);
+	if _oF(!vl) return get_error(errid_MemLess,label);
+	vl->mode=pvm->number;
+	vmat_insert(pvm,vl);
+	if _oT(!vp->length) switch(vp->type&type_all)
+	{
+		case type_vlist:
+			vl=vp->v.v_vlist;
+			if _oT(vl)
+			{
+				z++;
+				while(vl->l) vl=vl->l;
+				while(vl)
+				{
+					if _oF(err=store_get_refer(vl->v,pvl,pvm,z)) return err;
+					vl=vl->r;
+				}
+			}
+			break;
+		case type_vmat:
+			vm=vp->v.v_vmat;
+			z++;
+			if _oT(vm && vm->avl) for(i=0;i<=vm->mask;i++)
+			{
+				if _oT(vl=vm->avl[i])
+				{
+					while(vl->l) vl=vl->l;
+					while(vl)
+					{
+						if _oF(err=store_get_refer(vl->v,pvl,pvm,z)) return err;
+						vl=vl->r;
+					}
+				}
+			}
+			break;
+		case type_refer:
+			vl=vlist_alloc_index((u64)vp);
+			if _oF(!vl) return get_error(errid_MemLess,label);
+			vl->v=refer_check(vp);
+			if _oT(vl->v)
+			{
+				if _oT(*pvl)
+				{
+					(*pvl)->r=vl;
+					vl->l=*pvl;
+				}
+				*pvl=vl;
+			}
+			else free(vl);
+			break;
+	}
+	return NULL;
+}
+
+var* store_refer(FILE *fp, u32 *n, vlist *pvl, vmat *pvm)
+{
+	static char *label="store_refer";
+	vlist *vl;
+	vmat *rvm;
+	var *err;
+	rvm=vmat_alloc();
+	if _oF(!rvm)
+	{
+		err=get_error(errid_MemLess,label);
+		goto Err;
+	}
+	if _oF(fwrite(n,sizeof(u32),1,fp)!=1)
+	{
+		err=get_error(errid_SysFileErrorWrite,label);
+		goto Err;
+	}
+	while(pvl)
+	{
+		vl=pvl->r;
+		if _oT(pvl->v)
+		{
+			if _oT(!vmat_find_index(rvm,pvl->mode))
+			{
+				if _oF(fwrite(&(pvl->mode),sizeof(u32),1,fp)!=1)
+				{
+					err=get_error(errid_SysFileErrorWrite,label);
+					goto Err;
+				}
+				pvl->v=(var*)vlist_alloc_index(pvl->mode);
+				if _oF(!pvl->v)
+				{
+					err=get_error(errid_MemLess,label);
+					goto Err;
+				}
+				vmat_insert(rvm,(vlist*)pvl->v);
+			}
+			pvl->l=NULL;
+			pvl->r=NULL;
+			pvl->v=NULL;
+			vmat_insert(pvm,pvl);
+		}
+		else free(pvl);
+		pvl=vl;
+	}
+	if _oF(*n!=rvm->number)
+	{
+		fseek(fp,sizeof(u32),SEEK_SET);
+		if _oF(fwrite(&(rvm->number),sizeof(u32),1,fp)!=1)
+		{
+			err=get_error(errid_SysFileErrorWrite,label);
+			goto Err;
+		}
+		fseek(fp,sizeof(u32)*(2+rvm->number),SEEK_SET);
+		*n=rvm->number;
+	}
+	vmat_free(rvm);
+	return NULL;
+	Err:
+	if _oT(rvm) vmat_free(rvm);
+	while(pvl)
+	{
+		vl=pvl->r;
+		free(pvl);
+		pvl=vl;
+	}
+	return err;
+}
+
+var* load_refer(FILE *fp, vmat *pvm, u32 *pn)
+{
+	static char *label="load_refer";
+	u32 n,r;
+	vlist *vl;
+	var *err;
+	if _oF(fread(&n,sizeof(u32),1,fp)!=1) return get_error(errid_SysFileErrorRead,label);
+	*pn=n;
+	while(n)
+	{
+		if _oF(fread(&r,sizeof(u32),1,fp)!=1) return get_error(errid_SysFileErrorRead,label);
+		if _oF(!vmat_find_index(pvm,r))
+		{
+			vl=vlist_alloc_index(r);
+			vmat_insert(pvm,vl);
+		}
+		n--;
+	}
 	return NULL;
 }
 
@@ -645,7 +835,8 @@ var* store_data(char *path, var *obj)
 {
 	static char *label="store_data";
 	u32 f;
-	vlist vl={0};
+	vlist vl={0},*pvl,*tvl;
+	vmat *pvm;
 	FILE *fp;
 	if _oF(!obj) return NULL;
 	if _oF((obj->mode&auth_all)!=auth_normal)
@@ -662,20 +853,62 @@ var* store_data(char *path, var *obj)
 		obj=get_error(errid_SysFileNotLoad,label);
 		goto Err;
 	}
+	vl.v=obj;
+	vl.mode=free_temp;
+	// check & get refer
+	pvm=vmat_alloc();
+	if _oF(!pvm)
+	{
+		obj=get_error(errid_MemLess,label);
+		goto Err;
+	}
+	pvl=NULL;
+	if _oF(obj=store_get_refer(vl.v,&pvl,pvm,0))
+	{
+		vmat_free(pvm);
+		goto Err_pvl;
+	}
+	f=0;
+	while(pvl)
+	{
+		if _oT(pvl->v && (tvl=vmat_find_index(pvm,(u64)(pvl->v))))
+		{
+			pvl->mode=tvl->mode;
+			f++;
+		}
+		else pvl->v=NULL;
+		if _oF(!pvl->l) break;
+		pvl=pvl->l;
+	}
+	vmat_free(pvm);
 	// write magic
 	if _oF(fwrite(&data_magic,sizeof(u32),1,fp)!=1)
 	{
 		obj=get_error(errid_SysFileErrorWrite,label);
-		goto Err;
+		goto Err_pvl;
 	}
-	f=sizeof(u32);
+	// write refer
+	pvm=vmat_alloc();
+	if _oF(!pvm)
+	{
+		obj=get_error(errid_MemLess,label);
+		goto Err_pvl;
+	}
+	if _oF(obj=store_refer(fp,&f,pvl,pvm)) goto Err;
+	f=sizeof(u32)*(2+f);
 	// store var
-	vl.v=obj;
-	vl.mode=free_temp;
-	obj=store_var(fp,&vl,&f,0);
+	obj=store_var(fp,&vl,&f,0,pvm);
+	vmat_free(pvm);
 	fclose(fp);
 	if _oF(obj) remove(path);
 	return obj;
+	Err_pvl:
+	while(pvl)
+	{
+		tvl=pvl->r;
+		free(pvl);
+		pvl=tvl;
+	}
 	Err:
 	if _oT(fp)
 	{
@@ -689,8 +922,9 @@ var* load_data(var *obj, char *path)
 {
 	static char *label="load_data";
 	u32 f,magic;
-	vlist vl={0};
+	vlist vl={0},*pvl,*tvl;
 	FILE *fp;
+	_load_ds ds={0};
 	if _oF(!obj) return NULL;
 	f_max=_lim_data_fmax->v.v_long;
 	z_max=_lim_data_zmax->v.v_long;
@@ -701,6 +935,8 @@ var* load_data(var *obj, char *path)
 		obj=get_error(errid_SysFileNotLoad,label);
 		goto Err;
 	}
+	vl.v=obj;
+	vl.mode=free_temp;
 	// read magic
 	if _oF(fread(&magic,sizeof(u32),1,fp)!=1)
 	{
@@ -709,14 +945,36 @@ var* load_data(var *obj, char *path)
 	}
 	if _oF(magic!=data_magic)
 	{
-		obj=get_error(errid_SysFileDataError,label);
+		obj=get_error(errid_FileDataError,label);
 		goto Err;
 	}
-	f=sizeof(u32);
+	// read refer
+	ds.vm=vmat_alloc();
+	if _oF(!ds.vm)
+	{
+		obj=get_error(errid_MemLess,label);
+		goto Err;
+	}
+	if _oF(obj=load_refer(fp,ds.vm,&f))
+	{
+		vmat_free(ds.vm);
+		goto Err;
+	}
+	f=sizeof(u32)*(2+f);
 	// load var
-	vl.v=obj;
-	vl.mode=free_temp;
-	obj=load_var(fp,&vl,&f,0);
+	obj=load_var(fp,&vl,&f,0,&ds);
+	// set refer
+	if _oF(ds.rl)
+	{
+		while(ds.rl)
+		{
+			pvl=ds.rl;
+			ds.rl=pvl->l;
+			if _oT(tvl=vmat_find_index(ds.vm,pvl->mode)) refer_set((var*)(pvl->head),tvl->v);
+			free(pvl);
+		}
+	}
+	vmat_free(ds.vm);
 	fclose(fp);
 	return obj;
 	Err:

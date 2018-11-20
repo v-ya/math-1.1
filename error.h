@@ -32,11 +32,8 @@
 		#define errid_SysPackageDamage	(errty_CodeSys|0x09)
 		#define errid_SysFileNotLoad	(errty_CodeSys|0x0a)
 		#define errid_SysFileStringSize	(errty_CodeSys|0x0b)
-		#define errid_SysFileDataSize	(errty_CodeSys|0x0c)
-		#define errid_SysFileDataZmax	(errty_CodeSys|0x0d)
-		#define errid_SysFileDataError	(errty_CodeSys|0x0e)
-		#define errid_SysFileErrorWrite	(errty_CodeSys|0x0f)
-		#define errid_SysFileErrorRead	(errty_CodeSys|0x10)
+		#define errid_SysFileErrorWrite	(errty_CodeSys|0x0c)
+		#define errid_SysFileErrorRead	(errty_CodeSys|0x0d)
 	#define errty_CodeFun	errcl_Code|0x0400
 		#define errid_FunArgvType	(errty_CodeFun|0x01)
 		#define errid_FunNotfindLabel	(errty_CodeFun|0x02)
@@ -79,6 +76,15 @@
 		#define errid_VarNotRun		(errty_VarAuth|0x05)
 		#define errid_VarNotRelength	(errty_VarAuth|0x06)
 		#define errid_VarIsSystem	(errty_VarAuth|0x07)
+
+// File Class
+#define errcl_File	0x00040000
+	// Data File
+	#define errty_FileData	errcl_File|0x0100
+		#define errid_FileDataSize	(errty_FileData|0x01)
+		#define errid_FileDataZmax	(errty_FileData|0x02)
+		#define errid_FileDataError	(errty_FileData|0x03)
+		#define errid_FileDataHardlink	(errty_FileData|0x04)
 
 typedef struct ERROR_INFO {
 	u32 errid;
