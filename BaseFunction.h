@@ -74,6 +74,11 @@ typedef struct Interface_Base {
 	var*	(*sbuf_reduce)		(void);
 	var*	(*sbuf_sprintf)		(char *format, vlist *vl);
 	char*	(*get_name)		(char *exp, char **pexp);
+	// file.h
+	char*	(*get_path)		(char *path_list, char *path_short);
+	char*	(*load_string)		(char *path);
+	var*	(*store_data)		(char *path, var *obj, u32 isfast);
+	var*	(*load_data)		(var *obj, char *path);
 	// math.h
 	var*	(*temp_get)		(void);
 	void	(*temp_free)		(void);

@@ -113,14 +113,17 @@
 				// 变量树转换成文件的最大大小
 			data_zmax	uword	0	rw	MAX_zdata
 				// 变量树转换成文件允许的最大深度
+			data_stfast	ubyte	0	rw	0
+				// 是否启动快速储存模式（如果是，将忽略 refer 类型）
 			
-			_lim_array_max	-export	.sys.limit.array_max
-			_lim_sbuf_base	-export	.sys.limit.sbuf_base
-			_lim_sbuf_max	-export	.sys.limit.sbuf_max
-			_lim_fargc_max	-export	.sys.limit.fargc_max
-			_lim_ftos_size	-export	.sys.limit.file_str_size
-			_lim_data_fmax	-export	.sys.limit.data_size
-			_lim_data_zmax	-export	.sys.limit.data_zmax
+			_lim_array_max		-export	.sys.limit.array_max
+			_lim_sbuf_base		-export	.sys.limit.sbuf_base
+			_lim_sbuf_max		-export	.sys.limit.sbuf_max
+			_lim_fargc_max		-export	.sys.limit.fargc_max
+			_lim_ftos_size		-export	.sys.limit.file_str_size
+			_lim_data_fmax		-export	.sys.limit.data_size
+			_lim_data_zmax		-export	.sys.limit.data_zmax
+			_lim_data_stfast	-export	.sys.limit.data_stfast
 		}
 		// 路径
 		path	vlist	0	r	{
@@ -185,9 +188,10 @@
 	issame	fun	0	r	addr_fun(issame)
 		// long is-one-var= issame(var, var, ...);
 	store_data fun	0	r	addr_fun(store_data)
-		// store_data("path", var);
+		// .store_data("path", var);
+		// .store_data("path", var, isfast);
 	load_data fun	0	r	addr_fun(load_data)
-		// var = store_data(var, "path");
+		// var = .load_data(var, "path");
 	
 		// 数学库
 		srand	fun	0	r	addr_fun(srand)

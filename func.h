@@ -35,6 +35,7 @@ extern var *_lim_fargc_max;
 extern var *_lim_ftos_size;
 extern var *_lim_data_fmax;
 extern var *_lim_data_zmax;
+extern var *_lim_data_stfast;
 // 路径
 extern var *_path_cutup;
 extern var *_path_incutup;

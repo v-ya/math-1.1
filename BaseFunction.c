@@ -73,6 +73,11 @@ interface_base BaseFunction = {
 	&sbuf_reduce,
 	&sbuf_sprintf,
 	&get_name,
+	// file.h
+	&get_path,
+	&load_string,
+	&store_data,
+	&load_data,
 	// math.h
 	&temp_get,
 	&temp_free,

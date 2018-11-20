@@ -314,6 +314,7 @@
 			<keyword>file_str_size</keyword>
 			<keyword>data_size</keyword>
 			<keyword>data_zmax</keyword>
+			<keyword>data_stfast</keyword>
 		</context>
 		<context id="cv_sys_path" style-ref="cv">
 			<prefix>(?&lt;!\w)\.sys\.path\.</prefix>

@@ -456,12 +456,19 @@ func(store_data)
 	static char *label=".store_data";
 	var *vp;
 	char *path;
-	if _oF(argc!=2) return get_error(errid_FunArgvType,label);
+	if _oF(argc!=2 && argc!=3) return get_error(errid_FunArgvType,label);
 	vp=argv->v;
 	if _oF(!(vp->type&type_string) || vp->length) return get_error(errid_FunArgvType,label);
 	path=vp->v.v_string;
 	vp=argv->r->v;
-	vp=store_data(path,vp);
+	if _oF(argc>2)
+	{
+		argv=argv->r;
+		vp=argv->r->v;
+		if _oF(!(vp->type&type_znum)) return get_error(errid_FunArgvType,label);
+		vp=store_data(path,argv->v,vpbool(vp));
+	}
+	else vp=store_data(path,vp,_lim_data_stfast->v.v_int);
 	if _oF(vp) return vp;
 	else
 	{

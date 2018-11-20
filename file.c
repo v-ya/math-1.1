@@ -424,17 +424,20 @@ var* store_var(FILE *fp, vlist *vl, u32 *psize, u32 z, vmat *pvm)
 			(*psize)++;
 			break;
 		case type_refer:
-			if _oF(err=store_head(fp,vl,tlog_refer,psize)) return err;
-			if _oT(vl=vmat_find_index(pvm,(u64)vp))
+			if _oT(pvm)
 			{
-				if _oF(fwrite(&(vl->mode),sizeof(u32),1,fp)!=1) return get_error(errid_SysFileErrorWrite,label);
+				if _oF(err=store_head(fp,vl,tlog_refer,psize)) return err;
+				if _oT(vl=vmat_find_index(pvm,(u64)vp))
+				{
+					if _oF(fwrite(&(vl->mode),sizeof(u32),1,fp)!=1) return get_error(errid_SysFileErrorWrite,label);
+				}
+				else
+				{
+					if _oF(fwrite(&norefer,sizeof(u32),1,fp)!=1) return get_error(errid_SysFileErrorWrite,label);
+				}
+				(*psize)+=sizeof(u32);
+				break;
 			}
-			else
-			{
-				if _oF(fwrite(&norefer,sizeof(u32),1,fp)!=1) return get_error(errid_SysFileErrorWrite,label);
-			}
-			(*psize)+=sizeof(u32);
-			break;
 		default:
 			return NULL;
 	}
@@ -831,7 +834,7 @@ var* load_refer(FILE *fp, vmat *pvm, u32 *pn)
 	return NULL;
 }
 
-var* store_data(char *path, var *obj)
+var* store_data(char *path, var *obj, u32 isfast)
 {
 	static char *label="store_data";
 	u32 f;
@@ -855,50 +858,72 @@ var* store_data(char *path, var *obj)
 	}
 	vl.v=obj;
 	vl.mode=free_temp;
-	// check & get refer
-	pvm=vmat_alloc();
-	if _oF(!pvm)
+	if _oF(isfast)
 	{
-		obj=get_error(errid_MemLess,label);
-		goto Err;
-	}
-	pvl=NULL;
-	if _oF(obj=store_get_refer(vl.v,&pvl,pvm,0))
-	{
-		vmat_free(pvm);
-		goto Err_pvl;
-	}
-	f=0;
-	while(pvl)
-	{
-		if _oT(pvl->v && (tvl=vmat_find_index(pvm,(u64)(pvl->v))))
+		// write magic
+		if _oF(fwrite(&data_magic,sizeof(u32),1,fp)!=1)
 		{
-			pvl->mode=tvl->mode;
-			f++;
+			obj=get_error(errid_SysFileErrorWrite,label);
+			goto Err;
 		}
-		else pvl->v=NULL;
-		if _oF(!pvl->l) break;
-		pvl=pvl->l;
+		// write refer number
+		f=0;
+		if _oF(fwrite(&f,sizeof(u32),1,fp)!=1)
+		{
+			obj=get_error(errid_SysFileErrorWrite,label);
+			goto Err;
+		}
+		f=sizeof(u32)*2;
+		// store var
+		obj=store_var(fp,&vl,&f,0,NULL);
 	}
-	vmat_free(pvm);
-	// write magic
-	if _oF(fwrite(&data_magic,sizeof(u32),1,fp)!=1)
+	else
 	{
-		obj=get_error(errid_SysFileErrorWrite,label);
-		goto Err_pvl;
+		// check & get refer
+		pvm=vmat_alloc();
+		if _oF(!pvm)
+		{
+			obj=get_error(errid_MemLess,label);
+			goto Err;
+		}
+		pvl=NULL;
+		if _oF(obj=store_get_refer(vl.v,&pvl,pvm,0))
+		{
+			vmat_free(pvm);
+			goto Err_pvl;
+		}
+		f=0;
+		while(pvl)
+		{
+			if _oT(pvl->v && (tvl=vmat_find_index(pvm,(u64)(pvl->v))))
+			{
+				pvl->mode=tvl->mode;
+				f++;
+			}
+			else pvl->v=NULL;
+			if _oF(!pvl->l) break;
+			pvl=pvl->l;
+		}
+		vmat_free(pvm);
+		// write magic
+		if _oF(fwrite(&data_magic,sizeof(u32),1,fp)!=1)
+		{
+			obj=get_error(errid_SysFileErrorWrite,label);
+			goto Err_pvl;
+		}
+		// write refer
+		pvm=vmat_alloc();
+		if _oF(!pvm)
+		{
+			obj=get_error(errid_MemLess,label);
+			goto Err_pvl;
+		}
+		if _oF(obj=store_refer(fp,&f,pvl,pvm)) goto Err;
+		f=sizeof(u32)*(2+f);
+		// store var
+		obj=store_var(fp,&vl,&f,0,pvm);
+		vmat_free(pvm);
 	}
-	// write refer
-	pvm=vmat_alloc();
-	if _oF(!pvm)
-	{
-		obj=get_error(errid_MemLess,label);
-		goto Err_pvl;
-	}
-	if _oF(obj=store_refer(fp,&f,pvl,pvm)) goto Err;
-	f=sizeof(u32)*(2+f);
-	// store var
-	obj=store_var(fp,&vl,&f,0,pvm);
-	vmat_free(pvm);
 	fclose(fp);
 	if _oF(obj) remove(path);
 	return obj;
