@@ -1,0 +1,259 @@
+# randseq
+
+.if .include.inc("time",.type.vmat);
+	.exit ;
+
+# init
+time.try {
+	# version
+	var vlist:(limit,version);
+	.include.version(version,1,0,0);
+	.include.version(limit,1,6,0);
+	add(.const.error,.type.string);
+	.if limit.value > .sys.version.value; .exit error="limit version >= "+limit.string;
+} , {
+	.if ![.const.error]; error="try init error";
+} ;
+.if time[.const.error]; .exit ;
+
+# define
+time.run {
+	var long:(spm=60,mph=60,sph=spm*mph,spd=24*sph,dpy=365,dp4y=4*dpy+1,
+		dp100y=25*dp4y,dp200y=50*dp4y-1,dp300y=75*dp4y-2,dp400y=100*dp4y-3);
+	var long:base=1970*365+478;
+	var long:dpm[12]=[31,28,31,30,31,30,31,31,30,31,30,31];
+	var long:dpml[12]=[31,29,31,30,31,30,31,31,30,31,30,31];
+	var string:ms[12]=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+	var string:ws[7]=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+	var string:GMT_fm="W, DD MMM YYYY hh:mm:ss G#MT";
+	var string:UTC_fm="YYYY-MM-DDThh:mm:ss ZZ00 UTC";
+} ;
+time.var refer:r=time;
+time.var string:code={
+	var ulong:(t0,t),float:cps=.sys.info.clocks_per_sec;
+	add("date",.type.vmat).var long:(time,year,month,day,weak,h,m,s,leap,zone);
+	
+	function void:stamp() {
+		.time.clock()@r.t:
+		.print("time = +%fs, @%fs\n",r.t-r.t0/r.cps,r.t/r.cps):
+		r.t@r.t0;
+	} ;
+	stamp.add("r",.type.refer,.this());
+	
+	function void:stamp_noprint() {
+		.time.clock()@r.t@r.t0;
+	} ;
+	stamp_noprint.add("r",.type.refer,.this());
+	
+	function void:set_zone(z:.type.znum) {
+		zone=z;
+		(zone>12)||(zone<-12)?0@zone;
+	} ;
+	set_zone.var refer:zone=date.zone;
+	###
+	1970-01-01(Thu) 00:00:00 -12
+	2004-12-25(Sat) 12:30:05 +08
+	Y	0	4
+	YY	70	04
+	YYY	970	004
+	YYYY	1970	2004
+	M	1	12
+	MM	01	12
+	MMM	Jan	Dec
+	D	1	25
+	DD	01	25
+	W	Thu	Sat
+	h	0	12
+	hh	00	12
+	m	0	30
+	mm	00	30
+	s	0	5
+	ss	00	05
+	Z	-12	+8
+	ZZ	-12	+08
+	
+	#c	转译
+	###
+	function string:format_at(fm:.type.string,time:.type.znum) {
+		v.zone*r.sph+time@v.time;
+		v.day=v.time/r.spd+r.base;
+		v.weak=v.day+6%7;
+		v.s=v.time%r.spd;
+		v.m=v.s/r.spm;
+		v.s%=r.spm;
+		v.h=v.m/r.mph;
+		v.m%=r.mph;
+		v.year=v.day/r.dp400y*400;
+		v.day%=r.dp400y;
+		.if v.day>=r.dp300y;
+			v.year+=300:v.day-=r.dp300y:.gotodw d100;
+		.if v.day>=r.dp200y;
+			v.year+=200:v.day-=r.dp200y:.gotodw d100;
+		.if v.day>=r.dp100y;
+			v.year+=100:v.day-=r.dp100y:.gotodw d100;
+		.goto d4;
+		#d100;
+		.if 4*r.dpy>v.day;
+			.gotodw day;
+		v.day-=(4*r.dpy);
+		v.year+=4;
+		#d4;
+		v.year+=(v.day/r.dp4y*4);
+		v.day%=r.dp4y;
+		#day;
+		v.leap=!(v.year%4)&&(v.year%100)||!(v.year%400);
+		.if r.dpy+v.leap<=v.day;
+			v.day-=(r.dpy+v.leap):v.year+=1:0@v.leap;
+		v.year+=(v.day/r.dpy);
+		v.day%=r.dpy;
+		0@v.month;
+		.if v.leap;
+			.gotodw leap;
+		.while (v.month<12)&&(r.dpm[v.month]<=v.day);
+			v.day-=r.dpm[v.month]:
+			v.month+=1;
+		.gotodw format;
+		#leap;
+		.while (v.month<12)&&(r.dpml[v.month]<=v.day);
+			v.day-=r.dpml[v.month]:
+			v.month+=1;
+		#format;
+		v.month+=1:v.day+=1;
+		var vmat:t;
+		t.var string:s,ubyte:(f[4*.strlen(fm)],c=0xff),ulong:(i,j,k,n=.length(t.f)),refer:(r=r,v=v);
+		t.s=fm;
+		.strarray t.s;
+		.while t.c;
+			t.run fc;
+		.arrstring t.f;
+		t.f@_ret_;
+		delete t;
+	} ;
+	format_at.var refer:(v=date,r=r);
+	format_at.var string:fc={
+		var string:t;
+		s[i]@c:i+=1;
+		.if !c; .exit ;
+		.if c=='#';
+			.gotodw char;
+		.if c=='Y';
+			.gotodw year;
+		.if c=='M';
+			.gotodw month;
+		.if c=='D';
+			.gotodw day;
+		.if c=='W';
+			.gotodw weak;
+		.if c=='h';
+			.gotodw hour;
+		.if c=='m';
+			.gotodw min;
+		.if c=='s';
+			.gotodw sec;
+		.if c=='Z';
+			.gotodw zone;
+		.exit c@f[j]:j+=1;
+		#end;
+		.strarray t;
+		t[0]@f[j]:j+=1;
+		t[1]?(t[1]@f[j]:j+=1):.exit ;
+		t[2]?(t[2]@f[j]:j+=1):.exit ;
+		t[3]?(t[3]@f[j]:j+=1):.exit ;
+		.exit ;
+		#char;
+		s[i]@c;
+		.if c;
+			c@f[j]:j+=1:i+=1;
+		.exit ;
+		#year;
+		s[i]=='Y'?(
+			i+=1:
+			2@k:
+			s[i]=='Y'?(
+				i+=1:
+				3@k:
+				s[i]=='Y'?(
+					i+=1:
+					4@k
+		))):1@k;
+		t=.s("%0*u",k,v.year%(10**k));
+		.goto end;
+		#month;
+		s[i]=='M'?(
+			i+=1:
+			s[i]=='M'?(
+				i+=1:
+				r.ms[v.month-1]@t
+			):.s("%02u",v.month)@t
+		):.s("%u",v.month)@t;
+		.goto end;
+		#day;
+		s[i]=='D'?(
+			i+=1:
+			.s("%02u",v.day)@t
+		):.s("%u",v.day)@t;
+		.goto end;
+		#weak;
+		r.ws[v.weak]@t;
+		.goto end;
+		#hour;
+		s[i]=='h'?(
+			i+=1:
+			.s("%02u",v.h)@t
+		):.s("%u",v.h)@t;
+		.goto end;
+		#min;
+		s[i]=='m'?(
+			i+=1:
+			.s("%02u",v.m)@t
+		):.s("%u",v.m)@t;
+		.goto end;
+		#sec;
+		s[i]=='s'?(
+			i+=1:
+			.s("%02u",v.s)@t
+		):.s("%u",v.s)@t;
+		.goto end;
+		#zone;
+		s[i]=='Z'?(
+			i+=1:
+			.s("%02u",.abs(v.zone))@t
+		):.s("%u",.abs(v.zone))@t;
+		(v.zone<0?'-':'+')@f[j]:j+=1;
+		.goto end;
+	} ;
+	
+	function string:format(fm:.type.string) {
+		f(fm,.time.stamp())@_ret_;
+	} ;
+	format.var refer:f=format_at;
+	
+	function string:GMT_at(time:.type.znum) {
+		f(fm,time)@_ret_;
+	} ;
+	GMT_at.var refer:(f=format_at,fm=r.GMT_fm);
+	
+	function string:GMT() {
+		f(fm,.time.stamp())@_ret_;
+	} ;
+	GMT.var refer:(f=format_at,fm=r.GMT_fm);
+	
+	function string:UTC_at(time:.type.znum) {
+		f(fm,time)@_ret_;
+	} ;
+	UTC_at.var refer:(f=format_at,fm=r.UTC_fm);
+	
+	function string:UTC() {
+		f(fm,.time.stamp())@_ret_;
+	} ;
+	UTC.var refer:(f=format_at,fm=r.UTC_fm);
+	
+	.time.clock()@t@t0;
+} ;
+time.function void:new(o:.type.object) {
+	o.var refer:r=r;
+	o.run r.code;
+} ;
+time.new.var refer:r=time;
+time.run time.code;
+

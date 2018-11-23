@@ -58,12 +58,12 @@ char* skip_string(char *exp)
 		if _oF(*exp=='\\')
 		{
 			exp++;
-			if _oF(*exp==c)
+			if _oT(*exp)
 			{
 				exp++;
 				continue;
 			}
-			continue;
+			else continue;
 		}
 		exp++;
 	}

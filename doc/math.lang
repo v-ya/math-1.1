@@ -194,6 +194,7 @@
 			<keyword>ceil</keyword>
 			<keyword>floor</keyword>
 			<keyword>round</keyword>
+			<keyword>abs</keyword>
 			<keyword>ftol</keyword>
 			<keyword>ftoi</keyword>
 			<keyword>ltof</keyword>
