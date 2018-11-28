@@ -44,6 +44,13 @@
 		sub	fun	0	r	addr_fun(sub)
 			// sub("name"|index);
 			// like delete name;
+		get_index fun	0	r	addr_fun(get_index)
+			// number = [object].get_index(vmat); allow=3;
+			// number = [object].get_index(vmat,allow);
+			// [object].* => vmat.{0=>*, 1=>*, ...}; *=string|ulong;
+			// allow == 1: name
+			// allow == 2: head
+			// allow == 3: all
 		
 		// 占位符
 		_vt_	void	0	r

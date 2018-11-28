@@ -210,7 +210,7 @@ func(issame)
 	return ret;
 }
 
-var *_func__add(char *label, var *root, var *index, var *vt, var *argv, u32 isreplace)
+var* _func__add(char *label, var *root, var *index, var *vt, var *argv, u32 isreplace)
 {
 	u32 tlog,length,u=0,type,size;
 	var *vp;

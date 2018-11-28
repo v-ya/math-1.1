@@ -2,7 +2,7 @@
 export	CC		= gcc #-pie -fPIE
 export	MAKEFLAGS	= --no-print-directory
 obj	= main.o string.o var.o error.o math.o sbuf.o file.o BaseFunction.o package.o func.o init.o exfun.o
-func	= func/function.o func/key.o func/con.o func/math.o func/string.o func/time.o func/file.o func/try.o func/thread.o func/init.o func/debug.o
+func	= func/function.o func/key.o func/con.o func/math.o func/string.o func/index.o func/time.o func/file.o func/try.o func/thread.o func/init.o func/debug.o
 
 all: math package/package
 

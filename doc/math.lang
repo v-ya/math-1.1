@@ -211,6 +211,7 @@
 			<keyword>add</keyword>
 			<keyword>replace</keyword>
 			<keyword>sub</keyword>
+			<keyword>get_index</keyword>
 		</context>
 		<context id="fun_thread" style-ref="fun">
 			<prefix>(?&lt;!\w)\.thread\.</prefix>
