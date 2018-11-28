@@ -31,10 +31,10 @@ func(file_size)
 func(file_read)
 {
 	static char *label=".file.read";
-	static u32 type_2[2]={type_string,type_znum|type_allowarray};
-	static u32 type_3[3]={type_string,type_znum|type_allowarray,type_znum};
-	static u32 type_4[4]={type_string,type_znum|type_allowarray,type_znum,type_znum};
-	static u32 type_5[5]={type_string,type_znum|type_allowarray,type_znum,type_znum,type_znum};
+	static u32 type_2[2]={type_string,type_znum|type_onlyarray};
+	static u32 type_3[3]={type_string,type_znum|type_onlyarray,type_znum};
+	static u32 type_4[4]={type_string,type_znum|type_onlyarray,type_znum,type_znum};
+	static u32 type_5[5]={type_string,type_znum|type_onlyarray,type_znum,type_znum,type_znum};
 	char *path;
 	var *vp;
 	FILE *fp;
@@ -88,7 +88,6 @@ func(file_read)
 			return get_error(errid_FunArgvType,label);
 			break;
 	}
-	if _oF(!vp->length) return get_error(errid_FunArgvType,label);
 	ret->type=type_long|type_unsign;
 	if _oF(array_at>=vp->length)
 	{
@@ -135,11 +134,11 @@ func(file_read)
 func(file_write)
 {
 	static char *label=".file.write";
-	static u32 type_2[2]={type_string,type_znum|type_allowarray};
-	static u32 type_3[3]={type_string,type_znum|type_allowarray,type_znum};
-	static u32 type_4[4]={type_string,type_znum|type_allowarray,type_znum,type_znum};
-	static u32 type_5[5]={type_string,type_znum|type_allowarray,type_znum,type_znum,type_znum};
-	static u32 type_6[6]={type_string,type_znum|type_allowarray,type_znum,type_znum,type_znum,type_znum};
+	static u32 type_2[2]={type_string,type_znum|type_onlyarray};
+	static u32 type_3[3]={type_string,type_znum|type_onlyarray,type_znum};
+	static u32 type_4[4]={type_string,type_znum|type_onlyarray,type_znum,type_znum};
+	static u32 type_5[5]={type_string,type_znum|type_onlyarray,type_znum,type_znum,type_znum};
+	static u32 type_6[6]={type_string,type_znum|type_onlyarray,type_znum,type_znum,type_znum,type_znum};
 	char *path;
 	var *vp;
 	FILE *fp;
@@ -212,7 +211,6 @@ func(file_write)
 			return get_error(errid_FunArgvType,label);
 			break;
 	}
-	if _oF(!vp->length) return get_error(errid_FunArgvType,label);
 	ret->type=type_long|type_unsign;
 	if _oF(array_at>=vp->length)
 	{

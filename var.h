@@ -40,8 +40,10 @@ struct VMAT;
 #define type_unsign	0x01000000
 // only used at check_varlist
 #define type_allowarray	0x01000000
+#define type_onlyarray	0x02000000
 // type class
 #define type_all	0x00ffffff
+#define type_argvall	0x0fffffff
 #define type_znum	0x0000001e
 #define type_num	0x0000003e
 #define type_snum	0x0000007e

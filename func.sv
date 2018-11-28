@@ -329,6 +329,9 @@
 		all	uint	0	r	type_all
 		// 特殊类型
 		unsign	uint	0	r	type_unsign
+		// argv check
+		allowarray uint	0	r	type_allowarray
+		onlyarray uint	0	r	type_onlyarray
 	}
 	// 时间相关
 	time	vlist	0	r	{

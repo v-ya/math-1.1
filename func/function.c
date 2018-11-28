@@ -398,7 +398,7 @@ var* function_define(char *exp, char **expp, var **_vt_, var **_vn_)
 		exp++;
 		while(is_space(*exp)) exp++;
 	}
-	vl->mode|=get_int(exp,&exp,&vp)&type_all;
+	vl->mode|=get_int(exp,&exp,&vp)&type_argvall;
 	if _oF(vp) goto Err;
 	switch(*exp)
 	{
@@ -429,7 +429,7 @@ var* function_define(char *exp, char **expp, var **_vt_, var **_vn_)
 	do
 	{
 		size--;
-		vt->v.vp_int[size]=vl->mode&type_all;
+		vt->v.vp_int[size]=vl->mode&type_argvall;
 		vn->v.vp_string[size]=vl->name;
 		vl->mode&=~free_name;
 		if _oT(vl->l) vl=vl->l;

@@ -103,7 +103,7 @@ randseq.function void:init(rs:.type.object, method:.type.string|.type.void)
 	rs.mode("Loop");
 	
 	# setinput
-	rs.function void:setinput(i:.type.num|.type.string|.type.void)
+	rs.function void:setinput(i:.type.snum|.type.void|.type.allowarray)
 	{
 		t=.get_type(i);
 		.if t==.type.void;

@@ -109,10 +109,22 @@ int check_varlist(vlist *vl, u32 argc, u32 type[])
 	u32 i;
 	for(i=0;i<argc;i++)
 	{
-		if _oF(!vl) return 1;
-		else if _oF(!vl->v) return 1;
-		else if _oF(!(vl->v->type&type[i])) return 1;
-		else if _oF((!(type[i]&type_allowarray))&&vl->v->length) return 1;
+		if _oF(!vl||!vl->v) return 1;
+		if _oF(!(vl->v->type&type[i]&type_all)) return 1;
+		switch(type[i]&(type_allowarray|type_onlyarray))
+		{
+			case 0:
+				// only not array
+				if _oF(vl->v->length) return 1;
+				break;
+			case type_allowarray:
+				// allow all
+				break;
+			default:
+				// only array;
+				if _oF(!vl->v->length) return 1;
+				break;
+		}
 		vl=vl->r;
 	}
 	return 0;
@@ -166,12 +178,15 @@ var* run_fun_vlist(var *func, int argc, vlist *argv)
 	// get caller
 	caller=ptvar_get(_pt_this);
 	// check var list type
+	if _oF(check_varlist(argv,argc,vt)) goto Err_argv;
+	/*
 	vl=argv;
 	for(i=0;i<argc;i++)
 	{
 		if _oF(!(vt[i]&vl->v->type)) goto Err_argv;
 		vl=vl->r;
 	}
+	*/
 	// link caller
 	vc=vlist_find(func->v.v_vlist,"_caller_");
 	if _oF(!vc)

@@ -61,7 +61,7 @@ random.function void:init_method(rdm:.type.object, method:.type.string|.type.voi
 	rdm.rand.var refer:rs=rdm.rs,uint:t;
 	
 	# srand
-	rdm.function void:srand(i:.type.snum|.type.void)
+	rdm.function void:srand(i:.type.snum|.type.void|.type.allowarray)
 	{
 		t=.get_type(i);
 		.if t==.type.void;

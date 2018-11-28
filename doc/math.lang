@@ -375,6 +375,8 @@
 			<keyword>func</keyword>
 			<keyword>all</keyword>
 			<keyword>unsign</keyword>
+			<keyword>allowarray</keyword>
+			<keyword>onlyarray</keyword>
 		</context>
 		
 		<context id="calc" class="no-spell-check">

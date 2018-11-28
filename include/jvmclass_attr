@@ -18,19 +18,19 @@ jvmclass_attr.try {
 
 jvmclass_attr.run {
 	# read
-	function ubyte:getb(f:.type.byte,p:.type.znum) {
+	function ubyte:getb(f:.type.byte|.type.onlyarray,p:.type.znum) {
 		.if p>=.length(f); .exit 0@_ret_;
 		f[p]@_ret_:p+=1;
 	} ;
-	function uword:getw(f:.type.byte,p:.type.znum) {
+	function uword:getw(f:.type.byte|.type.onlyarray,p:.type.znum) {
 		.if p+2>.length(f); .exit 0@_ret_;
 		f[p]<<8|f[p+1]@_ret_:p+=2;
 	} ;
-	function uint:getd(f:.type.byte,p:.type.znum) {
+	function uint:getd(f:.type.byte|.type.onlyarray,p:.type.znum) {
 		.if p+4>.length(f); .exit 0@_ret_;
 		f[p]<<24|f[p+1]<<16|f[p+2]<<8|f[p+3]@_ret_:p+=4;
 	} ;
-	function ulong:getq(f:.type.byte,p:.type.znum) {
+	function ulong:getq(f:.type.byte|.type.onlyarray,p:.type.znum) {
 		.if p+8>.length(f); .exit 0@_ret_;
 		f[p]<<56|f[p+1]<<48|f[p+2]<<40|f[p+3]<<32|
 		f[p+4]<<24|f[p+5]<<16|f[p+6]<<8|f[p+7]@_ret_:p+=8;
