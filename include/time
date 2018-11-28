@@ -7,7 +7,7 @@
 time.try {
 	# version
 	var vlist:(limit,version);
-	.include.version(version,1,0,0);
+	.include.version(version,1,0,1);
 	.include.version(limit,1,6,0);
 	add(.const.error,.type.string);
 	.if limit.value > .sys.version.value; .exit error="limit version >= "+limit.string;
@@ -27,6 +27,92 @@ time.run {
 	var string:ws[7]=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
 	var string:GMT_fm="W, DD MMM YYYY hh:mm:ss G#MT";
 	var string:UTC_fm="YYYY-MM-DDThh:mm:ss ZZ00 UTC";
+	var vmat:fm_code;
+	# char
+	fm_code.add('#',.type.string)={
+		s[i]@c;
+		.if c;
+			c@f[j]:j+=1:i+=1;
+	};
+	# year
+	fm_code.add('Y',.type.string)={
+		s[i]=='Y'?(
+			i+=1:
+			2@k:
+			s[i]=='Y'?(
+				i+=1:
+				3@k:
+				s[i]=='Y'?(
+					i+=1:
+					4@k
+		))):1@k;
+		t=.s("%0*u",k,v.year%(10**k));
+	};
+	# month
+	fm_code.add('M',.type.string)={
+		s[i]=='M'?(
+			i+=1:
+			s[i]=='M'?(
+				i+=1:
+				r.ms[v.month-1]@t
+			):.s("%02u",v.month)@t
+		):.s("%u",v.month)@t;
+	};
+	# day
+	fm_code.add('D',.type.string)={
+		s[i]=='D'?(
+			i+=1:
+			.s("%02u",v.day)@t
+		):.s("%u",v.day)@t;
+	};
+	# weak
+	fm_code.add('W',.type.string)={
+		r.ws[v.weak]@t;
+	};
+	# hour
+	fm_code.add('h',.type.string)={
+		s[i]=='h'?(
+			i+=1:
+			.s("%02u",v.h)@t
+		):.s("%u",v.h)@t;
+	};
+	# min
+	fm_code.add('m',.type.string)={
+		s[i]=='m'?(
+			i+=1:
+			.s("%02u",v.m)@t
+		):.s("%u",v.m)@t;
+	};
+	# sec
+	fm_code.add('s',.type.string)={
+		s[i]=='s'?(
+			i+=1:
+			.s("%02u",v.s)@t
+		):.s("%u",v.s)@t;
+	};
+	# zone
+	fm_code.add('Z',.type.string)={
+		s[i]=='Z'?(
+			i+=1:
+			.s("%02u",.abs(v.zone))@t
+		):.s("%u",.abs(v.zone))@t;
+		(v.zone<0?'-':'+')@f[j]:j+=1;
+	};
+	# hour/12
+	fm_code.add('H',.type.string)={
+		s[i]=='H'?(
+			i+=1:
+			.s("%02u",v.h+11%12+1)@t
+		):.s("%u",v.h+11%12+1)@t;
+	};
+	# AM/PM
+	fm_code.add('A',.type.string)={
+		t=v.h<12?"AM":"PM";
+	};
+	# am/pm
+	fm_code.add('a',.type.string)={
+		t=v.h<12?"am":"pm";
+	};
 } ;
 time.var refer:r=time;
 time.var string:code={
@@ -51,8 +137,8 @@ time.var string:code={
 	} ;
 	set_zone.var refer:zone=date.zone;
 	###
-	1970-01-01(Thu) 00:00:00 -12
-	2004-12-25(Sat) 12:30:05 +08
+	1970-01-01(Thu) 00:00:00 -10
+	2004-12-25(Sat) 13:30:05 +08
 	Y	0	4
 	YY	70	04
 	YYY	970	004
@@ -63,16 +149,20 @@ time.var string:code={
 	D	1	25
 	DD	01	25
 	W	Thu	Sat
-	h	0	12
-	hh	00	12
+	h	0	13
+	hh	00	13
 	m	0	30
 	mm	00	30
 	s	0	5
 	ss	00	05
-	Z	-12	+8
-	ZZ	-12	+08
+	Z	-10	+8
+	ZZ	-10	+08
+	H	12	1
+	HH	12	01
+	A	AM	PM
+	a	am	pm
 	
-	#c	转译
+	#Y	Y	Y	转译
 	###
 	function string:format_at(fm:.type.string,time:.type.znum) {
 		v.zone*r.sph+time@v.time;
@@ -120,7 +210,7 @@ time.var string:code={
 		#format;
 		v.month+=1:v.day+=1;
 		var vmat:t;
-		t.var string:s,ubyte:(f[4*.strlen(fm)],c=0xff),ulong:(i,j,k,n=.length(t.f)),refer:(r=r,v=v);
+		t.var string:s,ubyte:(f[4*.strlen(fm)],c=0xff),ulong:(i,j,k,n=.length(t.f)),refer:(r=r,v=v,fmc=r.fm_code);
 		t.s=fm;
 		.strarray t.s;
 		.while t.c;
@@ -134,93 +224,16 @@ time.var string:code={
 		var string:t;
 		s[i]@c:i+=1;
 		.if !c; .exit ;
-		.if c=='#';
-			.gotodw char;
-		.if c=='Y';
-			.gotodw year;
-		.if c=='M';
-			.gotodw month;
-		.if c=='D';
-			.gotodw day;
-		.if c=='W';
-			.gotodw weak;
-		.if c=='h';
-			.gotodw hour;
-		.if c=='m';
-			.gotodw min;
-		.if c=='s';
-			.gotodw sec;
-		.if c=='Z';
-			.gotodw zone;
-		.exit c@f[j]:j+=1;
-		#end;
+		.if !fmc[c];
+			.exit c@f[j]:j+=1;
+		run fmc[c];
+		.if !t; .exit ;
 		.strarray t;
 		t[0]@f[j]:j+=1;
 		t[1]?(t[1]@f[j]:j+=1):.exit ;
 		t[2]?(t[2]@f[j]:j+=1):.exit ;
 		t[3]?(t[3]@f[j]:j+=1):.exit ;
 		.exit ;
-		#char;
-		s[i]@c;
-		.if c;
-			c@f[j]:j+=1:i+=1;
-		.exit ;
-		#year;
-		s[i]=='Y'?(
-			i+=1:
-			2@k:
-			s[i]=='Y'?(
-				i+=1:
-				3@k:
-				s[i]=='Y'?(
-					i+=1:
-					4@k
-		))):1@k;
-		t=.s("%0*u",k,v.year%(10**k));
-		.goto end;
-		#month;
-		s[i]=='M'?(
-			i+=1:
-			s[i]=='M'?(
-				i+=1:
-				r.ms[v.month-1]@t
-			):.s("%02u",v.month)@t
-		):.s("%u",v.month)@t;
-		.goto end;
-		#day;
-		s[i]=='D'?(
-			i+=1:
-			.s("%02u",v.day)@t
-		):.s("%u",v.day)@t;
-		.goto end;
-		#weak;
-		r.ws[v.weak]@t;
-		.goto end;
-		#hour;
-		s[i]=='h'?(
-			i+=1:
-			.s("%02u",v.h)@t
-		):.s("%u",v.h)@t;
-		.goto end;
-		#min;
-		s[i]=='m'?(
-			i+=1:
-			.s("%02u",v.m)@t
-		):.s("%u",v.m)@t;
-		.goto end;
-		#sec;
-		s[i]=='s'?(
-			i+=1:
-			.s("%02u",v.s)@t
-		):.s("%u",v.s)@t;
-		.goto end;
-		#zone;
-		s[i]=='Z'?(
-			i+=1:
-			.s("%02u",.abs(v.zone))@t
-		):.s("%u",.abs(v.zone))@t;
-		(v.zone<0?'-':'+')@f[j]:j+=1;
-		.goto end;
 	} ;
 	
 	function string:format(fm:.type.string) {
