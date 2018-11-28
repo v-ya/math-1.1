@@ -5,7 +5,7 @@ char *package	=PACKAGE;
 
 void init(void)
 {
-	root->inode=0;
+	
 }
 
 void uini(void)

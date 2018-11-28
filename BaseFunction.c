@@ -1,6 +1,8 @@
 #include "main.h"
 
 interface_base BaseFunction = {
+	// version
+	InterfaceBase_Version,
 	// string.h
 	&vname_check,
 	&vname_gen,

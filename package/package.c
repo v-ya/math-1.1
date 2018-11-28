@@ -49,11 +49,13 @@ void package_name(char **a, char **p)
 var* package_init(void *Base, void **Interface)
 {
 	base=(interface_base*)Base;
+	if _oF(base->version!=InterfaceBase_Version) return NULL;
 	interface=Interface;
 	error=NULL;
+	root->inode=0;
 	init();
 	if _oF(error) return error;
-	else if _oF(root->inode!=0||(!(root->mode&auth_link))) return base->get_error(errid_IntError,NULL);
+	else if _oF(root->inode!=0) return base->get_error(errid_IntError,NULL);
 	else return root;
 }
 

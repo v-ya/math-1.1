@@ -3,7 +3,8 @@
 // 开始自动生成静态结构
 //	name	type	length	auth	value
 
-@.	vmat	0	rl	{
+@.	vmat	0	r	{
+	root	-export	.
 	info	vlist	0	r	{
 		author	string	0	r	AUTHOR
 		package	string	0	r	PACKAGE
@@ -13,7 +14,6 @@
 			rev	ubyte	0	r	PACKAGE_revision
 		}
 	}
-	root	-export	.
 	hello	fun	0	r	addr_fun(hello)
 }
 

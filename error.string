@@ -21,6 +21,7 @@ ss(errcl_Code_S)	"代码基类";
 		ss(errid_SysDlsymNotfind_S)	"被链接包内预定义符号未找到";
 		ss(errid_SysPackageCheck_S)	"被链接包验证失败";
 		ss(errid_SysPackageName_S)	"被链接包同名冲突";
+		ss(errid_SysPackageBase_S)	"被链接包 base-api 版本冲突";
 		ss(errid_SysPackageInit_S)	"被链接包初始化失败";
 		ss(errid_SysPackageNotfind_S)	"被链接包未找到";
 		ss(errid_SysPackageTakeup_S)	"被链接包占用状态";
@@ -102,6 +103,7 @@ static char *errty_CodeSys_idA[]={
 	errid_SysDlsymNotfind_S,
 	errid_SysPackageCheck_S,
 	errid_SysPackageName_S,
+	errid_SysPackageBase_S,
 	errid_SysPackageInit_S,
 	errid_SysPackageNotfind_S,
 	errid_SysPackageTakeup_S,

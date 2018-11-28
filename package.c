@@ -38,26 +38,26 @@ var* package_import(char *path, char **name)
 		vl=var_insert(_package,author,tlog_vlist,leng_no);
 		if _oF(!vl) goto Err_mem;
 		vp=vl->v;
-		vp->mode&=~(auth_retype|auth_write|auth_link);
+		vp->mode&=~auth_normal|auth_read;
 	}
 	if _oF(var_find(vp,package)) goto Err_pname;
 	vl=var_insert(vp,package,tlog_vlist,leng_no);
 	if _oF(!vl) goto Err_mem;
 	vp=vl->v;
-	vp->mode&=~(auth_retype|auth_write|auth_link);
+	vp->mode&=~auth_normal|auth_read;
 	vl=var_insert(vp,"handle",tlog_void,leng_no);
 	if _oF(!vl) goto Err_mem;
 	vl->v->v.v_void=hdl;
-	vl->v->mode&=~(auth_retype|auth_write|auth_link);
+	vl->v->mode&=~auth_normal|auth_read;
 	vl=var_insert(vp,"interface",tlog_void,leng_no);
 	if _oF(!vl) goto Err_mem;
 	interface=&(vl->v->v.v_void);
-	vl->v->mode&=~(auth_retype|auth_write|auth_link);
+	vl->v->mode&=~auth_normal|auth_read;
 	vl=vlist_alloc("root");
 	if _oF(!vl) goto Err_mem;
 	vp->v.v_vlist=vlist_insert(vp->v.v_vlist,vl);
 	vp=package_init(&BaseFunction,interface);
-	if _oF(!vp) goto Err_init;
+	if _oF(!vp) goto Err_base;
 	if _oF(vp->type&type_spe) goto Err_init;
 	vlist_link(vl,vp);
 	vl->mode&=~free_pointer;
@@ -96,6 +96,9 @@ var* package_import(char *path, char **name)
 	goto Err;
 	Err_pname:
 	vp=get_error(errid_SysPackageName,label);
+	goto Err;
+	Err_base:
+	vp=get_error(errid_SysPackageBase,label);
 	goto Err;
 	Err_init:
 	vp=get_error(errid_SysPackageInit,label);
@@ -143,6 +146,11 @@ var* package_remove(char *name)
 	// check root && integer
 	vr=var_find(vp,"root");
 	if _oF(!vr) goto Err_damage;
+	if _oF(refer_get((u64)vr))
+	{
+		refer_free((u64)vr);
+		if _oT(vr->inode) (vr->inode)--;
+	}
 	if _oF(vr->inode>1) goto Err_takeup;
 	vr=var_find(vp,"interface");
 	if _oF(!vr) goto Err_damage;

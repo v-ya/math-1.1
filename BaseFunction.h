@@ -1,7 +1,11 @@
 #ifndef	_BaseFunction_h_
 #define	_BaseFunction_h_
 
+#define InterfaceBase_Version	1
+
 typedef struct Interface_Base {
+	// version
+	u32	version;
 	// string.h
 	u32	(*vname_check)		(char *name);
 	u32	(*vname_gen)		(unsigned char *name);

@@ -152,12 +152,15 @@ func(import)
 	}
 	else vp=package_import(path,&fullname);
 	if _oF(vp->type&type_err) goto Err;
-	// 产生资源链接变量
+	// 产生资源链接变量(refer)
 	vl=vlist_alloc(name);
 	if _oF(!vl) goto Err_mem;
+	vl->v=var_alloc(tlog_refer,leng_no);
+	if _oF(!vl->v) goto Err_mem;
+	(vl->v->inode)++;
 	if _oF(root->type&type_vlist) root->v.v_vlist=vlist_insert(root->v.v_vlist,vl);
 	else vmat_insert(root->v.v_vmat,vl);
-	vlist_link(vl,vp);
+	refer_set(vl->v,vp);
 	// 生成返回值
 	vp=var_alloc(tlog_string,leng_no);
 	if _oF(!vp) goto Err_mem;
