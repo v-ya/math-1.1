@@ -168,6 +168,7 @@
 			<keyword>issame</keyword>
 			<keyword>store_data</keyword>
 			<keyword>load_data</keyword>
+			<keyword>get_sid</keyword>
 			<keyword>srand</keyword>
 			<keyword>rand</keyword>
 			<keyword>sin</keyword>
@@ -331,6 +332,7 @@
 			<prefix>(?&lt;!\w)\.sys\.info\.</prefix>
 			<keyword>rand_max</keyword>
 			<keyword>clocks_per_sec</keyword>
+			<keyword>next_sid</keyword>
 		</context>
 		<context id="cv_const" style-ref="cv">
 			<prefix>(?&lt;!\w)\.const\.</prefix>

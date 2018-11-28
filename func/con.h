@@ -17,6 +17,7 @@ func(replace);
 func(sub);
 func(store_data);
 func(load_data);
+func(get_sid);
 
 #endif
 

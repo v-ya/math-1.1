@@ -1,7 +1,7 @@
 #ifndef	_BaseFunction_h_
 #define	_BaseFunction_h_
 
-#define InterfaceBase_Version	1
+#define InterfaceBase_Version	2
 
 typedef struct Interface_Base {
 	// version
@@ -100,6 +100,7 @@ typedef struct Interface_Base {
 	s32	(*type_check)		(var *obj, char *type);
 	var*	(*type_set)		(var *obj, var *type);
 	var*	(*type_empty)		(var *obj);
+	u64	(*get_sid)		(void);
 	
 } interface_base;
 

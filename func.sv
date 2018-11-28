@@ -160,6 +160,9 @@
 				// .rand() 默认返回的上限 [0, rand_max)
 			clocks_per_sec	ulong	0	r	CLOCKS_PER_SEC
 				// .time.clock() 返回值与时间关系
+			next_sid	ulong	0	r	1
+				// 下一个唯一 sid（资源索引id）
+			_info_sid	-export	.sys.info.next_sid
 		}
 	}
 	// 关键字函数
@@ -199,6 +202,8 @@
 		// .store_data("path", var, isfast);
 	load_data fun	0	r	addr_fun(load_data)
 		// var = .load_data(var, "path");
+	get_sid	fun	0	r	addr_fun(get_sid)
+		// sid = .get_sid();
 	
 		// 数学库
 		srand	fun	0	r	addr_fun(srand)

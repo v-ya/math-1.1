@@ -17,6 +17,7 @@
 *	新增 `type_onlyarray`，自定义函数可以更容易的验证类型 => **v1.6.5**
 *	`BaseFunction` 内嵌版本号，`import` 由原先的硬链接改为软链接，暂时弃用 `[.vya.wav]` => **v1.6.6**
 *	新增 `[object].get_index` ，可以提取 `[object]` 的索引 => **v1.6.7**
+*	新增 `.get_sid` `.sys.info.next_sid`
 
 2018.11.24 v1.6.4
 ---

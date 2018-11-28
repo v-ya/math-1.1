@@ -97,5 +97,6 @@ interface_base BaseFunction = {
 	&type_check,
 	&type_set,
 	&type_empty,
+	&get_sid,
 } ;
 

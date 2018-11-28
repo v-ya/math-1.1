@@ -60,3 +60,8 @@ var* type_empty(var *obj)
 	return type_set(obj,_type_null);
 }
 
+u64 get_sid(void)
+{
+	return (_info_sid->v.v_long)++;
+}
+

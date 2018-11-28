@@ -506,4 +506,10 @@ func(load_data)
 	}
 }
 
+func(get_sid)
+{
+	ret->type=type_long|type_unsign;
+	ret->v.v_long=get_sid();
+	return ret;
+}
 

@@ -42,6 +42,8 @@ extern var *_path_incutup;
 extern var *_path_import;
 extern var *_path_include;
 extern var *_path_data;
+// 信息
+extern var *_info_sid;
 // 特殊
 extern var *_type_null;
 
