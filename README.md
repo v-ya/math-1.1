@@ -18,6 +18,7 @@
 *	`BaseFunction` 内嵌版本号，`import` 由原先的硬链接改为软链接，暂时弃用 `[.vya.wav]` => **v1.6.6**
 *	新增 `[object].get_index` ，可以提取 `[object]` 的索引 => **v1.6.7**
 *	新增 `.get_sid` `.sys.info.next_sid`
+*	修复 `.debug.list` 不能正确显示 `null` 类型的问题
 
 2018.11.24 v1.6.4
 ---

@@ -19,6 +19,7 @@ char* get_type(u32 type, u32 auth)
 				return "end";
 		}
 	}
+	if _oF(type&type_null) return "null";
 	if _oF(type&type_unsign) i=tlog_max;
 	else i=0;
 	type&=type_all;
@@ -38,7 +39,7 @@ void print_vlist(vlist *vl, u32 tab, void *rp)
 	char *s,buffer[16];
 	print("%*s",tab,"");
 	vp=vl->v;
-	if _oT(vp)
+	if _oT(vp && (vp->type&type_all))
 	{
 		if _oF(vp->type&type_refer)
 		{
