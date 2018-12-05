@@ -11,6 +11,10 @@
 ## <span id="history">版本更新记录</span>
 ---
 
+2018.12.05 v1.6.7 => v1.6.8
+---
+*	新增 `[system/socket]` package ，阶段性总结
+
 2018.11.28 v1.6.4 => v1.6.7
 ---
 *	修改 `include/time`

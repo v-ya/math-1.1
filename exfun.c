@@ -1,5 +1,6 @@
 #include "main.h"
 
+/*
 static char *type_name="_type_";
 
 s32 type_check(var *obj, char *type)
@@ -59,9 +60,210 @@ var* type_empty(var *obj)
 {
 	return type_set(obj,_type_null);
 }
+*/
+
+// var == ok || NULL == fail
+var* create_var(var *obj, char *name, u64 head, u32 tlog, u32 length, u32 auth)
+{
+	var *r;
+	vlist *vl;
+	if _oT(obj->type&type_object)
+	{
+		if _oT(name)
+		{
+			vl=v_find(obj,name);
+			if _oT(!vl)
+			{
+				vl=vlist_alloc(name);
+				if _oF(!vl) return NULL;
+				if _oF(obj->type&type_vlist) obj->v.v_vlist=vlist_insert(obj->v.v_vlist,vl);
+				else vmat_insert(obj->v.v_vmat,vl);
+			}
+		}
+		else
+		{
+			vl=v_find_index(obj,head);
+			if _oT(!vl)
+			{
+				vl=vlist_alloc_index(head);
+				if _oF(!vl) return NULL;
+				if _oF(obj->type&type_vlist) obj->v.v_vlist=vlist_insert(obj->v.v_vlist,vl);
+				else vmat_insert(obj->v.v_vmat,vl);
+			}
+		}
+		r=var_alloc(tlog,length);
+		if _oF(!r) return NULL;
+		r->mode&=~auth_all;
+		r->mode|=auth&auth_all;
+		vlist_link(vl,r);
+		return r;
+	}
+	return NULL;
+}
+
+void remove_var(var *obj, char *name, u64 head)
+{
+	if _oT(obj->type&type_vlist)
+	{
+		if _oT(name) obj->v.v_vlist=vlist_delete(obj->v.v_vlist,name);
+		else obj->v.v_vlist=vlist_delete_index(obj->v.v_vlist,head);
+	}
+	else if _oT(obj->type&type_vmat)
+	{
+		if _oT(name) vmat_delete(obj->v.v_vmat,name);
+		else vmat_delete_index(obj->v.v_vmat,head);
+	}
+}
+
+// create void & not set free_pointer
+var* create_void(var *obj, char *name, u64 head, u32 auth, void *value)
+{
+	var *r;
+	r=create_var(obj,name,head,tlog_void,leng_no,auth);
+	if _oF(!r) return NULL;
+	r->v.v_void=value;
+	return r;
+}
+
+// create byte
+var* create_ubyte(var *obj, char *name, u64 head, u32 auth, u8 value)
+{
+	var *r;
+	r=create_var(obj,name,head,tlog_byte,leng_no,auth);
+	if _oF(!r) return NULL;
+	r->type|=type_unsign;
+	r->v.v_long=value;
+	return r;
+}
+var* create_sbyte(var *obj, char *name, u64 head, u32 auth, s8 value)
+{
+	var *r;
+	r=create_var(obj,name,head,tlog_byte,leng_no,auth);
+	if _oF(!r) return NULL;
+	r->v.v_long=value;
+	var_fixvalue(r);
+	return r;
+}
+
+// create word
+var* create_uword(var *obj, char *name, u64 head, u32 auth, u16 value)
+{
+	var *r;
+	r=create_var(obj,name,head,tlog_word,leng_no,auth);
+	if _oF(!r) return NULL;
+	r->type|=type_unsign;
+	r->v.v_long=value;
+	return r;
+}
+var* create_sword(var *obj, char *name, u64 head, u32 auth, s16 value)
+{
+	var *r;
+	r=create_var(obj,name,head,tlog_word,leng_no,auth);
+	if _oF(!r) return NULL;
+	r->v.v_long=value;
+	var_fixvalue(r);
+	return r;
+}
+
+// create int
+var* create_uint(var *obj, char *name, u64 head, u32 auth, u32 value)
+{
+	var *r;
+	r=create_var(obj,name,head,tlog_int,leng_no,auth);
+	if _oF(!r) return NULL;
+	r->type|=type_unsign;
+	r->v.v_long=value;
+	return r;
+}
+var* create_sint(var *obj, char *name, u64 head, u32 auth, s32 value)
+{
+	var *r;
+	r=create_var(obj,name,head,tlog_int,leng_no,auth);
+	if _oF(!r) return NULL;
+	r->v.v_long=value;
+	var_fixvalue(r);
+	return r;
+}
+
+// create long
+var* create_ulong(var *obj, char *name, u64 head, u32 auth, u64 value)
+{
+	var *r;
+	r=create_var(obj,name,head,tlog_long,leng_no,auth);
+	if _oF(!r) return NULL;
+	r->type|=type_unsign;
+	r->v.v_long=value;
+	return r;
+}
+var* create_slong(var *obj, char *name, u64 head, u32 auth, s64 value)
+{
+	var *r;
+	r=create_var(obj,name,head,tlog_long,leng_no,auth);
+	if _oF(!r) return NULL;
+	r->v.v_long=value;
+	return r;
+}
+
+// create float
+var* create_float(var *obj, char *name, u64 head, u32 auth, double value)
+{
+	var *r;
+	r=create_var(obj,name,head,tlog_float,leng_no,auth);
+	if _oF(!r) return NULL;
+	r->v.v_float=value;
+	return r;
+}
+
+// create string
+var* create_string(var *obj, char *name, u64 head, u32 auth, char *value)
+{
+	var *r;
+	u32 size;
+	r=create_var(obj,name,head,tlog_float,leng_no,auth);
+	if _oF(!r) return NULL;
+	if _oT(value)
+	{
+		size=strlen(value)+1;
+		r->v.v_string=malloc(size);
+		if _oF(!r->v.v_string) return NULL;
+		r->mode|=free_pointer;
+		memcpy(r->v.v_string,value,size);
+	}
+	return r;
+}
+
+// create vlist|vmat
+var* create_vlist(var *obj, char *name, u64 head, u32 auth)
+{
+	return create_var(obj,name,head,tlog_vlist,leng_no,auth);
+}
+var* create_vmat(var *obj, char *name, u64 head, u32 auth)
+{
+	return create_var(obj,name,head,tlog_vmat,leng_no,auth);
+}
+
+// create refer
+var* create_refer(var *obj, char *name, u64 head, u32 auth, var *value)
+{
+	var *r;
+	u32 size;
+	r=create_var(obj,name,head,tlog_refer,leng_no,auth);
+	if _oF(!r) return NULL;
+	if _oT(value)
+	{
+		refer_set(r,value);
+		if _oF(refer_check(r)!=value) return NULL;
+	}
+	return r;
+}
 
 u64 get_sid(void)
 {
-	return (_info_sid->v.v_long)++;
+	u64 sid;
+	do
+	{
+		sid=(_info_sid->v.v_long)++;
+	} while(!sid);
+	return sid;
 }
 

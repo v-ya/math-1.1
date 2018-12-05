@@ -12,6 +12,7 @@
 			major	ubyte	0	r	PACKAGE_major
 			minor	ubyte	0	r	PACKAGE_minor
 			rev	ubyte	0	r	PACKAGE_revision
+			value	uint	0	r	PACKAGE_value
 		}
 	}
 	hello	fun	0	r	addr_fun(hello)

@@ -17,6 +17,7 @@ void uini(void);
 extern interface_base *base;
 var* get_error(char *info, char *label);
 void throw_error(char *info, char *label);
+void throw_errid(u32 errid);
 void set_interface(void *_if);
 // 导出变量
 export u32 package_ckeck(u32 r);

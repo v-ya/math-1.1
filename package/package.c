@@ -29,6 +29,11 @@ void throw_error(char *info, char *label)
 	error=get_error(info,label);
 }
 
+void throw_errid(u32 errid)
+{
+	error=base->get_error(errid,NULL);
+}
+
 void set_interface(void *_if)
 {
 	*interface=_if;

@@ -7,7 +7,7 @@
 // 版本号
 	#define	VERSION_major		1
 	#define VERSION_minor		6
-	#define VERSION_revision	7
+	#define VERSION_revision	8
 	#define VERSION_value		(VERSION_major<<16|VERSION_minor<<8|VERSION_revision)
 
 // 限制
