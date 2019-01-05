@@ -219,12 +219,6 @@ void var_free(var *vp)
 	if _oT(vp->inode>1)
 	{
 		vp->inode--;
-		// 当变量实体仅被引用时，将彻底删除该变量，并使所有引用该变量者失效
-		if _oF((vp->inode==1)&&refer_get((u64)vp))
-		{
-			refer_free((u64)vp);
-			if _oT(!refer_get((u64)vp)) var_free(vp);
-		}
 		return ;
 	}
 	else
@@ -273,6 +267,7 @@ void var_free(var *vp)
 				free(vp->v.v_void);
 			}
 		}
+		if _oF(vp->mode&is_refer) refer_free((u64)vp);
 		free(vp);
 		return ;
 	}
@@ -1187,7 +1182,7 @@ void refer_set(var *rp, var *vp)
 		{
 			refer_alloc((u64)vp);
 			vl=vmat_find_index(_refpool_vmat,(u64)vp);
-			if _oT(vl) var_save(vp);
+			vp->mode|=is_refer;
 		}
 		if _oT(vl&&(vl->mode<refer_max))
 		{
@@ -1214,7 +1209,7 @@ void refer_unset(var *rp)
 			if _oF(vl->mode==0)
 			{
 				vmat_delete_index(_refpool_vmat,(u64)vp);
-				var_free(vp);
+				vp->mode&=~is_refer;
 			}
 		}
 	}
