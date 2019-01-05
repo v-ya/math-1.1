@@ -3,11 +3,15 @@
 
 var* new_addr(var *addr, int af, u32 auth);
 u64 new_sid(int af, int type, int ptc, int *psock);
+u64 copy_sid(u64 sid, var **v, int *swap);
 var* get_sid(u64 sid);
 void close_sid(u64 sid);
 void clear_sid(void);
 var* get_sock(var *sid, int *sock);
+void set_sock(var *sid, int sock);
 var* get_af(var *sid, int *af);
+var* get_type(var *sid, int *type);
+var* get_ptc(var *sid, int *ptc);
 var* get_addr_ipv4(var *addr, u32 *ipv4);
 void set_addr_ipv4(var *addr, u32 ipv4);
 var* get_addr_port(var *addr, u16 *port);

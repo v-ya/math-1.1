@@ -30,6 +30,11 @@
 		tcp	sint	0	r	IPPROTO_TCP
 			// tcp
 	}
+	shut	vlist	0	r	{
+		rd	ulong	0	r	SHUT_RD
+		wr	ulong	0	r	SHUT_WR
+		rdwr	ulong	0	r	SHUT_RDWR
+	}
 	address	fun	0	r	addr_fun(address)
 		// var object = address(var object ,af.?, ...);
 		// inet = address(var object ,af.inet[, znum ipv4[, znum port]]);
@@ -52,5 +57,11 @@
 		// ulong recv(sid,array,size);
 		// ulong recv(sid,array,at,size);
 		// ulong recv(znum,byte[],znum,znum);
+	listen	fun	0	r	addr_fun(listen)
+		// [-1|0] = listen(ulong sid, znum limit);
+	accept	fun	0	r	addr_fun(accept)
+		// ulong sid = accept(ulong sid);
+	shutdown fun	0	r	addr_fun(shutdown)
+		// [-1|0] = shutdown(ulong sid, shut.?);
 }
 

@@ -8,6 +8,9 @@ func(bind);
 func(connect);
 func(send);
 func(recv);
+func(listen);
+func(accept);
+func(shutdown);
 
 #endif
 

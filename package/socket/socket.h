@@ -8,9 +8,9 @@
 #include "socket.func.h"
 #define AUTHOR			"system"
 #define PACKAGE			"socket"
-#define PACKAGE_major		0
+#define PACKAGE_major		1
 #define PACKAGE_minor		0
-#define PACKAGE_revision	1
+#define PACKAGE_revision	0
 #define PACKAGE_value		(PACKAGE_major<<16|PACKAGE_minor<<8|PACKAGE_revision)
 
 #define SID		"sid"

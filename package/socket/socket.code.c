@@ -28,8 +28,11 @@ u64 new_sid(int af, int type, int ptc, int *psock)
 	vp=base->create_vlist(_sid,NULL,sid,auth_read);
 	if _oF(!vp) goto Err;
 	
-	sock=socket(af,type,ptc);
-	if _oF(sock<0) goto Err;
+	if _oT(psock)
+	{
+		*psock=sock=socket(af,type,ptc);
+		if _oF(sock<0) goto Err;
+	}
 	
 	if _oF(!base->create_sint(vp,SID_SOCK,0,auth_read,sock)) goto Err;
 	if _oF(!base->create_sint(vp,SID_AF,0,auth_read,af)) goto Err;
@@ -41,10 +44,65 @@ u64 new_sid(int af, int type, int ptc, int *psock)
 	if _oF(!(va=base->create_vlist(vp,SID_PEER,0,auth_read))) goto Err;
 	if _oF(!new_addr(va,af,auth_read)) goto Err;
 	
-	if _oT(psock) *psock=sock;
 	return sid;
 	Err:
 	if _oF(sock>=0) close(sock);
+	base->vmat_delete_index(_sid_vm,sid);
+	return 0;
+}
+
+u64 copy_sid(u64 sid, var **v, int *swap)
+{
+	int sock,af,type,ptc;
+	u32 ipv4;
+	u16 port;
+	var *vp,*vs,*va;
+	
+	vs=get_sid(sid);
+	if _oF(!vs) return 0;
+	do
+	{
+		sid=base->get_sid();
+	}
+	while(base->vmat_find_index(_sid_vm,sid));
+	
+	if _oF(!get_sock(vs,&sock)) goto Err;
+	if _oF(swap)
+	{
+		af=*swap;
+		*swap=sock;
+		sock=af;
+	}
+	if _oF(!get_af(vs,&af)) goto Err;
+	if _oF(!get_type(vs,&type)) goto Err;
+	if _oF(!get_ptc(vs,&ptc)) goto Err;
+	
+	vp=base->create_vlist(_sid,NULL,sid,auth_read);
+	if _oF(!vp) goto Err;
+	
+	if _oF(!base->create_sint(vp,SID_SOCK,0,auth_read,sock)) goto Err;
+	if _oF(!base->create_sint(vp,SID_AF,0,auth_read,af)) goto Err;
+	if _oF(!base->create_sint(vp,SID_TYPE,0,auth_read,type)) goto Err;
+	if _oF(!base->create_sint(vp,SID_PTC,0,auth_read,ptc)) goto Err;
+	
+	if (!(va=base->var_find(vs,SID_LOCAL))) goto Err;
+	get_addr_ipv4(va,&ipv4);
+	get_addr_port(va,&port);
+	if _oF(!(va=base->create_vlist(vp,SID_LOCAL,0,auth_read))) goto Err;
+	if _oF(!new_addr(va,af,auth_read)) goto Err;
+	set_addr_ipv4(va,ipv4);
+	set_addr_port(va,port);
+	if (!(va=base->var_find(vs,SID_PEER))) goto Err;
+	get_addr_ipv4(va,&ipv4);
+	get_addr_port(va,&port);
+	if _oF(!(va=base->create_vlist(vp,SID_PEER,0,auth_read))) goto Err;
+	if _oF(!new_addr(va,af,auth_read)) goto Err;
+	set_addr_ipv4(va,ipv4);
+	set_addr_port(va,port);
+	
+	if _oT(v) *v=vp;
+	return sid;
+	Err:
 	base->vmat_delete_index(_sid_vm,sid);
 	return 0;
 }
@@ -66,7 +124,7 @@ void close_sid(u64 sid)
 	if _oT(vp && get_sock(vp,&sock))
 	{
 		base->vmat_delete_index(_sid_vm,sid);
-		close(sock);
+		if _oT(sock>=0) close(sock);
 	}
 }
 
@@ -109,12 +167,36 @@ var* get_sock(var *sid, int *sock)
 	return sid;
 }
 
+void set_sock(var *sid, int sock)
+{
+	sid=base->var_find(sid,SID_SOCK);
+	if _oT(sid && (sid->type&type_znum)) sid->v.v_long=sock;
+}
+
 var* get_af(var *sid, int *af)
 {
 	sid=base->var_find(sid,SID_AF);
 	if _oF(!sid) return NULL;
 	if _oF(!(sid->type&type_znum)) return NULL;
 	if _oT(af) *af=sid->v.v_int;
+	return sid;
+}
+
+var* get_type(var *sid, int *type)
+{
+	sid=base->var_find(sid,SID_TYPE);
+	if _oF(!sid) return NULL;
+	if _oF(!(sid->type&type_znum)) return NULL;
+	if _oT(type) *type=sid->v.v_int;
+	return sid;
+}
+
+var* get_ptc(var *sid, int *ptc)
+{
+	sid=base->var_find(sid,SID_PTC);
+	if _oF(!sid) return NULL;
+	if _oF(!(sid->type&type_znum)) return NULL;
+	if _oT(ptc) *ptc=sid->v.v_int;
 	return sid;
 }
 
@@ -130,10 +212,11 @@ var* get_addr_ipv4(var *addr, u32 *ipv4)
 void set_addr_ipv4(var *addr, u32 ipv4)
 {
 	addr=base->var_find(addr,SID_ADDR_IPV4);
-	if _oF(!addr) return ;
-	if _oF(!(addr->type&type_znum)) return ;
-	addr->v.v_int=ipv4;
-	base->var_fixvalue(addr);
+	if _oT(addr && (addr->type&type_znum))
+	{
+		addr->v.v_int=ipv4;
+		base->var_fixvalue(addr);
+	}
 }
 
 var* get_addr_port(var *addr, u16 *port)
@@ -148,22 +231,24 @@ var* get_addr_port(var *addr, u16 *port)
 void set_addr_port(var *addr, u16 port)
 {
 	addr=base->var_find(addr,SID_ADDR_PORT);
-	if _oF(!addr) return ;
-	if _oF(!(addr->type&type_znum)) return ;
-	addr->v.v_word=port;
-	base->var_fixvalue(addr);
+	if _oT(addr && (addr->type&type_znum))
+	{
+		addr->v.v_word=port;
+		base->var_fixvalue(addr);
+	}
 }
 
 struct sockaddr* get_local_addr(int sock, int af, int *addrlen)
 {
 	struct sockaddr *a;
+	int len;
 	switch (af)
 	{
 		case AF_INET:
 			a=malloc(sizeof(struct sockaddr_in));
 			if _oF(!a) goto Err_mem;
 			if _oT(addrlen) *addrlen=sizeof(struct sockaddr_in);
-			getsockname(sock,a,NULL);
+			getsockname(sock,a,&len);
 			return a;
 	}
 	Err_mem:
@@ -174,13 +259,14 @@ struct sockaddr* get_local_addr(int sock, int af, int *addrlen)
 struct sockaddr* get_peer_addr(int sock, int af, int *addrlen)
 {
 	struct sockaddr *a;
+	int len;
 	switch (af)
 	{
 		case AF_INET:
 			a=malloc(sizeof(struct sockaddr_in));
 			if _oF(!a) goto Err_mem;
 			if _oT(addrlen) *addrlen=sizeof(struct sockaddr_in);
-			getpeername(sock,a,NULL);
+			getpeername(sock,a,&len);
 			return a;
 	}
 	Err_mem:
@@ -196,14 +282,20 @@ struct sockaddr* get_addr(var *addr, int af, int *addrlen)
 	switch (af)
 	{
 		case AF_INET:
-			if _oF(!get_addr_ipv4(addr,&ipv4)) goto Err;
-			if _oF(!get_addr_port(addr,&port)) goto Err;
+			if _oT(addr)
+			{
+				if _oF(!get_addr_ipv4(addr,&ipv4)) goto Err;
+				if _oF(!get_addr_port(addr,&port)) goto Err;
+			}
 			a=malloc(sizeof(struct sockaddr_in));
 			if _oF(!a) goto Err_mem;
 			if _oT(addrlen) *addrlen=sizeof(struct sockaddr_in);
-			((struct sockaddr_in*)a)->sin_family=AF_INET;
-			((struct sockaddr_in*)a)->sin_port=htons(port);
-			((struct sockaddr_in*)a)->sin_addr.s_addr=htonl(ipv4);
+			if _oT(addr)
+			{
+				((struct sockaddr_in*)a)->sin_family=AF_INET;
+				((struct sockaddr_in*)a)->sin_port=htons(port);
+				((struct sockaddr_in*)a)->sin_addr.s_addr=htonl(ipv4);
+			}
 			return a;
 	}
 	Err:

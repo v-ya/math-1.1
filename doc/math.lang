@@ -274,6 +274,7 @@
 			<keyword>try</keyword>
 			<keyword>include</keyword>
 			<keyword>debug</keyword>
+			<keyword>args</keyword>
 		</context>
 		<context id="cv_g" style-ref="cv">
 			<prefix>\.?</prefix>
@@ -381,6 +382,12 @@
 			<keyword>allowarray</keyword>
 			<keyword>onlyarray</keyword>
 		</context>
+		<context id="cv_args" style-ref="cv">
+			<prefix>(?&lt;!\w)\.args\.</prefix>
+			<keyword>argv</keyword>
+			<keyword>exec</keyword>
+			<keyword>script</keyword>
+		</context>
 		
 		<context id="calc" class="no-spell-check">
 			<start> ?</start>
@@ -415,6 +422,7 @@
 				<context ref="cv_sys"/>
 				<context ref="cv_const"/>
 				<context ref="cv_type"/>
+				<context ref="cv_args"/>
 				<context ref="cv_a"/>
 				<context ref="cv_g"/>
 				<context ref="var"/>

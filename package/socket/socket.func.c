@@ -44,7 +44,7 @@ func(socket)
 {
 	static char *label=label_name("socket");
 	static u32 type_3[3]={type_znum,type_znum,type_znum};
-	int af,type,ptc;
+	int af,type,ptc,sock;
 	if _oF(argc!=3) return base->get_error(errid_FunArgvType,label);
 	if _oF(base->check_varlist(argv,3,type_3)) return base->get_error(errid_FunArgvType,label);
 	af=argv->v->v.v_int;
@@ -71,7 +71,7 @@ func(socket)
 	}
 	return ret;
 	_new:
-	ret->v.v_long=new_sid(af,type,ptc,NULL);
+	ret->v.v_long=new_sid(af,type,ptc,&sock);
 	if _oF(!ret->v.v_long) return base->get_error(errid_MemLess,label);
 	return ret;
 }
@@ -301,17 +301,101 @@ func(recv)
 
 func(listen)
 {
+	static char *label=label_name("listen");
+	static u32 type_2[2]={type_znum,type_znum};
+	u64 sid,n;
+	var *s;
+	int sock,af,addrlen;
+	struct sockaddr *a;
 	
+	if _oF(argc!=2) return base->get_error(errid_FunArgvType,label);
+	if _oF(base->check_varlist(argv,2,type_2)) return base->get_error(errid_FunArgvType,label);
+	
+	sid=argv->v->v.v_long;
+	n=argv->r->v->v.v_long;
+	s=get_sid(sid);
+	if _oF(!get_sock(s,&sock)) goto Err;
+	if _oF(!get_af(s,&af)) goto Err;
+	ret->type=type_long;
+	ret->v.v_long=listen(sock,n);
+	if _oT(ret->v.v_long>=0)
+	{
+		a=get_local_addr(sock,af,&addrlen);
+		if _oF(!a) return base->get_error(errid_MemLess,label);
+		set_addr(base->var_find(s,SID_LOCAL),af,a);
+		free(a);
+	}
+	return ret;
+	Err:
+	ret->type=type_long;
+	ret->v.v_long=-1;
+	return ret;
 }
 
 func(accept)
 {
+	static char *label=label_name("accept");
+	static u32 type_1[1]={type_znum};
+	u64 sid;
+	var *addr,*s;
+	struct sockaddr *a=NULL;
+	int sock=-1,af,addrlen;
 	
+	if _oF(argc!=1) return base->get_error(errid_FunArgvType,label);
+	if _oF(base->check_varlist(argv,1,type_1)) return base->get_error(errid_FunArgvType,label);
+	
+	ret->type=type_long|type_unsign;
+	sid=argv->v->v.v_long;
+	sid=copy_sid(sid,&s,&sock);
+	if _oF(!sid) goto Err;
+	if _oF(!get_af(s,&af)) goto Err;
+	a=get_addr(NULL,af,&addrlen);
+	if _oF(!a)
+	{
+		close_sid(sid);
+		return base->get_error(errid_MemLess,label);
+	}
+	sock=accept(sock,a,&addrlen);
+	if _oT(sock>=0)
+	{
+		set_sock(s,sock);
+		set_addr(base->var_find(s,SID_PEER),af,a);
+		ret->v.v_long=sid;
+	}
+	else
+	{
+		close_sid(sid);
+		ret->v.v_long=0;
+	}
+	free(a);
+	return ret;
+	Err:
+	if _oF(sid) close_sid(sid);
+	ret->v.v_long=0;
+	return ret;
 }
 
 func(shutdown)
 {
+	static char *label=label_name("shutdown");
+	static u32 type_2[2]={type_znum,type_znum};
+	u64 sid,shut;
+	int sock;
 	
+	if _oF(argc!=2) return base->get_error(errid_FunArgvType,label);
+	if _oF(base->check_varlist(argv,2,type_2)) return base->get_error(errid_FunArgvType,label);
+	
+	sid=argv->v->v.v_long;
+	shut=argv->r->v->v.v_long;
+	if _oF(!get_sock(get_sid(sid),&sock)) goto Err;
+	ret->type=type_long;
+	ret->v.v_long=shutdown(sock,shut);
+	
+	return ret;
+	Err:
+	ret->type=type_long;
+	ret->v.v_long=-1;
+	return ret;
 }
 
 
