@@ -51,6 +51,23 @@
 			// allow == 1: name
 			// allow == 2: head
 			// allow == 3: all
+		thread	fun	0	r	addr_fun(thread_create)
+			// ulong pthid = [object].thread({code});
+			// ulong pthid = [object].thread("thread_name",{code});
+		lock	fun	0	r	addr_fun(lock_create)
+			// [object].lock("locker");
+				// [].locker.used	:ulong	: 被引用数
+				// [].locker.create	:fun	: 创建锁值
+				// [].locker.remove	:fun	: 删除锁值
+					// [].locker.create(string value, znum value, ...)
+					// [].locker.remove(string value, znum value, ...)
+				// [].locker.use	:key	: 获取锁
+					// [].locker.use cal();			占用整个锁树
+					// [].locker.usr:value cal();		占用锁索引 "value"
+					// [].locker.usr:123 cal();		占用锁索引 123
+					// [].locker.usr@string-var cal();	占用锁索引，索引为 string-var 内的字符串
+					// [].locker.usr@znum-var cal();	占用锁索引，索引为 znum-var 整数
+				// [].locker.lock("locker");	: 创建锁树内子树
 		
 		// 占位符
 		_vt_	void	0	r
@@ -69,24 +86,85 @@
 	_package	-export	.package
 	// 线程相关
 	thread	vlist	0	r	{
-		this	vmat	0	rc
-		text	vmat	0	rc
-		temp	vmat	0	rc
-		sbuf	vmat	0	rc
-		kill	vlist	0	rc
-		error	vlist	0	rc
-		buerr	vlist	0	rc
+		sys	vlist	0	rc	{
+			this	vmat	0	rc
+			text	vmat	0	rc
+			temp	vmat	0	rc
+			sbuf	vmat	0	rc
+			kill	vlist	0	rc
+			error	vlist	0	rc
+			buerr	vlist	0	rc
+		}
+		_pt_this	-export	.thread.sys.this
+		_pt_text	-export	.thread.sys.text
+		_pt_temp	-export	.thread.sys.temp
+		_pt_sbuf	-export	.thread.sys.sbuf
+		_pt_kill	-export .thread.sys.kill
+		_pt_error	-export	.thread.sys.error
+		_pt_buerr	-export	.thread.sys.buerr
 		
-		_pt_this	-export	.thread.this
-		_pt_text	-export	.thread.text
-		_pt_temp	-export	.thread.temp
-		_pt_sbuf	-export	.thread.sbuf
-		_pt_kill	-export .thread.kill
-		_pt_error	-export	.thread.error
-		_pt_buerr	-export	.thread.buerr
+		// 线程相关变量
+		thid	vmat	0	r
+		attr	vmat	0	r	{
+			detach_state	sint	0	r
+				// 线程的分离状态
+				// 0:	joinable	非分离
+				// 1:	detach		分离
+			sched_policy	sint	0	r
+				// 线程的调度策略
+			sched_param	sint	0	r
+				// 线程的调度参数
+			inheritance	sint	0	r
+				// 线程的继承性
+			scope		sint	0	r
+				// 线程的作用域
+			guard_size	ulong	0	r
+				// 线程栈末尾警戒缓冲区大小
+			stack_addr	ulong	0	r
+				// 线程栈位置
+			stack_size	ulong	0	r
+				// 线程栈大小
+			struct		void	0	r
+				// 线程属性内部结构
+			set	vmat	0	r	{
+				// 线程属性设置函数
+				detach_state	fun	0	r
+				sched_policy	fun	0	r
+				sched_param	fun	0	r
+				inheritance	fun	0	r
+				scope		fun	0	r
+				stack		fun	0	r
+				stack_addr	fun	0	r
+				stack_size	fun	0	r
+				guard_size	fun	0	r
+			}
+		}
+		
+		_thread_thid	-export	.thread.thid
+		_thread_attr	-export	.thread.attr.struct
+		_thattr_detach_state	-export	.thread.attr.detach_state
+		_thattr_sched_policy	-export	.thread.attr.sched_policy
+		_thattr_sched_param	-export	.thread.attr.sched_param
+		_thattr_inheritance	-export	.thread.attr.inheritance
+		_thattr_scope		-export	.thread.attr.scope
+		_thattr_guard_size	-export	.thread.attr.guard_size
+		_thattr_stack_addr	-export	.thread.attr.stack_addr
+		_thattr_stack_size	-export	.thread.attr.stack_size
 		
 		// 线程相关函数
 		self	fun	0	r	addr_fun(thread_self)
+			// ulong pthid = self([.void]);	返回当前线程的 pthid
+		kill	fun	0	r	addr_fun(thread_kill)
+			// [-1|0] = kill("name");	发送结束信号给名称为 name 的子线程
+			// [-1|0] = kill(znum id);	发送结束信号给 pthid 为 id 的子线程
+		wait	fun	0	r	addr_fun(thread_wait)
+			// wait([void]);		等待所有子线程结束
+			// wait("name");		等待名称为 name 的子线程结束
+			// wait(znum id);		等待 pthid 为 id 的子线程结束
+		sleep	fun	0	r	addr_fun(sleep)
+		msleep	fun	0	r	addr_fun(msleep)
+		usleep	fun	0	r	addr_fun(usleep)
+			// [m|u]sleep(znum time);	sleep time [m|u]s
 	}
 	// 引用池
 	refpool	vmat	0	rc
@@ -353,6 +431,9 @@
 		clock	fun	0	r	addr_fun(clock)
 			// ulong .time.clock(); => clock()
 			// 自进程开始经历的滴答，单位见 .sys.info.clocks_per_sec
+		sleep	-link	.thread.sleep
+		msleep	-link	.thread.msleep
+		usleep	-link	.thread.usleep
 	}
 	// 文件相关
 	file	vlist	0	r	{

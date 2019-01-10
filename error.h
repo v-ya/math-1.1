@@ -11,6 +11,8 @@
 		#define errid_IntFuncErr	(errty_CodeInt|0x02)
 		#define errid_IntDivZero	(errty_CodeInt|0x03)
 		#define errid_IntKilled		(errty_CodeInt|0x04)
+		#define errid_IntThreadInit	(errty_CodeInt|0x05)
+		#define errid_IntInitScript	(errty_CodeInt|0x06)
 	// grammar
 	#define errty_CodeGra	errcl_Code|0x0200
 		#define errid_GraQuoVarname	(errty_CodeGra|0x01)
@@ -35,6 +37,7 @@
 		#define errid_SysFileStringSize	(errty_CodeSys|0x0c)
 		#define errid_SysFileErrorWrite	(errty_CodeSys|0x0d)
 		#define errid_SysFileErrorRead	(errty_CodeSys|0x0e)
+		#define errid_SysLockTakeup	(errty_CodeSys|0x0f)
 	#define errty_CodeFun	errcl_Code|0x0400
 		#define errid_FunArgvType	(errty_CodeFun|0x01)
 		#define errid_FunNotfindLabel	(errty_CodeFun|0x02)
@@ -68,6 +71,7 @@
 		#define errid_VarNotIndex	(errty_VarType|0x08)
 		#define errid_VarUnknowFun	(errty_VarType|0x09)
 		#define errid_VarNotBytesArray	(errty_VarType|0x0a)
+		#define errid_VarErrorCaller	(errty_VarType|0x0b)
 	// Var Auth
 	#define errty_VarAuth	errcl_Var|0x0300
 		#define errid_VarNotRetype	(errty_VarAuth|0x01)

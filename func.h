@@ -25,6 +25,17 @@ extern var *_pt_sbuf;
 extern var *_pt_kill;
 extern var *_pt_error;
 extern var *_pt_buerr;
+// 线程创建相关
+extern var *_thread_thid;
+extern var *_thread_attr;
+extern var *_thattr_detach_state;
+extern var *_thattr_sched_policy;
+extern var *_thattr_sched_param;
+extern var *_thattr_inheritance;
+extern var *_thattr_scope;
+extern var *_thattr_guard_size;
+extern var *_thattr_stack_addr;
+extern var *_thattr_stack_size;
 // 引用池
 extern var *_refpool;
 // 限制

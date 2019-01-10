@@ -156,6 +156,7 @@
 			<keyword>run</keyword>
 			<keyword>try</keyword>
 			<keyword>include</keyword>
+			<keyword>use</keyword>
 		</context>
 		<context id="fun_a" style-ref="fun">
 			<prefix>(?&lt;!\w)\.</prefix>
@@ -213,15 +214,39 @@
 			<keyword>replace</keyword>
 			<keyword>sub</keyword>
 			<keyword>get_index</keyword>
+			<keyword>thread</keyword>
+			<keyword>lock</keyword>
+			<keyword>create</keyword>
+			<keyword>remove</keyword>
 		</context>
 		<context id="fun_thread" style-ref="fun">
 			<prefix>(?&lt;!\w)\.thread\.</prefix>
 			<keyword>self</keyword>
+			<keyword>kill</keyword>
+			<keyword>wait</keyword>
+			<keyword>sleep</keyword>
+			<keyword>msleep</keyword>
+			<keyword>usleep</keyword>
+		</context>
+		<context id="fun_thread_attr_set" style-ref="fun">
+			<prefix>(?&lt;!\w)\.thread\.attr\.set\.</prefix>
+			<keyword>detach_state</keyword>
+			<keyword>sched_policy</keyword>
+			<keyword>sched_param</keyword>
+			<keyword>inheritance</keyword>
+			<keyword>scope</keyword>
+			<keyword>stack</keyword>
+			<keyword>stack_addr</keyword>
+			<keyword>stack_size</keyword>
+			<keyword>guard_size</keyword>
 		</context>
 		<context id="fun_time" style-ref="fun">
 			<prefix>(?&lt;!\w)\.time\.</prefix>
 			<keyword>stamp</keyword>
 			<keyword>clock</keyword>
+			<keyword>sleep</keyword>
+			<keyword>msleep</keyword>
+			<keyword>usleep</keyword>
 		</context>
 		<context id="fun_file" style-ref="fun">
 			<prefix>(?&lt;!\w)\.file\.</prefix>
@@ -287,6 +312,12 @@
 		</context>
 		<context id="cv_thread" style-ref="cv">
 			<prefix>(?&lt;!\w)\.thread\.</prefix>
+			<keyword>sys</keyword>
+			<keyword>thid</keyword>
+			<keyword>attr</keyword>
+		</context>
+		<context id="cv_thread_sys" style-ref="cv">
+			<prefix>(?&lt;!\w)\.thread\.sys\.</prefix>
 			<keyword>this</keyword>
 			<keyword>text</keyword>
 			<keyword>temp</keyword>
@@ -294,6 +325,19 @@
 			<keyword>kill</keyword>
 			<keyword>error</keyword>
 			<keyword>buerr</keyword>
+		</context>
+		<context id="cv_thread_attr" style-ref="cv">
+			<prefix>(?&lt;!\w)\.thread\.attr\.</prefix>
+			<keyword>detach_state</keyword>
+			<keyword>sched_policy</keyword>
+			<keyword>sched_param</keyword>
+			<keyword>inheritance</keyword>
+			<keyword>scope</keyword>
+			<keyword>guard_size</keyword>
+			<keyword>stack_addr</keyword>
+			<keyword>stack_size</keyword>
+			<keyword>struct</keyword>
+			<keyword>set</keyword>
 		</context>
 		<context id="cv_sys" style-ref="cv">
 			<prefix>(?&lt;!\w)\.sys\.</prefix>
@@ -406,14 +450,15 @@
 				<context ref="bin"/>
 				<context ref="dec"/>
 				<context ref="key_a"/>
-				<context ref="key_g"/>
 				<context ref="fun_a"/>
-				<context ref="fun_g"/>
+				<context ref="fun_thread_attr_set"/>
 				<context ref="fun_thread"/>
 				<context ref="fun_time"/>
 				<context ref="fun_file"/>
 				<context ref="fun_try"/>
 				<context ref="fun_debug"/>
+				<context ref="cv_thread_sys"/>
+				<context ref="cv_thread_attr"/>
 				<context ref="cv_thread"/>
 				<context ref="cv_sys_version"/>
 				<context ref="cv_sys_limit"/>
@@ -424,6 +469,8 @@
 				<context ref="cv_type"/>
 				<context ref="cv_args"/>
 				<context ref="cv_a"/>
+				<context ref="key_g"/>
+				<context ref="fun_g"/>
 				<context ref="cv_g"/>
 				<context ref="var"/>
 				<context ref="oper"/>

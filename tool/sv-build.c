@@ -1,6 +1,16 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+void lock_alloc(int id)
+{
+
+}
+void lock_free(int id)
+{
+
+}
+
 #include "../type.h"
 #include "../string.h"
 #include "../var.h"

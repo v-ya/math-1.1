@@ -233,11 +233,7 @@ var* run_fun_vlist(var *func, int argc, vlist *argv)
 			vl->v=NULL;
 		}
 	}
-	if _oF(func->inode<=1)
-	{
-		if _oT(ret&&(!(ret->type&type_err)))
-		ret=NULL;
-	}
+	if _oT(ret && !(ret->type&type_spe)) var_save(ret);
 	var_free(_vn_);
 	var_free(func);
 	return ret;
@@ -309,7 +305,6 @@ char* run_fun(char *exp, var *root, var **function)
 				(*function)->v.v_long=0;
 			}
 		}
-		else var_save(*function);
 	}
 	else *function=get_error(errid_VarUnknowFun,label);
 	// 清除获取的变量链
@@ -460,6 +455,7 @@ var* get_var(char *exp, char **expp, int *array_n)
 				var_free(func);
 				goto Err;
 			}
+			// 需要重写
 			if _oF(vp->inode==0) ;
 			else if _oF((!(vp->mode&free_temp))&&(vp->inode==1))
 			{
@@ -1949,7 +1945,7 @@ var* run_script(var *pt_text, var *pt_this)
 	if _oF(!script) goto End;
 	while(*script)
 	{
-		if _oF(pt_kill&&pt_kill->v.v_void)
+		if _oF(pt_kill&&pt_kill->mode)
 		{
 			vp=get_error(errid_IntKilled,label);
 			goto Err;

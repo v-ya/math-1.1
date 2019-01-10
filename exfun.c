@@ -1,9 +1,9 @@
 #include "main.h"
 
-/*
+
 static char *type_name="_type_";
 
-s32 type_check(var *obj, char *type)
+int type_check(var *obj, char *type)
 {
 	var *vp;
 	char *st;
@@ -27,8 +27,6 @@ var* type_set(var *obj, var *type)
 {
 	static char *label="type_set";
 	vlist *vl;
-	if _oF(!(obj->mode&auth_write)) return get_error(errid_VarNotWrite,label);
-	if _oF(!(obj->mode&auth_retype)) return get_error(errid_VarNotRetype,label);
 	if _oT(obj->type&type_vlist)
 	{
 		vl=vlist_find(obj->v.v_vlist,type_name);
@@ -56,11 +54,24 @@ var* type_set(var *obj, var *type)
 	return get_error(errid_MemLess,label);
 }
 
-var* type_empty(var *obj)
+var* type_set_auth(var *obj, var *type)
 {
-	return type_set(obj,_type_null);
+	static char *label="type_set_auth";
+	if _oF(!(obj->mode&auth_write)) return get_error(errid_VarNotWrite,label);
+	return type_set(obj,type);
 }
-*/
+
+int type_isempty(var *obj)
+{
+	return !var_find(obj,type_name);
+}
+
+int object_isempty(var *obj)
+{
+	if _oF(obj->type&type_vlist) return !obj->v.v_vlist;
+	else if _oT(obj->type&type_vmat) return !obj->v.v_vmat->number;
+	else return 0;
+}
 
 // var == ok || NULL == fail
 var* create_var(var *obj, char *name, u64 head, u32 tlog, u32 length, u32 auth)
@@ -260,10 +271,12 @@ var* create_refer(var *obj, char *name, u64 head, u32 auth, var *value)
 u64 get_sid(void)
 {
 	u64 sid;
+	lock_alloc(lock_sid);
 	do
 	{
 		sid=(_info_sid->v.v_long)++;
 	} while(!sid);
+	lock_free(lock_sid);
 	return sid;
 }
 

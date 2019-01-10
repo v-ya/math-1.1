@@ -7,6 +7,8 @@ ss(errcl_Code_S)	"代码基类";
 		ss(errid_IntFuncErr_S)		"函数内部错误";
 		ss(errid_IntDivZero_S)		"除零错误中断";
 		ss(errid_IntKilled_S)		"线程意外终止";
+		ss(errid_IntThreadInit_S)	"线程初始化失败";
+		ss(errid_IntInitScript_S)	"init 脚本执行失败";
 	ss(errty_CodeGra_S)	"语法类别";
 		ss(errid_GraQuoVarname_S)	"变量名称非法";
 		ss(errid_GraBraMismatch_S)	"缺少括号匹配";
@@ -30,6 +32,7 @@ ss(errcl_Code_S)	"代码基类";
 		ss(errid_SysFileStringSize_S)	"文件转换字符串超出大小限制";
 		ss(errid_SysFileErrorWrite_S)	"写文件出错";
 		ss(errid_SysFileErrorRead_S)	"读文件出错/预期外结束";
+		ss(errid_SysLockTakeup_S)	"目标锁已被占用";
 	ss(errty_CodeFun_S)	"函数类别";
 		ss(errid_FunArgvType_S)		"函数传参类型错误";
 		ss(errid_FunNotfindLabel_S)	"不能找到标签";
@@ -59,6 +62,7 @@ ss(errcl_Var_S)		"变量基类";
 		ss(errid_VarNotIndex_S)		"变量不是索引类型(String|Number)";
 		ss(errid_VarUnknowFun_S)	"未知函数类型";
 		ss(errid_VarNotBytesArray_S)	"变量不是 Byte[]";
+		ss(errid_VarErrorCaller_S)	"调用变量错误";
 	ss(errty_VarAuth_S)	"权限类别";
 		ss(errid_VarNotRetype_S)	"无权重置变量类型";
 		ss(errid_VarNotRead_S)		"无权读取变量";
@@ -83,6 +87,8 @@ static char *errty_CodeInt_idA[]={
 	errid_IntFuncErr_S,
 	errid_IntDivZero_S,
 	errid_IntKilled_S,
+	errid_IntThreadInit_S,
+	errid_IntInitScript_S,
 } ;
 
 static char *errty_CodeGra_idA[]={
@@ -112,6 +118,7 @@ static char *errty_CodeSys_idA[]={
 	errid_SysFileStringSize_S,
 	errid_SysFileErrorWrite_S,
 	errid_SysFileErrorRead_S,
+	errid_SysLockTakeup_S,
 } ;
 
 static char *errty_CodeFun_idA[]={
@@ -163,6 +170,7 @@ static char *errty_VarType_idA[]={
 	errid_VarNotIndex_S,
 	errid_VarUnknowFun_S,
 	errid_VarNotBytesArray_S,
+	errid_VarErrorCaller_S,
 } ;
 
 static char *errty_VarAuth_idA[]={

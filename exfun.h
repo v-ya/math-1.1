@@ -3,11 +3,12 @@
 
 #ifndef __nosym__
 
-/*
-s32 type_check(var *obj, char *type);
+
+int type_check(var *obj, char *type);
 var* type_set(var *obj, var *type);
-var* type_empty(var *obj);
-*/
+var* type_set_auth(var *obj, var *type);
+int type_isempty(var *obj);
+int object_isempty(var *obj);
 var* create_var(var *obj, char *name, u64 head, u32 tlog, u32 length, u32 auth);
 void remove_var(var *obj, char *name, u64 head);
 var* create_void(var *obj, char *name, u64 head, u32 auth, void *value);

@@ -104,16 +104,18 @@ int main(int argc, char *argv[])
 	pt_text.type=type_string;
 	pt_text.mode=auth_read|free_temp;
 	pt_text.v.v_string=exp;
-	
-	if (init_args(argc,argv)) get_error(errid_MemLess,"init_args");
+	if (thread_init()) get_error(errid_IntThreadInit,"thread_init");
+	else if (init_args(argc,argv)) get_error(errid_MemLess,"init_args");
 	else 
 	{
-		if _oF(init_run()) printf("error: init.math 初始化失败\n");
+		if _oF(init_run()) get_error(errid_IntInitScript,"init_run");
 		else run_script(&pt_text,_vm_user);
 	}
 	print_error();
 	clr_error();
 	
+	thread_waitall();
+	thread_uini();
 	free(exp);
 	return 0;
 }

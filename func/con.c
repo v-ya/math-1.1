@@ -157,7 +157,7 @@ func(import)
 	if _oF(!vl) goto Err_mem;
 	vl->v=var_alloc(tlog_refer,leng_no);
 	if _oF(!vl->v) goto Err_mem;
-	(vl->v->inode)++;
+	var_save(vl->v);
 	if _oF(root->type&type_vlist) root->v.v_vlist=vlist_insert(root->v.v_vlist,vl);
 	else vmat_insert(root->v.v_vmat,vl);
 	refer_set(vl->v,vp);

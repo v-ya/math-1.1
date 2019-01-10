@@ -14,7 +14,7 @@ var* sbuf_alloc(void)
 	if _oF(!vl) return get_error(errid_MemLess,label);
 	vp=var_alloc(tlog_byte,_lim_sbuf_base->v.v_long);
 	if _oF(!vp) return get_error(errid_MemLess,label);
-	vl->v=vp;
+	vlist_link(vl,vp);
 	return vp;
 }
 // 删除 sbuf

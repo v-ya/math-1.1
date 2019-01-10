@@ -241,7 +241,8 @@ keyword(while)
 {
 	static char *label=".while";
 	char *exp_c,*exp_x,*exp_e;
-	var *vp;
+	var *vp,*pt_kill;
+	pt_kill=ptvar_get(_pt_kill);
 	exp_c=*expp;
 	vp=cal(*expp,expp);
 	exp_x=*expp;
@@ -264,6 +265,7 @@ keyword(while)
 		if _oT(vpbool(vp))
 		{
 			var_free(vp);
+			if _oF(pt_kill&&pt_kill->mode) return get_error(errid_IntKilled,label);
 			vp=cal(exp_x,&exp_e);
 			if _oF(vp->type&type_spe)
 			{
