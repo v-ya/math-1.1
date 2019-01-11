@@ -246,6 +246,7 @@
 			<prefix>(?&lt;!\w)\.time\.</prefix>
 			<keyword>stamp</keyword>
 			<keyword>clock</keyword>
+			<keyword>ustamp</keyword>
 			<keyword>sleep</keyword>
 			<keyword>msleep</keyword>
 			<keyword>usleep</keyword>

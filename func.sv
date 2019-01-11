@@ -454,6 +454,9 @@
 		clock	fun	0	r	addr_fun(clock)
 			// ulong .time.clock(); => clock()
 			// 自进程开始经历的滴答，单位见 .sys.info.clocks_per_sec
+		ustamp	fun	0	r	addr_fun(ustamp)
+			// ulong .time.ustamp();
+			// 自 1970-01-01 经过的微秒数
 		sleep	-link	.thread.sleep
 		msleep	-link	.thread.msleep
 		usleep	-link	.thread.usleep

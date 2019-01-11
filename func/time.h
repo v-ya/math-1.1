@@ -6,6 +6,7 @@
 
 func(stamp);
 func(clock);
+func(ustamp);
 
 #endif
 

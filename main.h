@@ -10,6 +10,7 @@
 #include <time.h>
 #include <dlfcn.h>
 #include <unistd.h>
+#include <sys/time.h>
 #include "type.h"
 #include "limit.h"
 #include "string.h"
