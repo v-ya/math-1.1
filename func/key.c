@@ -114,6 +114,7 @@ keyword(function)
 	if _oF(!vl) goto Err_malloc;
 	vlist_link(vl,_vn_);
 	_vn_=NULL;
+	// define _text_ -rw-
 	while(is_space(*exp)) exp++;
 	vl=var_insert(root,"_text_",tlog_string,leng_no);
 	if _oF(!vl) goto Err_malloc;
@@ -125,6 +126,10 @@ keyword(function)
 		while(is_space(*exp)) exp++;
 	}
 	if _oF(*exp!=';') goto Err_notsem;
+	// define _takeup_ -r--
+	vp=create_var(root,"_takeup_",0,tlog_long,2,auth_read);
+	if _oF(!vp) goto Err_malloc;
+	vp->type|=type_unsign;
 	vp=NULL;
 	root->mode|=auth_run;
 	Err:

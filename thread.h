@@ -9,7 +9,6 @@ enum {
 	lock_ptvar,
 	lock_inode,
 	lock_vlist,
-	lock_vmat,
 	lock_vmatex,
 	lock_refer,
 	lock_sid,
@@ -39,6 +38,16 @@ void thread_wait(u64 pthid);
 void thread_waitall(void);
 int thread_getid(char *thread_name, u64 *pthid);
 int thread_kill(u64 pthid);
+// set attr
+int thattr_detach_state(int detach);
+int thattr_sched_policy(int policy);
+int thattr_sched_param(int param);
+int thattr_inheritance(int explicit);
+int thattr_scope(int scope);
+int thattr_guard_size(u64 guard_size);
+int thattr_stack_addr(u64 stack_addr);
+int thattr_stack_size(u64 stack_size);
+int thattr_stack(u64 stack_addr, u64 stack_size);
 
 #endif
 

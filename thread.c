@@ -11,6 +11,33 @@ static var _thread_kill_data = {
 } ;
 var *_thread_kill=&_thread_kill_data;
 
+// detach_state
+#if defined(PTHREAD_CREATE_JOINABLE) && defined(PTHREAD_CREATE_DETACHED)
+	#define _F_thattr_detach_state
+#endif
+// sched_policy
+#if defined(SCHED_OTHER) && defined(SCHED_FIFO) && defined(SCHED_RR)
+	#define _F_thattr_sched_policy
+#endif
+// sched_param
+#define _F_thattr_sched_param
+// inheritance
+#if defined(PTHREAD_INHERIT_SCHED) && defined(PTHREAD_EXPLICIT_SCHED)
+	#define _F_thattr_inheritance
+#endif
+// scope
+#if defined(PTHREAD_SCOPE_SYSTEM) && defined(PTHREAD_SCOPE_PROCESS)
+	#define _F_thattr_scope
+#endif
+// guard_size
+#define _F_thattr_guard_size
+// stack_addr 已弃用
+//#define _F_thattr_stack_addr
+// stack_size
+#define _F_thattr_stack_size
+// stack
+#define _F_thattr_stack
+
 int thread_init(void)
 {
 	s32 i;
@@ -24,6 +51,7 @@ int thread_init(void)
 	if _oF(pthread_attr_init(attr)) goto Err_i;
 	_thread_attr->v.v_void=attr;
 	// detach_state
+	#ifdef _F_thattr_detach_state
 	if _oF(pthread_attr_getdetachstate(attr,&i)) goto Err;
 	switch(i)
 	{
@@ -37,7 +65,11 @@ int thread_init(void)
 			_thattr_detach_state->v.v_long=-1;
 			break;
 	}
+	#else
+	_thattr_detach_state->v.v_long=-1;
+	#endif
 	// sched_policy
+	#ifdef _F_thattr_sched_policy
 	if _oF(pthread_attr_getschedpolicy(attr,&i)) goto Err;
 	switch(i)
 	{
@@ -54,11 +86,19 @@ int thread_init(void)
 			_thattr_sched_policy->v.v_long=-1;
 			break;
 	}
+	#else
+	_thattr_sched_policy->v.v_long=-1;
+	#endif
 	// sched_param
+	#ifdef _F_thattr_sched_param
 	if _oF(pthread_attr_getschedparam(attr,&sp)) goto Err;
 	_thattr_sched_param->v.v_int=sp.sched_priority;
 	var_fixvalue(_thattr_sched_param);
+	#else
+	_thattr_sched_param->v.v_long=-1;
+	#endif
 	// inheritance
+	#ifdef _F_thattr_inheritance
 	if _oF(pthread_attr_getinheritsched(attr,&i)) goto Err;
 	switch(i)
 	{
@@ -72,7 +112,11 @@ int thread_init(void)
 			_thattr_inheritance->v.v_long=-1;
 			break;
 	}
+	#else
+	_thattr_inheritance->v.v_long=-1;
+	#endif
 	// scope
+	#ifdef _F_thattr_scope
 	if _oF(pthread_attr_getscope(attr,&i)) goto Err;
 	switch(i)
 	{
@@ -86,13 +130,20 @@ int thread_init(void)
 			_thattr_scope->v.v_long=-1;
 			break;
 	}
+	#else
+	_thattr_scope->v.v_long=-1;
+	#endif
 	// stack_addr & stack_size
+	#ifdef _F_thattr_stack
 	if _oF(pthread_attr_getstack(attr,&v,&l)) goto Err;
 	_thattr_stack_addr->v.v_void=v;
 	_thattr_stack_size->v.v_long=l;
+	#endif
 	// guard_size
+	#ifdef _F_thattr_guard_size
 	if _oF(pthread_attr_getguardsize(attr,&l)) goto Err;
 	_thattr_guard_size->v.v_long=l;
+	#endif
 	return 0;
 	Err:
 	pthread_attr_destroy(attr);
@@ -343,19 +394,192 @@ int thread_kill(u64 pthid)
 	return vp?0:-1;
 }
 
-void thattr_detach_state(int detach)
+int thattr_detach_state(int detach)
 {
+	#ifdef _F_thattr_detach_state
+	int r=-1;
 	lock_alloc(lock_thread);
-	if _oT(detach)
+	switch(detach)
 	{
-		_thattr_detach_state->v.v_int=1;
-		pthread_attr_setdetachstate(attr,PTHREAD_CREATE_DETACHED);
-	}
-	else
-	{
-		_thattr_detach_state->v.v_int=0;
-		pthread_attr_setdetachstate(attr,PTHREAD_CREATE_JOINABLE);
+		case 0:
+			if _oF(r=pthread_attr_setdetachstate(attr,PTHREAD_CREATE_JOINABLE)) ;
+			else _thattr_detach_state->v.v_int=0;
+			break;
+		case 1:
+			if _oF(r=pthread_attr_setdetachstate(attr,PTHREAD_CREATE_DETACHED)) ;
+			else _thattr_detach_state->v.v_int=1;
+			break;
 	}
 	lock_free(lock_thread);
+	return r;
+	#endif
+	return -1;
 }
+
+int thattr_sched_policy(int policy)
+{
+	#ifdef _F_thattr_sched_policy
+	int r=-1;
+	struct sched_param sp;
+	lock_alloc(lock_thread);
+	switch(policy)
+	{
+		case 0:
+			if _oF(r=pthread_attr_setschedpolicy(attr,SCHED_OTHER)) ;
+			else _thattr_sched_policy->v.v_long=0;
+			break;
+		case 1:
+			if _oF(r=pthread_attr_setschedpolicy(attr,SCHED_FIFO)) ;
+			else _thattr_sched_policy->v.v_long=1;
+			break;
+		case 2:
+			if _oF(r=pthread_attr_setschedpolicy(attr,SCHED_RR)) ;
+			else _thattr_sched_policy->v.v_long=2;
+			break;
+	}
+	#ifdef _F_thattr_sched_param
+	if _oT(!r)
+	{
+		if _oT(!pthread_attr_getschedparam(attr,&sp))
+		{
+			_thattr_sched_param->v.v_int=sp.sched_priority;
+			var_fixvalue(_thattr_sched_param);
+		}
+	}
+	#endif
+	lock_free(lock_thread);
+	return r;
+	#endif
+	return -1;
+}
+
+int thattr_sched_param(int param)
+{
+	#ifdef _F_thattr_sched_param
+	int r=-1;
+	struct sched_param sp;
+	lock_alloc(lock_thread);
+	sp.sched_priority=param;
+	if _oF(r=pthread_attr_setschedparam(attr,&sp)) ;
+	else if _oT(!pthread_attr_getschedparam(attr,&sp))
+	{
+		_thattr_sched_param->v.v_int=sp.sched_priority;
+		var_fixvalue(_thattr_sched_param);
+	}
+	lock_free(lock_thread);
+	return r;
+	#endif
+	return -1;
+}
+
+int thattr_inheritance(int explicit)
+{
+	#ifdef _F_thattr_inheritance
+	int r=-1;
+	lock_alloc(lock_thread);
+	switch(explicit)
+	{
+		case 0:
+			if _oF(r=pthread_attr_setinheritsched(attr,PTHREAD_INHERIT_SCHED)) ;
+			else _thattr_inheritance->v.v_int=0;
+			break;
+		case 1:
+			if _oF(r=pthread_attr_setinheritsched(attr,PTHREAD_EXPLICIT_SCHED)) ;
+			else _thattr_inheritance->v.v_int=1;
+			break;
+	}
+	lock_free(lock_thread);
+	return r;
+	#endif
+	return -1;
+}
+
+int thattr_scope(int scope)
+{
+	#ifdef _F_thattr_scope
+	int r=-1;
+	lock_alloc(lock_thread);
+	switch(scope)
+	{
+		case 0:
+			if _oF(r=pthread_attr_setscope(attr,PTHREAD_SCOPE_SYSTEM)) ;
+			else _thattr_inheritance->v.v_int=0;
+			break;
+		case 1:
+			if _oF(r=pthread_attr_setscope(attr,PTHREAD_SCOPE_PROCESS)) ;
+			else _thattr_inheritance->v.v_int=1;
+			break;
+	}
+	lock_free(lock_thread);
+	return r;
+	#endif
+	return -1;
+}
+
+int thattr_guard_size(u64 guard_size)
+{
+	#ifdef _F_thattr_guard_size
+	int r=-1;
+	size_t t;
+	lock_alloc(lock_thread);
+	t=guard_size;
+	if _oF(r=pthread_attr_setguardsize(attr,t)) ;
+	else if _oT(!pthread_attr_getguardsize(attr,&t)) _thattr_guard_size->v.v_long=t;
+	lock_free(lock_thread);
+	return r;
+	#endif
+	return -1;
+}
+
+int thattr_stack_addr(u64 stack_addr)
+{
+	#ifdef _F_thattr_stack_addr
+	int r=-1;
+	void *t;
+	lock_alloc(lock_thread);
+	t=(void*)stack_addr;
+	if _oF(r=pthread_attr_setstackaddr(attr,t)) ;
+	else if _oT(!pthread_attr_getstackaddr(attr,&t)) _thattr_stack_addr->v.v_long=(u64)t;
+	lock_free(lock_thread);
+	return r;
+	#endif
+	return -1;
+}
+
+int thattr_stack_size(u64 stack_size)
+{
+	#ifdef _F_thattr_stack_size
+	int r=-1;
+	size_t t;
+	lock_alloc(lock_thread);
+	t=stack_size;
+	if _oF(r=pthread_attr_setstacksize(attr,t)) ;
+	else if _oT(!pthread_attr_getstacksize(attr,&t)) _thattr_stack_size->v.v_long=t;
+	lock_free(lock_thread);
+	return r;
+	#endif
+	return -1;
+}
+
+int thattr_stack(u64 stack_addr, u64 stack_size)
+{
+	#ifdef _F_thattr_stack_size
+	int r=-1;
+	void *v;
+	size_t t;
+	lock_alloc(lock_thread);
+	v=(void*)stack_addr;
+	t=stack_size;
+	if _oF(r=pthread_attr_setstack(attr,v,t)) ;
+	else if _oT(!pthread_attr_getstack(attr,&v,&t))
+	{
+		_thattr_stack_addr->v.v_long=(u64)v;
+		_thattr_stack_size->v.v_long=t;
+	}
+	lock_free(lock_thread);
+	return r;
+	#endif
+	return -1;
+}
+
 

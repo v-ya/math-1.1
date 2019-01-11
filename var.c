@@ -217,9 +217,15 @@ void var_free(var *vp)
 	if _oF(vp==NULL) return ;
 	if _oF(vp->mode&free_temp) return ;
 	lock_alloc(lock_inode);
-	if _oT(vp->inode>1) vp->inode--;
+	if _oT(vp->inode>1)
+	{
+		vp->inode--;
+		lock_free(lock_inode);
+	}
 	else
 	{
+		if _oF(vp->mode&is_refer) refer_free((u64)vp);
+		lock_free(lock_inode);
 		if _oF(vp->mode&free_pointer)
 		{
 			// 需要主动释放 vp->v.*
@@ -264,10 +270,8 @@ void var_free(var *vp)
 				free(vp->v.v_void);
 			}
 		}
-		if _oF(vp->mode&is_refer) refer_free((u64)vp);
 		free(vp);
 	}
-	lock_free(lock_inode);
 }
 
 vlist* vlist_insert(vlist *vl, vlist *v)
@@ -432,6 +436,7 @@ vlist* vlist_find_index(vlist *vl, u64 head)
 vlist* vlist_delete(vlist *vl, char *name)
 {
 	vlist *v;
+	var *vp=NULL;
 	v=vlist_find(vl,name);
 	if _oF(v==NULL) return vl;
 	lock_alloc(lock_vlist);
@@ -441,7 +446,7 @@ vlist* vlist_delete(vlist *vl, char *name)
 		vl->r=v->r;
 		if _oT(v->r) vl->r->l=vl;
 		if _oT(v->mode&free_name) free(v->name);
-		if _oT(v->mode&free_pointer) var_free(v->v);
+		if _oT(v->mode&free_pointer) vp=v->v;
 		free(v);
 	}
 	else if _oT(v->r)
@@ -450,23 +455,25 @@ vlist* vlist_delete(vlist *vl, char *name)
 		vl->l=v->l;
 		if _oT(v->l) vl->l->r=vl;
 		if _oT(v->mode&free_name) free(v->name);
-		if _oT(v->mode&free_pointer) var_free(v->v);
+		if _oT(v->mode&free_pointer) vp=v->v;
 		free(v);
 	}
 	else
 	{
 		if _oT(v->mode&free_name) free(v->name);
-		if _oT(v->mode&free_pointer) var_free(v->v);
+		if _oT(v->mode&free_pointer) vp=v->v;
 		free(v);
 		vl=NULL;
 	}
 	lock_free(lock_vlist);
+	if _oT(vp) var_free(vp);
 	return vl;
 }
 
 vlist* vlist_delete_index(vlist *vl, u64 head)
 {
 	vlist *v;
+	var *vp=NULL;
 	v=vlist_find_index(vl,head);
 	if _oF(v==NULL) return vl;
 	lock_alloc(lock_vlist);
@@ -476,7 +483,7 @@ vlist* vlist_delete_index(vlist *vl, u64 head)
 		vl->r=v->r;
 		if _oT(v->r) vl->r->l=vl;
 		if _oT(v->mode&free_name) free(v->name);
-		if _oT(v->mode&free_pointer) var_free(v->v);
+		if _oT(v->mode&free_pointer) vp=v->v;
 		free(v);
 	}
 	else if _oT(v->r)
@@ -485,17 +492,18 @@ vlist* vlist_delete_index(vlist *vl, u64 head)
 		vl->l=v->l;
 		if _oT(v->l) vl->l->r=vl;
 		if _oT(v->mode&free_name) free(v->name);
-		if _oT(v->mode&free_pointer) var_free(v->v);
+		if _oT(v->mode&free_pointer) vp=v->v;
 		free(v);
 	}
 	else
 	{
 		if _oT(v->mode&free_name) free(v->name);
-		if _oT(v->mode&free_pointer) var_free(v->v);
+		if _oT(v->mode&free_pointer) vp=v->v;
 		free(v);
 		vl=NULL;
 	}
 	lock_free(lock_vlist);
+	if _oT(vp) var_free(vp);
 	return vl;
 }
 
@@ -549,20 +557,10 @@ void vmat_insert(vmat *vm, vlist *v)
 	// v->l == v->r == NULL
 	u32 i;
 	if _oF(vm==NULL) return ;
-	lock_alloc(lock_vmat);
 	i=(v->name?vname_gen(v->name):vhead_gen(v->head))&vm->mask;
-	if ((vm->avl[i]=vlist_insert(vm->avl[i],v))!=v) goto End;
+	if ((vm->avl[i]=vlist_insert(vm->avl[i],v))!=v) return ;
 	vm->number++;
-	if _oF(vm->number>vm->mask && !(vm->flag&vmat_flag_notex))
-	{
-		lock_free(lock_vmat);
-		vmat_extend(vm);
-	}
-	else
-	{
-		End:
-		lock_free(lock_vmat);
-	}
+	if _oF(vm->number>vm->mask && !(vm->flag&vmat_flag_notex)) vmat_extend(vm);
 }
 
 vlist* vmat_find(vmat *vm, char *name)
@@ -581,22 +579,18 @@ void vmat_delete(vmat *vm, char *name)
 {
 	u32 i;
 	if _oF(vm==NULL) return ;
-	lock_alloc(lock_vmat);
 	i=vname_gen(name)&vm->mask;
 	vm->avl[i]=vlist_delete(vm->avl[i],name);
 	if _oT(vm->number) vm->number--;
-	lock_free(lock_vmat);
 }
 
 void vmat_delete_index(vmat *vm, u64 head)
 {
 	u32 i;
 	if _oF(vm==NULL) return ;
-	lock_alloc(lock_vmat);
 	i=vhead_gen(head)&vm->mask;
 	vm->avl[i]=vlist_delete_index(vm->avl[i],head);
 	if _oT(vm->number) vm->number--;
-	lock_free(lock_vmat);
 }
 
 void var_save(var *vp)

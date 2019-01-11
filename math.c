@@ -160,7 +160,7 @@ char* run_key(char *exp, var *root, var **function)
 var* run_fun_vlist(var *func, int argc, vlist *argv)
 {
 	static char *label="run_fun_vlist";
-	var *ret,*pt_text,*_vn_,*caller;
+	var *ret,*pt_text,*_vn_,*caller,*takeup;
 	u32 *vt,i;
 	char **vn;
 	vlist *vl,*vl1,*vc;
@@ -179,14 +179,10 @@ var* run_fun_vlist(var *func, int argc, vlist *argv)
 	caller=ptvar_get(_pt_this);
 	// check var list type
 	if _oF(check_varlist(argv,argc,vt)) goto Err_argv;
-	/*
-	vl=argv;
-	for(i=0;i<argc;i++)
-	{
-		if _oF(!(vt[i]&vl->v->type)) goto Err_argv;
-		vl=vl->r;
-	}
-	*/
+	// lock func._takeup_
+	takeup=var_find(func,"_takeup_");
+	if _oF(!takeup) goto Err_func;
+	lock_alloc_user(takeup);
 	// link caller
 	vc=vlist_find(func->v.v_vlist,"_caller_");
 	if _oF(!vc)
@@ -234,6 +230,8 @@ var* run_fun_vlist(var *func, int argc, vlist *argv)
 		}
 	}
 	if _oT(ret && !(ret->type&type_spe)) var_save(ret);
+	// unlock func._takeup_
+	lock_free_user(takeup);
 	var_free(_vn_);
 	var_free(func);
 	return ret;

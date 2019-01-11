@@ -170,6 +170,8 @@
 			<keyword>store_data</keyword>
 			<keyword>load_data</keyword>
 			<keyword>get_sid</keyword>
+			<keyword>lock</keyword>
+			<keyword>unlock</keyword>
 			<keyword>srand</keyword>
 			<keyword>rand</keyword>
 			<keyword>sin</keyword>

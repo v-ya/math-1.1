@@ -77,6 +77,7 @@
 		_caller_ void	0	r
 		_type_	string	0	r	"null"
 		_type_null	-export	.gobj._type_
+		_takeup_ void	0	r
 	}
 	package	vlist	0	r
 	
@@ -112,31 +113,46 @@
 				// 1:	detach		分离
 			sched_policy	sint	0	r
 				// 线程的调度策略
+				// 0:	OTHER		分时调度策略
+				// 1:	FIFO		实时调度策略，先到先服务
+				// 2:	RR		实时调度策略，时间片轮转
 			sched_param	sint	0	r
 				// 线程的调度参数
+				// OTHER	:0	不支持优先级
+				// FIFO		:1-99
+				// RR		:1-99
 			inheritance	sint	0	r
 				// 线程的继承性
+				// 0:	inherit		继承
+				// 1:	explicit	非继承
 			scope		sint	0	r
 				// 线程的作用域
+				// 0:	system		系统内竞争
+				// 1:	process		线程内竞争 (linux 未实现)
 			guard_size	ulong	0	r
 				// 线程栈末尾警戒缓冲区大小
+				// 最少一页?
 			stack_addr	ulong	0	r
 				// 线程栈位置
+				// 最好页面大小对其
 			stack_size	ulong	0	r
 				// 线程栈大小
+				// 最小为 16 KiB
 			struct		void	0	r
 				// 线程属性内部结构
 			set	vmat	0	r	{
 				// 线程属性设置函数
-				detach_state	fun	0	r
-				sched_policy	fun	0	r
-				sched_param	fun	0	r
-				inheritance	fun	0	r
-				scope		fun	0	r
-				stack		fun	0	r
-				stack_addr	fun	0	r
-				stack_size	fun	0	r
-				guard_size	fun	0	r
+				detach_state	fun	0	r	addr_fun(thattr_detach_state)
+				sched_policy	fun	0	r	addr_fun(thattr_sched_policy)
+				sched_param	fun	0	r	addr_fun(thattr_sched_param)
+				inheritance	fun	0	r	addr_fun(thattr_inheritance)
+				scope		fun	0	r	addr_fun(thattr_scope)
+				guard_size	fun	0	r	addr_fun(thattr_guard_size)
+				//stack_addr	fun	0	r	addr_fun(thattr_stack_addr)
+				stack_size	fun	0	r	addr_fun(thattr_stack_size)
+					// [0:ok, *:fail] = $(znum);
+				stack		fun	0	r	addr_fun(thattr_stack)
+					// [0:ok, *:fail] = stack(znum addr,znum size);
 			}
 		}
 		
@@ -282,6 +298,13 @@
 		// var = .load_data(var, "path");
 	get_sid	fun	0	r	addr_fun(get_sid)
 		// sid = .get_sid();
+	lock	fun	0	r	addr_fun(lock)
+		// .lock();			获取锁 .this()._takeup_
+		// .lock(ulong[2] l);		获取锁 l
+	unlock	fun	0	r	addr_fun(unlock)
+		// .unlock();			释放锁 .this()._takeup_
+		// .unlock(ulong[2] l);		释放锁 l
+	// function._takeup_ 会每次在调用传参前 lock 一次，并在函数执行完 unlock 一次（不保证 function._ret_ 的传递）
 	
 		// 数学库
 		srand	fun	0	r	addr_fun(srand)

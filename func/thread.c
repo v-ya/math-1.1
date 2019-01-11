@@ -447,3 +447,96 @@ func(usleep)
 	return ret;
 }
 
+// set attr
+func(thattr_detach_state)
+{
+	static char *label=".thread.attr.set.detach_state";
+	static u32 type_1[1]={type_znum};
+	if _oF(argc!=1 || check_varlist(argv,1,type_1)) return get_error(errid_FunArgvType,label);
+	ret->type=type_long;
+	ret->v.v_long=thattr_detach_state(argv->v->v.v_long);
+	return ret;
+}
+
+func(thattr_sched_policy)
+{
+	static char *label=".thread.attr.set.sched_policy";
+	static u32 type_1[1]={type_znum};
+	if _oF(argc!=1 || check_varlist(argv,1,type_1)) return get_error(errid_FunArgvType,label);
+	ret->type=type_long;
+	ret->v.v_long=thattr_sched_policy(argv->v->v.v_long);
+	return ret;
+}
+
+func(thattr_sched_param)
+{
+	static char *label=".thread.attr.set.sched_param";
+	static u32 type_1[1]={type_znum};
+	if _oF(argc!=1 || check_varlist(argv,1,type_1)) return get_error(errid_FunArgvType,label);
+	ret->type=type_long;
+	ret->v.v_long=thattr_sched_param(argv->v->v.v_long);
+	return ret;
+}
+
+func(thattr_inheritance)
+{
+	static char *label=".thread.attr.set.inheritance";
+	static u32 type_1[1]={type_znum};
+	if _oF(argc!=1 || check_varlist(argv,1,type_1)) return get_error(errid_FunArgvType,label);
+	ret->type=type_long;
+	ret->v.v_long=thattr_inheritance(argv->v->v.v_long);
+	return ret;
+}
+
+func(thattr_scope)
+{
+	static char *label=".thread.attr.set.scope";
+	static u32 type_1[1]={type_znum};
+	if _oF(argc!=1 || check_varlist(argv,1,type_1)) return get_error(errid_FunArgvType,label);
+	ret->type=type_long;
+	ret->v.v_long=thattr_scope(argv->v->v.v_long);
+	return ret;
+}
+
+func(thattr_guard_size)
+{
+	static char *label=".thread.attr.set.guard_size";
+	static u32 type_1[1]={type_znum};
+	if _oF(argc!=1 || check_varlist(argv,1,type_1)) return get_error(errid_FunArgvType,label);
+	ret->type=type_long;
+	ret->v.v_long=thattr_guard_size(argv->v->v.v_long);
+	return ret;
+}
+
+func(thattr_stack_addr)
+{
+	static char *label=".thread.attr.set.stack_addr";
+	static u32 type_1[1]={type_znum};
+	if _oF(argc!=1 || check_varlist(argv,1,type_1)) return get_error(errid_FunArgvType,label);
+	ret->type=type_long;
+	ret->v.v_long=thattr_stack_addr(argv->v->v.v_long);
+	return ret;
+}
+
+func(thattr_stack_size)
+{
+	static char *label=".thread.attr.set.stack_size";
+	static u32 type_1[1]={type_znum};
+	if _oF(argc!=1 || check_varlist(argv,1,type_1)) return get_error(errid_FunArgvType,label);
+	ret->type=type_long;
+	ret->v.v_long=thattr_stack_size(argv->v->v.v_long);
+	return ret;
+}
+
+func(thattr_stack)
+{
+	static char *label=".thread.attr.set.stack";
+	static u32 type_2[2]={type_znum,type_znum};
+	if _oF(argc!=2 || check_varlist(argv,2,type_2)) return get_error(errid_FunArgvType,label);
+	ret->type=type_long;
+	ret->v.v_long=thattr_stack(argv->v->v.v_long,argv->r->v->v.v_long);
+	return ret;
+}
+
+
+

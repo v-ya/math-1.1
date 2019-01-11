@@ -18,6 +18,8 @@ func(sub);
 func(store_data);
 func(load_data);
 func(get_sid);
+func(lock);
+func(unlock);
 
 #endif
 

@@ -513,3 +513,51 @@ func(get_sid)
 	return ret;
 }
 
+func(lock)
+{
+	static char *label=".lock";
+	static u32 type_1[1]={type_void|type_long|type_allowarray};
+	var *vp;
+	if _oF(argc!=1) return get_error(errid_FunArgvType,label);
+	else if _oF(check_varlist(argv,1,type_1)) return get_error(errid_FunArgvType,label);
+	vp=argv->v;
+	if _oT(vp->type&type_void)
+	{
+		vp=ptvar_get(_pt_this);
+		if _oT(vp)
+		{
+			vp=var_find(vp,"_takeup_");
+			if _oT(vp) lock_alloc_user(vp);
+		}
+	}
+	else if _oT(vp->length==2) lock_alloc_user(vp);
+	else return get_error(errid_FunArgvType,label);
+	ret->type=type_void;
+	ret->v.v_long=0;
+	return ret;
+}
+
+func(unlock)
+{
+	static char *label=".unlock";
+	static u32 type_1[1]={type_void|type_long|type_allowarray};
+	var *vp;
+	if _oF(argc!=1) return get_error(errid_FunArgvType,label);
+	else if _oF(check_varlist(argv,1,type_1)) return get_error(errid_FunArgvType,label);
+	vp=argv->v;
+	if _oT(vp->type&type_void)
+	{
+		vp=ptvar_get(_pt_this);
+		if _oT(vp)
+		{
+			vp=var_find(vp,"_takeup_");
+			if _oT(vp) lock_free_user(vp);
+		}
+	}
+	else if _oT(vp->length==2) lock_free_user(vp);
+	else return get_error(errid_FunArgvType,label);
+	ret->type=type_void;
+	ret->v.v_long=0;
+	return ret;
+}
+
