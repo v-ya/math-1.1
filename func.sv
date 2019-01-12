@@ -177,6 +177,9 @@
 			// wait([void]);		等待所有子线程结束
 			// wait("name");		等待名称为 name 的子线程结束
 			// wait(znum id);		等待 pthid 为 id 的子线程结束
+		join	fun	0	r	addr_fun(thread_join)
+			// join("name");		等待名称为 name 的子线程结束
+			// join(znum id);		等待 pthid 为 id 的子线程结束
 		sleep	fun	0	r	addr_fun(sleep)
 		msleep	fun	0	r	addr_fun(msleep)
 		usleep	fun	0	r	addr_fun(usleep)

@@ -1162,10 +1162,10 @@ vlist* ptvar_vlist(var *object)
 	if _oT(object->type&type_vmat) vl=object->v.v_vmat->avl[vhead_gen(pthid)&object->v.v_vmat->mask];
 	else if _oT(object->type&type_vlist) vl=object->v.v_vlist;
 	else goto End;
-	while(vl&&(vl->head!=pthid))
+	if _oT(vl)
 	{
-		if (vl->head>pthid) vl=vl->l;
-		else vl=vl->r;
+		if _oF(vl->head<pthid) while(vl && vl->head!=pthid) vl=vl->r;
+		else if _oF(vl->head>pthid) while(vl && vl->head!=pthid) vl=vl->l;
 	}
 	End:
 	lock_free(lock_ptvar);

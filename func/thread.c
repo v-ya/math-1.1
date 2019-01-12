@@ -83,7 +83,7 @@ func(thread_wait)
 			case type_string:
 				if _oT(vp->v.v_string) ret->v.v_long=thread_getid(vp->v.v_string,&pthid);
 				else return get_error(errid_FunArgvType,label);
-				if _oF(ret->v.v_long) return ret;
+				if _oF(ret->v.v_long) continue;
 				break;
 			default:
 				if _oT(vp->type&type_znum) pthid=vp->v.v_long;
@@ -91,6 +91,36 @@ func(thread_wait)
 				break;
 		}
 		thread_wait(pthid);
+	}
+	return ret;
+}
+
+func(thread_join)
+{
+	static char *label=".thread.join";
+	var *vp;
+	u64 pthid;
+	void *v;
+	ret->type=type_void;
+	ret->v.v_long=0;
+	while(argv)
+	{
+		vp=argv->v;
+		argv=argv->r;
+		if _oF(vp->length) return get_error(errid_FunArgvType,label);
+		switch(vp->type&type_all)
+		{
+			case type_string:
+				if _oT(vp->v.v_string) ret->v.v_long=thread_getid(vp->v.v_string,&pthid);
+				else return get_error(errid_FunArgvType,label);
+				if _oF(ret->v.v_long) continue;
+				break;
+			default:
+				if _oT(vp->type&type_znum) pthid=vp->v.v_long;
+				else return get_error(errid_FunArgvType,label);
+				break;
+		}
+		pthread_join(pthid,&v);
 	}
 	return ret;
 }
@@ -432,6 +462,20 @@ func(msleep)
 	t=argv->v->v.v_long&0x003fffffffffffffUL;
 	usleep(t*1000);
 	return ret;
+	/*
+	struct timespec req;
+	if _oF(argc!=1 || check_varlist(argv,1,type_1)) return get_error(errid_FunArgvType,label);
+	ret->type=type_void;
+	ret->v.v_long=0;
+	t=(argv->v->v.v_long&0x00000fffffffffffUL)*1000000;
+	req.tv_sec=t/1000000000;
+	req.tv_nsec=t%1000000000;
+	while(nanosleep(&req,&req)==-1)
+	{
+		print("-1\n");
+	}
+	return ret;
+	*/
 }
 
 func(usleep)
@@ -445,6 +489,20 @@ func(usleep)
 	t=argv->v->v.v_long;
 	usleep(t);
 	return ret;
+	/*
+	struct timespec req;
+	if _oF(argc!=1 || check_varlist(argv,1,type_1)) return get_error(errid_FunArgvType,label);
+	ret->type=type_void;
+	ret->v.v_long=0;
+	t=(argv->v->v.v_long&0x003fffffffffffffUL)*1000;
+	req.tv_sec=t/1000000000;
+	req.tv_nsec=t%1000000000;
+	while(nanosleep(&req,&req)==-1)
+	{
+		print("-1\n");
+	}
+	return ret;
+	*/
 }
 
 // set attr

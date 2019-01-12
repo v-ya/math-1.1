@@ -8,6 +8,7 @@ func(thread_self);
 func(thread_create);
 func(thread_kill);
 func(thread_wait);
+func(thread_join);
 func(lock_create);
 func(sleep);
 func(msleep);

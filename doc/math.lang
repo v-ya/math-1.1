@@ -226,6 +226,7 @@
 			<keyword>self</keyword>
 			<keyword>kill</keyword>
 			<keyword>wait</keyword>
+			<keyword>join</keyword>
 			<keyword>sleep</keyword>
 			<keyword>msleep</keyword>
 			<keyword>usleep</keyword>
@@ -311,6 +312,7 @@
 			<keyword>_text_</keyword>
 			<keyword>_ret_</keyword>
 			<keyword>_caller_</keyword>
+			<keyword>_takeup_</keyword>
 			<keyword>_type_</keyword>
 		</context>
 		<context id="cv_thread" style-ref="cv">
