@@ -1,7 +1,7 @@
 export	CFLAGS	= -fPIC
 export	lflags	= -shared -fPIC -fvisibility=hidden
 
-package: package.o model/hello.so model/socket.so
+package: package.o model/hello.so model/socket.so model/sdl.so
 	echo >package
 
 model/hello.so: hello/*
@@ -11,6 +11,10 @@ model/hello.so: hello/*
 model/socket.so: socket/*
 	cd socket && make && cd ..
 	mv socket/socket.so model/
+
+model/sdl.so: sdl/*
+	cd sdl && make && cd ..
+	mv sdl/sdl.so model/
 
 clear:
 	rm -f package package.o model/*

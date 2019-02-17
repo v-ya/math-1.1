@@ -230,7 +230,7 @@ var* create_string(var *obj, char *name, u64 head, u32 auth, char *value)
 {
 	var *r;
 	u32 size;
-	r=create_var(obj,name,head,tlog_float,leng_no,auth);
+	r=create_var(obj,name,head,tlog_string,leng_no,auth);
 	if _oF(!r) return NULL;
 	if _oT(value)
 	{
