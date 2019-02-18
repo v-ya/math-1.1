@@ -3,6 +3,9 @@
 
 func(CreateWindow);
 func(UpdateWindow);
+func(DestroyWindow);
+func(LoadBMP);
+func(SaveBMP);
 
 #endif
 

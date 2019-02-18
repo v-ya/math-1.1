@@ -11,6 +11,10 @@
 ## <span id="history">版本更新记录</span>
 ---
 
+2019.02.18 v1.7.0
+---
+*	完善 package `[system.sdl]` ，新增调试函数 `.debug.pause`
+
 2019.02.17 v1.7.0
 ---
 *	新增 package `[system.sdl]`

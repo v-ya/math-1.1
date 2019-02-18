@@ -48,3 +48,57 @@ func(UpdateWindow)
 	return ret;
 }
 
+func(DestroyWindow)
+{
+	static char *label=label_name("DestroyWindow");
+	static u32 type_1[1]={type_znum};
+	
+	if _oF(argc!=1) return base->get_error(errid_FunArgvType,label);
+	else if _oF(base->check_varlist(argv,1,type_1)) return base->get_error(errid_FunArgvType,label);
+	
+	destroy_window(argv->v->v.v_long);
+	
+	ret->type=type_void;
+	ret->v.v_long=0;
+	return ret;
+}
+
+func(LoadBMP)
+{
+	static char *label=label_name("LoadBMP");
+	static u32 type_1[1]={type_string};
+	SDL_Surface *s;
+	char *path;
+	
+	if _oF(argc!=1) return base->get_error(errid_FunArgvType,label);
+	else if _oF(base->check_varlist(argv,1,type_1)) return base->get_error(errid_FunArgvType,label);
+	path=argv->v->v.v_string;
+	
+	s=path?SDL_LoadBMP(path):NULL;
+	s=setDisplayFormat(s);
+	
+	ret->type=type_long|type_unsign;
+	ret->v.v_long=s?new_surface(s):0;
+	return ret;
+}
+
+func(SaveBMP)
+{
+	static char *label=label_name("SaveBMP");
+	static u32 type_2[2]={type_znum,type_string};
+	u64 sid;
+	SDL_Surface *s;
+	char *path;
+	
+	if _oF(argc!=2) return base->get_error(errid_FunArgvType,label);
+	else if _oF(base->check_varlist(argv,2,type_2)) return base->get_error(errid_FunArgvType,label);
+	sid=argv->v->v.v_long;
+	argv=argv->r;
+	path=argv->v->v.v_string;
+	s=getSurface(sid);
+	
+	ret->type=type_long;
+	ret->v.v_long=(s&&path)?SDL_SaveBMP(s,path):0;
+	return ret;
+}
+

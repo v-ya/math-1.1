@@ -16,6 +16,7 @@
 #define _INIT_FLAGES	(SDL_INIT_VIDEO|SDL_INIT_AUDIO)
 
 #define __Windows__	"Windows"
+#define __Surface__	"Surface"
 #define __pWindow__	"pWindow"
 #define __pSurface__	"pSurface"
 #define __title__	"title"
@@ -25,6 +26,10 @@
 
 extern var *_Windows;
 extern vmat *_Windows_vmat;
+extern var *_Surface;
+extern vmat *_Surface_vmat;
+extern SDL_PixelFormat *_PixelFormat;
+extern u32 _WindowFormat;
 
 #endif
 

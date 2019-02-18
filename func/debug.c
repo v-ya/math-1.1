@@ -1,3 +1,4 @@
+#include <termios.h>
 #include "../main.h"
 
 char* get_type(u32 type, u32 auth)
@@ -232,4 +233,50 @@ func(debug_szvmat)
 	return ret;
 }
 
+void __stdin_nonblock(void)
+{
+	struct termios t;
+	u32 f;
+	tcgetattr(STDIN_FILENO,&t);
+	t.c_lflag&=~(ICANON|ECHO);
+	tcsetattr(STDIN_FILENO,TCSANOW,&t);
+	f=fcntl(STDIN_FILENO,F_GETFL,0);
+	fcntl(STDIN_FILENO,F_SETFL,f|O_NONBLOCK);
+}
+
+void __stdin_nblock(void)
+{
+	struct termios t;
+	u32 f;
+	tcgetattr(STDIN_FILENO,&t);
+	t.c_lflag|=(ICANON|ECHO);
+	tcsetattr(STDIN_FILENO,TCSANOW,&t);
+	f=fcntl(STDIN_FILENO,F_GETFL,0);
+	fcntl(STDIN_FILENO,F_SETFL,f&~O_NONBLOCK);
+}
+
+func(debug_pause)
+{
+	var *vp;
+	int c;
+	ret->type=type_long;
+	vp=argv->v;
+	if _oF(vp->type&(type_void|type_null)) vp=NULL;
+	print("<pause>");
+	__stdin_nonblock();
+	while(!vp||vpbool(vp))
+	{
+		if _oF((c=getchar())!=EOF) goto key;
+		usleep(50000);
+	}
+	__stdin_nblock();
+	ret->v.v_long=-1;
+	print("value</pause>\n");
+	return ret;
+	key:
+	__stdin_nblock();
+	ret->v.v_long=c;
+	print("key@%d</pause>\n",c);
+	return ret;
+}
 

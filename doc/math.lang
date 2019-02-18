@@ -272,6 +272,7 @@
 			<prefix>(?&lt;!\w)\.debug\.</prefix>
 			<keyword>list</keyword>
 			<keyword>szvmat</keyword>
+			<keyword>pause</keyword>
 		</context>
 		<context id="cv_a" style-ref="cv">
 			<prefix>(?&lt;!\w)\.</prefix>

@@ -16,11 +16,20 @@
 		}
 	}
 	
+	// Windows
+	// Surface
+	
 	// functions
 	CreateWindow	fun	0	r	addr_fun(CreateWindow)
 		// ulong wid = CreateWindow(string title, znum x, znum y, znum w, znum h, znum flags);
 	UpdateWindow	fun	0	r	addr_fun(UpdateWindow)
 		// void UpdateWindow(znum wid);
+	DestroyWindow	fun	0	r	addr_fun(DestroyWindow)
+		// void DestroyWindow(znum wid);
+	LoadBMP		fun	0	r	addr_fun(LoadBMP)
+		// ulong sid = LoadBMP(string path);
+	SaveBMP		fun	0	r	addr_fun(SaveBMP)
+		// long (0:ok) = SaveBMP(znum sid, string path);
 	
 }
 

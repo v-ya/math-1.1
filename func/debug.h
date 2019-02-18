@@ -6,6 +6,7 @@
 
 func(debug_list);
 func(debug_szvmat);
+func(debug_pause);
 
 #endif
 

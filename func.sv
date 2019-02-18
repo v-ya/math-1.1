@@ -505,7 +505,13 @@
 	// 调试相关
 	debug	vlist	0	r	{
 		list	fun	0	r	addr_fun(debug_list)
+			// list(var, ...);
 		szvmat	fun	0	r	addr_fun(debug_szvmat)
+			// ulong vmat-size szvmat(vmat);
+		pause	fun	0	r	addr_fun(debug_pause)
+			// long key = pause(void | bool);
+				// void || bool == true => loop => wait key
+				// bool == false => key=-1
 	}
 }
 
