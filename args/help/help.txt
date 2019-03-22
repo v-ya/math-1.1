@@ -1,0 +1,4 @@
+[%s] [--format, ...] script [argv, ...]
+	--help grammar	: 查看语法帮助
+	--help format	: 查看 format 命令表
+	--help command	: 查看 command 命令表

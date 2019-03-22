@@ -261,6 +261,9 @@
 				// 下一个唯一 sid（资源索引id）
 			_info_sid	-export	.sys.info.next_sid
 		}
+		// args 相关文本
+		args	vlist	0	r
+		_args_list	-export	.sys.args
 	}
 	// 关键字函数
 	goto	key	0	r	addr_key(goto)

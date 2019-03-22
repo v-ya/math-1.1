@@ -55,6 +55,8 @@ extern var *_path_include;
 extern var *_path_data;
 // 信息
 extern var *_info_sid;
+// 传参
+extern var *_args_list;
 // 特殊
 extern var *_type_null;
 

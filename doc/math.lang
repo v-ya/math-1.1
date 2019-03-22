@@ -351,6 +351,7 @@
 			<keyword>limit</keyword>
 			<keyword>path</keyword>
 			<keyword>info</keyword>
+			<keyword>args</keyword>
 		</context>
 		<context id="cv_sys_version" style-ref="cv">
 			<prefix>(?&lt;!\w)\.sys\.version\.</prefix>
@@ -434,9 +435,11 @@
 		</context>
 		<context id="cv_args" style-ref="cv">
 			<prefix>(?&lt;!\w)\.args\.</prefix>
+			<keyword>argc</keyword>
 			<keyword>argv</keyword>
 			<keyword>exec</keyword>
 			<keyword>script</keyword>
+			<keyword>text</keyword>
 		</context>
 		
 		<context id="calc" class="no-spell-check">

@@ -20,4 +20,5 @@ clear:
 	rm -f package package.o model/*
 	cd hello && make clear && cd ..
 	cd socket && make clear && cd ..
+	cd sdl && make clear && cd ..
 

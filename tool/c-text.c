@@ -33,45 +33,44 @@ char* load_string(char *path)
 	return str;
 }
 
-// init-makec <init.math-path> <to-c-file> <c-var-name> [--compress]
+// c-text <text-path> <to-c-file> <c-var-name> [--compress]
 int main(int argc, char *argv[])
 {
-	unsigned char *code,*cpcode;
+	unsigned char *text,*cptext;
 	int size,i;
 	FILE *fp;
-	if (argc<4) printf("%s <init.math-path> <to-c-file> <c-var-name> [--compress]\n",argv[0]);
-	code=load_string(argv[1]);
-	if (!code)
+	if (argc<4) printf("%s <text-path> <to-c-file> <c-var-name> [--compress]\n",argv[0]);
+	text=load_string(argv[1]);
+	if (!text)
 	{
 		printf("Error: Not Load %s!\n",argv[1]);
 		return -1;
 	}
 	if (argc>4 && strcmp(argv[4],"--compress")==0)
 	{
-		cpcode=compress_code(code);
-		free(code);
+		cptext=compress_code(text);
+		free(text);
 	}
-	else cpcode=code;
-	if (!cpcode)
+	else cptext=text;
+	if (!cptext)
 	{
-		printf("Error: Not Compress Code!\n");
+		printf("Error: Not Compress Text!\n");
 		return -1;
 	}
 	fp=fopen(argv[2],"w");
 	if (!fp)
 	{
 		printf("Error: Not Open %s!\n",argv[2]);
-		free(cpcode);
+		free(cptext);
 		return -1;
 	}
-	size=strlen(cpcode)+1;
-	fprintf(fp,"unsigned char %s_st[%d]={%d",argv[3],size,cpcode[0]);
+	size=strlen(cptext)+1;
+	fprintf(fp,"static char %s[%d]={%d",argv[3],size,cptext[0]);
 	for(i=1;i<size;i++)
-		fprintf(fp,",%d",cpcode[i]);
-	fprintf(fp,"};\nvar %s_vst={.type=type_string,.inode=1,.mode=free_temp|auth_read,.length=0,.v.v_string=%s_st};\n",argv[3],argv[3]);
-	fprintf(fp,"var *%s=&%s_vst;\n",argv[3],argv[3]);
+		fprintf(fp,",%d",cptext[i]);
+	fprintf(fp,"};\n");
 	fclose(fp);
-	free(cpcode);
+	free(cptext);
 	return 0;
 }
 

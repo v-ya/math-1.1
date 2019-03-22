@@ -1,0 +1,3 @@
+.print("未知 format 命令 '%s'!\n",.args._argv_[.args.argc-1]);
+.length(.args._argv_)@.args.argc;
+

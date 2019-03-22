@@ -1,0 +1,28 @@
+# --help 运行完毕直接舍弃后续传参
+#exit;.exit .args["_argv_"]?.length(.args._argv_)@.args.argc:.void@.string;
+
+.if .args["_argv_"]?(.args.argc>=.length(.args._argv_)@.ulong?.void@.string:.args._argv_[.args.argc]@.string:.ulong):1; .gotodw help;
+
+.if .string=="grammar"; .gotodw grammar;
+.if .string=="format"; .gotodw format;
+.if .string=="command"; .gotodw command;
+
+#help;
+.print(.sys.args.help.help,.args.exec);
+.goto exit;
+
+# grammar
+#grammar;
+
+.goto exit;
+
+# format
+#format;
+
+.goto exit;
+
+# command
+#command;
+
+.goto exit;
+
