@@ -1,7 +1,7 @@
 #ifndef	_BaseFunction_h_
 #define	_BaseFunction_h_
 
-#define InterfaceBase_Version	3
+#define InterfaceBase_Version	4
 
 typedef struct Interface_Base {
 	// version
@@ -62,6 +62,12 @@ typedef struct Interface_Base {
 	var*	(*ptvar_get)		(var *object);
 	vlist*	(*ptvar_vlist)		(var *object);
 	var*	(*ptvar_replace)	(var *object, var *value);
+	void	(*refer_alloc)		(u64 id);
+	void	(*refer_free)		(u64 id);
+	vlist*	(*refer_get)		(u64 id);
+	void	(*refer_set)		(var *rp, var *vp);
+	void	(*refer_unset)		(var *rp);
+	var*	(*refer_check)		(var *rp);
 	// error.h
 	var*	(*get_error)		(u32 errid, char *label);
 	void	(*set_error)		(var *pt_text, char *script);
@@ -114,6 +120,7 @@ typedef struct Interface_Base {
 	var*	(*create_vmat)		(var *obj, char *name, u64 head, u32 auth);
 	var*	(*create_refer)		(var *obj, char *name, u64 head, u32 auth, var *value);
 	u64	(*get_sid)		(void);
+	void	(*clear_vmsrc)		(var *root, char *name, FreeSrcFunc f);
 	
 } interface_base;
 

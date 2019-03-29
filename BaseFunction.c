@@ -59,6 +59,12 @@ interface_base BaseFunction = {
 	&ptvar_get,
 	&ptvar_vlist,
 	&ptvar_replace,
+	&refer_alloc,
+	&refer_free,
+	&refer_get,
+	&refer_set,
+	&refer_unset,
+	&refer_check,
 	// error.h
 	&get_error,
 	&set_error,
@@ -111,5 +117,6 @@ interface_base BaseFunction = {
 	&create_vmat,
 	&create_refer,
 	&get_sid,
+	&clear_vmsrc,
 } ;
 

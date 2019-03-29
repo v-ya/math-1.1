@@ -1,6 +1,8 @@
 #ifndef	_exfun_h_
 #define	_exfun_h_
 
+typedef void (*FreeSrcFunc)(var *);
+
 #ifndef __nosym__
 
 
@@ -26,6 +28,7 @@ var* create_vlist(var *obj, char *name, u64 head, u32 auth);
 var* create_vmat(var *obj, char *name, u64 head, u32 auth);
 var* create_refer(var *obj, char *name, u64 head, u32 auth, var *value);
 u64 get_sid(void);
+void clear_vmsrc(var *root, char *name, FreeSrcFunc f);
 
 #endif
 

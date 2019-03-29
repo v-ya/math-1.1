@@ -67,6 +67,7 @@ extern var *_type_null;
 #include "func/con.h"
 #include "func/math.h"
 #include "func/string.h"
+#include "func/transform.h"
 #include "func/index.h"
 #include "func/time.h"
 #include "func/file.h"

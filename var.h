@@ -77,7 +77,7 @@ struct VMAT;
 // var_free 忽略
 #define free_temp	0x20000000
 // refer set
-#define is_refer	0x00010000
+#define is_refer	0x10000000
 
 // length
 #define leng_no		0

@@ -280,3 +280,43 @@ u64 get_sid(void)
 	return sid;
 }
 
+void clear_vmsrc(var *root, char *name, FreeSrcFunc f)
+{
+	var *vp;
+	vlist *vl,*vl0;
+	vmat *vm;
+	u32 i,mvl;
+	
+	vl = v_find(root, name);
+	vp = vl?vl->v:NULL;
+	mvl = vl->mode;
+	if _oF(!vp || !(vp->type&type_vmat) || vp->inode>1) return ;
+	// 卸载
+	vl->v = NULL;
+	vl->mode &= ~free_pointer;
+	var_delete(root,name);
+	if _oF(vp->mode&is_refer) refer_free((u64)vp);
+	
+	vm = vp->v.v_vmat;
+	for(i=0;i<=vm->mask;i++)
+	{
+		vl=vm->avl[i];
+		vm->avl[i]=NULL;
+		if _oF(vl) while(vl->l) vl=vl->l;
+		else break;
+		while(vl)
+		{
+			if _oT(vl->v) f(vl->v);
+			vl0=vl->r;
+			vl->l=vl->r=NULL;
+			vlist_free(vl);
+			vl=vl0;
+		}
+	}
+	
+	if _oT(vm->flag&vmat_flag_favl) free(vm->avl);
+	if _oT(vm->flag&vmat_flag_fvmat) free(vm);
+	if (mvl&free_pointer) free(vp);
+}
+
+

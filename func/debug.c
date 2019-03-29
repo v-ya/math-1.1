@@ -85,12 +85,12 @@ void print_vlist(vlist *vl, u32 tab, void *rp)
 		print("  %16s  ", sbuf_get()->v.v_string);
 		// name
 		if _oT(vl->name) print("(%s)\n",vl->name);
-		else print("[%llu]\n",vl->head);
+		else print("[%lu]\n",vl->head);
 	}
 	else
 	{
-		if _oT(vl->name) print("......          unknow m=%016llx v=%016llx  (%s)\n",(u64)vl->mode,(u64)vl->v,vl->name);
-		else print("......          unknow m=%016llx v=%016llx  [%016llx]\n",(u64)vl->mode,(u64)vl->v,vl->head);
+		if _oT(vl->name) print("......          unknow m=%016lx v=%016lx  (%s)\n",(u64)vl->mode,(u64)vl->v,vl->name);
+		else print("......          unknow m=%016lx v=%016lx  [%016lx]\n",(u64)vl->mode,(u64)vl->v,vl->head);
 	}
 }
 

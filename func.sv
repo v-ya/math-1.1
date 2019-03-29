@@ -394,6 +394,16 @@
 		arrstring key	0	r	addr_key(arrstring)
 			// .arrstring exp(ubyte[]);
 			// ubyte[] => string
+		transform key	0	r	addr_key(transform)
+			// .transform type, exp(array[]);
+			// type = [u|s]byte [u|s]word [u|s]int [u|s]long float
+			// allow transform:
+				// byte[] => byte[] word[] int[] long[];	u8[] => u8[] u16[] u32[] u64[]
+				// word[] => byte[] word[] int[] long[];	u16[] => u8[] u16[] u32[] u64[]
+				// int[] => byte[] word[] int[] long[];		u32[] => u8[] u16[] u32[] u64[]
+				// long[] => byte[] word[] int[] long[];	u64[] => u8[] u16[] u32[] u64[]
+				// int[] long[] => float[];			u32[] -> f32[] => f64[] | u64 -> f64[]
+				// float[] => int[] long[];			f64[] => f32[] -> u32[] | f64 -> u64[]
 	// 常数表
 	const	vmat	0	r	{
 		// 数学常量

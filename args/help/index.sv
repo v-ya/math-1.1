@@ -5,6 +5,7 @@
 
 @.	vlist	0	r	{
 	help	string	0	r	_help_help
+	format	string	0	r	_help_format
 	
 	// 导出
 	_HELP_ROOT	-export	.

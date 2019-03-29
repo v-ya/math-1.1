@@ -147,6 +147,7 @@
 			<keyword>exit</keyword>
 			<keyword>strarray</keyword>
 			<keyword>arrstring</keyword>
+			<keyword>transform</keyword>
 		</context>
 		<context id="key_g" style-ref="key">
 			<prefix>\.?</prefix>

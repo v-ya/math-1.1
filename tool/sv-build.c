@@ -411,7 +411,7 @@ void put_vp(var *vp)
 				}
 			}
 			else if (vp->type&type_string) fprintf(outfile,"\t.v.v_string\t=\"%s\"\n};\n",vp->v.v_string);
-			else fprintf(outfile,"\t.v.v_long\t=0x%016llx\n};\n",vp->v.v_long);
+			else fprintf(outfile,"\t.v.v_long\t=0x%016lx\n};\n",vp->v.v_long);
 	}
 	vp->inode=0;
 	if (vp->type&type_vmat)
@@ -431,7 +431,7 @@ void put_vl(vlist *vl)
 	{
 		fprintf(outfile,"static vlist	_sv_vl_%p = {\n",vl);
 		fprintf(outfile,"\t.name\t=\"%s\",\n\t.mode\t=0,\n",vl->name);
-		fprintf(outfile,"\t.head\t=0x%016llx,\n",vl->head);
+		fprintf(outfile,"\t.head\t=0x%016lx,\n",vl->head);
 		if (vl->v) fprintf(outfile,"\t.v\t=&_sv_vp_%p,\n",vl->v);
 		else fprintf(outfile,"\t.v\t=NULL,\n");
 		if (vl->l) fprintf(outfile,"\t.l\t=&_sv_vl_%p,\n",vl->l);

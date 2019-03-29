@@ -11,6 +11,10 @@
 ## <span id="history">版本更新记录</span>
 ---
 
+2019.03.29 v1.7.1
+---
+*	新增 package `[vya.gspace]`
+
 2019.03.23 v1.7.1
 ---
 *	增加预设文件夹 `args/script/c-file/` `args/help/c-file/`

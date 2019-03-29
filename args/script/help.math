@@ -18,7 +18,7 @@
 
 # format
 #format;
-
+.print(.sys.args.help.format);
 .goto exit;
 
 # command
