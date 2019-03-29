@@ -25,4 +25,5 @@ clear:
 	cd hello && make clear && cd ..
 	cd socket && make clear && cd ..
 	cd sdl && make clear && cd ..
+	cd gspace && make clear && cd ..
 
