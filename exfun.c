@@ -288,7 +288,8 @@ void clear_vmsrc(var *root, char *name, FreeSrcFunc f)
 	u32 i,mvl;
 	
 	vl = v_find(root, name);
-	vp = vl?vl->v:NULL;
+	if _oF(!vl) return ;
+	vp = vl->v;
 	mvl = vl->mode;
 	if _oF(!vp || !(vp->type&type_vmat) || vp->inode>1) return ;
 	// 卸载
@@ -303,7 +304,7 @@ void clear_vmsrc(var *root, char *name, FreeSrcFunc f)
 		vl=vm->avl[i];
 		vm->avl[i]=NULL;
 		if _oF(vl) while(vl->l) vl=vl->l;
-		else break;
+		else continue;
 		while(vl)
 		{
 			if _oT(vl->v) f(vl->v);

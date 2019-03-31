@@ -1,9 +1,17 @@
 #ifndef	_package_vya_gspace_code_h_
 #define	_package_vya_gspace_code_h_
 
+typedef void (*DeleteSrcFunc)(u64);
+
 var* createSrc(var *src, u32 tlog, u64 *gen);
 GLuint getHandle(var *src, u64 sid, u32 isok, u32 *mode);
 void setHandleOk(var *src, u64 sid);
+u32 getHandleType(var *src, u64 sid);
+void referSrcHandle(var *src, u64 sid);
+int testSrcRefer(var *pool, u64 sid);
+int createSrcRefer(var *pool, var *src, u64 sid, u64 value);
+void deleteSrcRefer(var *pool, DeleteSrcFunc f, u64 sid);
+
 // program
 u64 createProgram(void);
 void deleteProgram(u64 sid);
@@ -26,11 +34,16 @@ GLuint getVertexAttribHandle(var *v);
 u64 createVertexAttrib(void);
 void deleteVertexAttrib(u64 sid);
 void deleteUserVertexAttrib(u64 sid);
-void finalVertexAttrib(u64 sid);
 int vertexAttribPointer(var *v, u64 bid, GLuint index,
 	GLint size, GLenum type, GLboolean normalized, GLsizei stride, GLvoid *pointer);
 void setVertexAttrib(var *v, u32 enable, u64 index);
 int useVertexAttrib(u64 sid);
+
+// model
+u64 createModel(u64 program);
+void deleteModel(u64 sid);
+void deleteUserModel(u64 sid);
+void finalModel(u64 sid);
 
 // draw
 int isDrawMode(GLenum m);

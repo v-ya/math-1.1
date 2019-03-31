@@ -27,7 +27,7 @@ GLuint getVertexAttribHandle(var *v)
 
 u64 createVertexAttrib(void)
 {
-	var *o, *vp;
+	var *o;
 	u64 sid;
 	GLuint va;
 	
@@ -40,7 +40,6 @@ u64 createVertexAttrib(void)
 	if _oF(!(o=createSrc(V_vertexAttrib, tlog_vlist, &sid))) goto Err_1;
 	
 	if _oF(!base->create_vmat(o, S_buffer, 0, auth_read)) goto Err;
-	if _oF(!base->create_vmat(o, S_bufferTakeup, 0, auth_read)) goto Err;
 	if _oF(!base->create_vmat(o, S_location, 0, auth_read)) goto Err;
 	if _oF(!base->create_vmat(o, S_list, 0, auth_read)) goto Err;
 	
@@ -57,18 +56,7 @@ u64 createVertexAttrib(void)
 
 void vertexAttrib_clearBuffer(var *v)
 {
-	u64 i,n;
-	var *vp;
-	v = base->var_find(v,S_buffer);
-	if _oT(v)
-	{
-		n = v->v.v_vmat->number;
-		for(i=0;i<n;i++)
-		{
-			vp = base->var_find_index(v, i);
-			if _oT(vp) deleteBuffer(vp->v.v_long);
-		}
-	}
+	deleteBuffer(v->v.v_long);
 }
 
 void deleteVertexAttrib(u64 sid)
@@ -84,7 +72,7 @@ void deleteVertexAttrib(u64 sid)
 		{
 			va = getVertexAttribHandle(vp);
 			glDeleteVertexArrays(1, &va);
-			vertexAttrib_clearBuffer(vp);
+			base->clear_vmsrc(vp, S_buffer, vertexAttrib_clearBuffer);
 			base->var_delete_index(V_vertexAttrib, sid);
 		}
 	}
@@ -103,27 +91,20 @@ void deleteUserVertexAttrib(u64 sid)
 		{
 			va = getVertexAttribHandle(vp);
 			glDeleteVertexArrays(1, &va);
-			vertexAttrib_clearBuffer(vp);
+			base->clear_vmsrc(vp, S_buffer, vertexAttrib_clearBuffer);
 			base->var_delete_index(V_vertexAttrib, sid);
 		}
 		vp->mode|=F_userDelete;
 	}
 }
 
-void finalVertexAttrib(u64 sid)
-{
-	var *vp;
-	
-	vp = base->var_find_index(V_vertexAttrib, sid);
-	if _oT(vp) vp->mode |= F_isok;
-}
-
 int vertexAttribPointer(var *v, u64 bid, GLuint index,
 	GLint size, GLenum type, GLboolean normalized, GLsizei stride, GLvoid *pointer)
 {
-	var *vb, *vbt, *vi, *vl;
-	u64 i, j;
+	var *vb, *vi, *vl;
+	u64 i;
 	GLuint buffer, va;
+	int r;
 	
 	if _oF(!v) return 1;
 	buffer = getHandle(V_buffer, bid, F_type_t(srcBufferTypeVertexAttributes)|F_isok, NULL);
@@ -175,45 +156,31 @@ int vertexAttribPointer(var *v, u64 bid, GLuint index,
 	
 	// set object
 	vb = base->var_find(v, S_buffer);
-	vbt = base->var_find(v, S_bufferTakeup);
 	vi = base->var_find(v, S_location);
 	vl = base->var_find(v, S_list);
-	if _oT(vb && vbt && vi && vl) ;
+	if _oT(vb && vi && vl) ;
 	else return -1;
 	
-	if _oF(base->var_find_index(vi, index)) i=0xffffffffffffffff;
-	else
+	i = vl->v.v_vmat->number;
+	r = createSrcRefer(vi, NULL, index, i);
+	switch(r)
 	{
-		i = vl->v.v_vmat->number;
-		if _oF(!base->create_ulong(vi, NULL, index, auth_read, i) ||
-			!base->create_uint(vl, NULL, i, auth_read, index))
-		{
-			base->var_delete_index(vi, index);
-			base->var_delete_index(vl, i);
+		case 0:
+			break;
+		case 1:
+			if _oT(base->create_ulong(vl, NULL, i, auth_read, index)) break;
+			deleteSrcRefer(vi, NULL, index);
+		default:
 			return -4;
-		}
 	}
-	if _oF(base->var_find_index(vbt, bid)) ;
-	else
+	if _oF(createSrcRefer(vb, V_buffer, bid, bid) < 0)
 	{
-		j = vb->v.v_vmat->number;
-		if _oF(!base->create_ulong(vbt, NULL, bid, auth_read, j) ||
-			!base->create_ulong(vb, NULL, j, auth_read, bid))
+		if _oT(r > 0)
 		{
-			base->var_delete_index(vbt, bid);
-			base->var_delete_index(vb, j);
-			if _oT(i != 0xffffffffffffffff)
-			{
-				base->var_delete_index(vi, index);
-				base->var_delete_index(vl, i);
-			}
-			return -4;
+			deleteSrcRefer(vi, NULL, index);
+			base->var_delete_index(vl, i);
 		}
-		else
-		{
-			v = base->var_find_index(V_buffer, bid);
-			base->var_save(v);
-		}
+		return -4;
 	}
 	
 	glBindVertexArray(va);

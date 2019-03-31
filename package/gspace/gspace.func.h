@@ -24,6 +24,11 @@ func(enableVertexAttrib);
 func(disableVertexAttrib);
 func(useVertexAttrib);
 
+// model
+func(createModel);
+func(deleteModel);
+func(finalModel);
+
 // draw
 func(drawClear);
 func(drawFlush);

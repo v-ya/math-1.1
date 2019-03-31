@@ -9,6 +9,7 @@ var *V_src;
 var *V_program;
 var *V_buffer;
 var *V_vertexAttrib;
+var *V_model;
 
 void init(void)
 {
@@ -16,6 +17,7 @@ void init(void)
 	if _oF(!(V_program=base->create_vmat(V_src, S_program, 0, auth_read))) goto Err;
 	if _oF(!(V_buffer=base->create_vmat(V_src, S_buffer, 0, auth_read))) goto Err;
 	if _oF(!(V_vertexAttrib=base->create_vmat(V_src, S_vertexAttrib, 0, auth_read))) goto Err;
+	if _oF(!(V_model=base->create_vmat(V_src, S_model, 0, auth_read))) goto Err;
 	
 	
 	return ;
@@ -25,14 +27,16 @@ void init(void)
 
 void uini(void)
 {
-	FreeSrcFunc FreeSrc_program;
-	FreeSrcFunc FreeSrc_buffer;
-	FreeSrcFunc FreeSrc_vertexAttrib;
+	void FreeSrc_program(var *v);
+	void FreeSrc_buffer(var *v);
+	void FreeSrc_vertexAttrib(var *v);
+	void FreeSrc_model(var *v);
 	
 	base->clear_vmsrc(V_src, S_program, FreeSrc_program);
 	base->clear_vmsrc(V_src, S_buffer, FreeSrc_buffer);
 	base->clear_vmsrc(V_src, S_vertexAttrib, FreeSrc_vertexAttrib);
 	
+	base->var_delete(root, S_src);
 }
 
 void FreeSrc_program(var *v)

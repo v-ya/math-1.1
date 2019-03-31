@@ -72,9 +72,10 @@ typedef enum ESrcBufferType {
 #define S_program	"program"
 #define S_buffer	"buffer"
 #define S_vertexAttrib	"vertexAttrib"
-	#define S_bufferTakeup	"bufferTakeup"
 	#define S_location	"location"
 	#define S_list		"list"
+#define S_model		"model"
+	#define S_bind		"bind"
 
 
 // extern
@@ -82,6 +83,7 @@ extern u64 isInit;
 extern var *V_program;
 extern var *V_buffer;
 extern var *V_vertexAttrib;
+extern var *V_model;
 
 extern var *INFO_OpenglVendor;
 extern var *INFO_OpenglRenderer;

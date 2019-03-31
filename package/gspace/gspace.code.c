@@ -50,9 +50,54 @@ void setHandleOk(var *src, u64 sid)
 	}
 }
 
+u32 getHandleType(var *src, u64 sid)
+{
+	var *vp;
+	
+	vp = base->var_find_index(src, sid);
+	if _oT(vp) return F_type_g(vp->mode);
+	else return (u32)-1;
+}
+
+void referSrcHandle(var *src, u64 sid)
+{
+	var *vp;
+	
+	vp = base->var_find_index(src, sid);
+	if _oT(vp) base->var_save(vp);
+}
+
+int testSrcRefer(var *pool, u64 sid)
+{
+	return base->var_find_index(pool, sid)?1:0;
+}
+
+int createSrcRefer(var *pool, var *src, u64 sid, u64 value)
+{
+	var *vp;
+	
+	if _oF(base->var_find_index(pool, sid)) return 0;
+	if _oT(base->create_ulong(pool, NULL, sid, auth_read, value))
+	{
+		if _oT(src) referSrcHandle(src, sid);
+		return 1;
+	}
+	else return -1;
+}
+
+void deleteSrcRefer(var *pool, DeleteSrcFunc f, u64 sid)
+{
+	if _oT(base->var_find_index(pool, sid))
+	{
+		base->var_delete_index(pool, sid);
+		if _oT(f) f(sid);
+	}
+}
+
 #include "code.program.c"
 #include "code.buffer.c"
 #include "code.vertexAttributes.c"
+#include "code.model.c"
 #include "code.draw.c"
 
 void init_window(char *title, int width, int height)

@@ -5,6 +5,7 @@
 #include "func.program.c"
 #include "func.buffer.c"
 #include "func.vertexAttributes.c"
+#include "func.model.c"
 #include "func.draw.c"
 
 func(initWindow)
@@ -45,11 +46,6 @@ func(initWindow)
 
 func(test)
 {
-	
-	glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
-	glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_INT, 0);
-	glFlush();
-	
 	ret->type = type_void;
 	return ret;
 }

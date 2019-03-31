@@ -37,7 +37,7 @@ func(finalVertexAttrib)
 	if _oF(argc!=1||base->check_varlist(argv,1,type_1)) return base->get_error(errid_FunArgvType,label);
 	
 	sid = argv->v->v.v_long;
-	finalVertexAttrib(sid);
+	setHandleOk(V_vertexAttrib, sid);
 	
 	ret->type = type_void;
 	

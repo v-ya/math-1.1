@@ -236,6 +236,13 @@
 		// long error = useVertexAttrib(ulong va-ok);
 		// 使用顶点属性
 	
+	// model
+	createModel		fun	0	r	addr_fun(createModel)
+		// ulong model = createModel(ulong program-ok);
+	deleteModel		fun	0	r	addr_fun(deleteModel)
+		// void delete(ulong model);
+	finalModel		fun	0	r	addr_fun(finalModel)
+		// void finalModel(ulong model);
 	
 	// draw
 	drawClear		fun	0	r	addr_fun(drawClear)
