@@ -5,6 +5,8 @@ typedef void (*DeleteSrcFunc)(u64);
 
 var* createSrc(var *src, u32 tlog, u64 *gen);
 GLuint getHandle(var *src, u64 sid, u32 isok, u32 *mode);
+var* getObject(var *src, u64 sid, u32 isok, u32 *mode);
+GLuint getObjectHandle(var *o);
 void setHandleOk(var *src, u64 sid);
 u32 getHandleType(var *src, u64 sid);
 void referSrcHandle(var *src, u64 sid);
@@ -29,8 +31,6 @@ int bufferSubData(GLuint buffer, u32 type, GLintptr offset, GLsizeiptr size, voi
 int useBuffer(u64 sid, u32 type);
 
 // vertexAttrib
-var* getVertexAttribObject(u64 sid, u32 isok, u32 *mode);
-GLuint getVertexAttribHandle(var *v);
 u64 createVertexAttrib(void);
 void deleteVertexAttrib(u64 sid);
 void deleteUserVertexAttrib(u64 sid);
@@ -44,6 +44,18 @@ u64 createModel(u64 program);
 void deleteModel(u64 sid);
 void deleteUserModel(u64 sid);
 void finalModel(u64 sid);
+ulong* modelNewCommand(var *vp, u32 argc);
+void modelDeleteCommand(var *vp, u32 n);
+int modelRunScript(var *vp, char *script);
+int modelSyncUniform(var *vp);
+int modelSetBindBuffer(var *vp, u32 type, u64 buffer, u32 *ptype, u64 *plast);
+int modelBindBuffer(var *vp, u64 buffer);
+int modelSetVertexAttrib(var *vp, u64 va, u64 *plast);
+int modelBindVertexAttrib(var *vp, u64 va);
+int modelDrawArrays(var *vp, u32 mode, u32 begin, u32 count);
+int modelDrawElements(var *vp, u32 mode, u32 begin, u32 count, u32 pbase);
+
+int modelDraw(var *model);
 
 // draw
 int isDrawMode(GLenum m);

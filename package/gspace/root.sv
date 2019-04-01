@@ -243,6 +243,24 @@
 		// void delete(ulong model);
 	finalModel		fun	0	r	addr_fun(finalModel)
 		// void finalModel(ulong model);
+	mcRunScript		fun	0	r	addr_fun(mcRunScript)
+		// long error = mcRunScript(ulong model, string script);
+	mcSyncUniform		fun	0	r	addr_fun(mcSyncUniform)
+		// long error = mcSyncUniform(ulong model);
+	mcBindBuffer		fun	0	r	addr_fun(mcBindBuffer)
+		// long error = mcBindBuffer(ulong model, ulong buffer);
+	mcBindVertexAttrib	fun	0	r	addr_fun(mcBindVertexAttrib)
+		// long error = mcBindVertexAttrib(ulong model, ulong va-ok);
+	mcDrawArrays		fun	0	r	addr_fun(mcDrawArrays)
+		// long error = mcDrawArrays(ulong model, DrawMode, znum count);
+		// long error = mcDrawArrays(ulong model, DrawMode, znum begin, znum count);
+	mcDrawElements		fun	0	r	addr_fun(mcDrawElements)
+		// long error = mcDrawElements(ulong model, DrawMode, znum count);
+		// long error = mcDrawElements(ulong model, DrawMode, znum begin, znum count);
+		// long error = mcDrawElements(ulong model, DrawMode, znum begin, znum count, znum base-vertex);
+	
+	modelDraw		fun	0	r	addr_fun(modelDraw)
+		// long error = modelDraw(ulong model-ok);
 	
 	// draw
 	drawClear		fun	0	r	addr_fun(drawClear)
@@ -299,10 +317,27 @@
 		
 		create		-link	.createVertexAttrib
 		delete		-link	.deleteVertexAttrib
+		final		-link	.finalVertexAttrib
 		pointer		-link	.vertexAttribPointer
+		enable		-link	.enableVertexAttrib
+		disable		-link	.disableVertexAttrib
 		use		-link	.useVertexAttrib
 	}
 	
+	model		vmat	0	r	{
+		create			-link	.createModel
+		delete			-link	.deleteModel
+		final			-link	.finalModel
+		mcRunScript		-link	.mcRunScript
+		mcSyncUniform		-link	.mcSyncUniform
+		mcBindBuffer		-link	.mcBindBuffer
+		mcBindVertexAttrib	-link	.mcBindVertexAttrib
+		mcDrawArrays		-link	.mcDrawArrays
+		mcDrawElements		-link	.mcDrawElements
+		
+		draw			-link	.modelDraw
+	}
+	drawModel		-link	.modelDraw
 	
 	
 	draw		vmat	0	r	{
@@ -314,6 +349,8 @@
 		finish		-link	.drawFinish
 		arrays		-link	.drawArrays
 		elements	-link	.drawElements
+		
+		model		-link	.modelDraw
 	}
 }
 

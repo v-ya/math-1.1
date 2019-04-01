@@ -27,7 +27,7 @@
 #define F_isok		0x00100000
 #define F_userDelete	0x00200000
 
-#define F_type_t(t)	(t<<16)
+#define F_type_t(t)	((t<<16)&F_type)
 #define F_type_s(m, t)	m = m & ~F_type | (t<<16)
 #define F_type_g(m)	((m&F_type)>>16)
 
@@ -66,6 +66,22 @@ typedef enum ESrcBufferType {
 	srcBufferTypeMax
 } SrcBufferType;
 
+#define MODEL_COMMAND_ARGC_MAX	16
+
+typedef void (*ModelFunc)(u64 [], var *);
+
+typedef enum EModelCommand {
+	mcRunScript,
+	mcSyncUniform,
+	mcBindBuffer,
+	mcBindVertexAttrib,
+	
+	mcDrawArrays,
+	mcDrawElements,
+	
+	mcNumber
+} ModelCommand;
+
 // string
 #define S_src		"src"
 #define S_handle	"handle"
@@ -76,6 +92,9 @@ typedef enum ESrcBufferType {
 	#define S_list		"list"
 #define S_model		"model"
 	#define S_bind		"bind"
+	#define S_command	"command"
+	#define S_script	"script"
+	#define S_env		"env"
 
 
 // extern

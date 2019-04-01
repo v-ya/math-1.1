@@ -21,6 +21,7 @@ var* createSrc(var *src, u32 tlog, u64 *gen)
 GLuint getHandle(var *src, u64 sid, u32 isok, u32 *mode)
 {
 	var *vp;
+	
 	if _oF(!(vp=base->var_find_index(src, sid))) return 0;
 	
 	if _oF(isok & F_type)
@@ -39,6 +40,36 @@ GLuint getHandle(var *src, u64 sid, u32 isok, u32 *mode)
 	if _oF(mode) *mode = vp->mode;
 	
 	return vp->v.v_long;
+}
+
+var* getObject(var *src, u64 sid, u32 isok, u32 *mode)
+{
+	var *vp;
+	
+	if _oF(!(vp=base->var_find_index(src, sid))) return 0;
+	
+	if _oF(isok & F_type)
+	{
+		if _oF((vp->mode&F_type) != (isok&F_type)) return 0;
+	}
+	if _oT(isok & F_isok)
+	{
+		if _oF(!(vp->mode&F_isok)) return 0;
+	}
+	else
+	{
+		if _oF(vp->mode&F_isok) return 0;
+	}
+	
+	if _oF(mode) *mode = vp->mode;
+	
+	return vp;
+}
+
+GLuint getObjectHandle(var *o)
+{
+	o = base->var_find(o, S_handle);
+	return o?o->v.v_long:0;
 }
 
 void setHandleOk(var *src, u64 sid)
@@ -76,6 +107,10 @@ int createSrcRefer(var *pool, var *src, u64 sid, u64 value)
 {
 	var *vp;
 	
+	if _oT(src)
+	{
+		if _oF(!getObject(src, sid, F_isok, NULL)) return -1;
+	}
 	if _oF(base->var_find_index(pool, sid)) return 0;
 	if _oT(base->create_ulong(pool, NULL, sid, auth_read, value))
 	{

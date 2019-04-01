@@ -1,30 +1,4 @@
 
-var* getVertexAttribObject(u64 sid, u32 isok, u32 *mode)
-{
-	var *vp;
-	
-	vp = base->var_find_index(V_vertexAttrib, sid);
-	
-	if _oT(isok & F_isok)
-	{
-		if _oF(!(vp->mode&F_isok)) return NULL;
-	}
-	else
-	{
-		if _oF(vp->mode&F_isok) return NULL;
-	}
-	
-	if _oF(mode) *mode = vp->mode;
-	
-	return vp;
-}
-
-GLuint getVertexAttribHandle(var *v)
-{
-	v = base->var_find(v, S_handle);
-	return v?v->v.v_long:0;
-}
-
 u64 createVertexAttrib(void)
 {
 	var *o;
@@ -70,7 +44,7 @@ void deleteVertexAttrib(u64 sid)
 		if _oT(vp->inode>1) vp->inode-=1;
 		else
 		{
-			va = getVertexAttribHandle(vp);
+			va = getObjectHandle(vp);
 			glDeleteVertexArrays(1, &va);
 			base->clear_vmsrc(vp, S_buffer, vertexAttrib_clearBuffer);
 			base->var_delete_index(V_vertexAttrib, sid);
@@ -89,7 +63,7 @@ void deleteUserVertexAttrib(u64 sid)
 		if _oT(vp->inode>1) vp->inode-=1;
 		else
 		{
-			va = getVertexAttribHandle(vp);
+			va = getObjectHandle(vp);
 			glDeleteVertexArrays(1, &va);
 			base->clear_vmsrc(vp, S_buffer, vertexAttrib_clearBuffer);
 			base->var_delete_index(V_vertexAttrib, sid);
@@ -109,7 +83,7 @@ int vertexAttribPointer(var *v, u64 bid, GLuint index,
 	if _oF(!v) return 1;
 	buffer = getHandle(V_buffer, bid, F_type_t(srcBufferTypeVertexAttributes)|F_isok, NULL);
 	if _oF(!buffer) return 2;
-	va = getVertexAttribHandle(v);
+	va = getObjectHandle(v);
 	if _oF(!va) return -1;
 	
 	normalized = normalized?GL_TRUE:GL_FALSE;
@@ -197,7 +171,7 @@ void setVertexAttrib(var *v, u32 enable, u64 index)
 	GLuint va;
 	
 	if _oF(!v) return ;
-	va = getVertexAttribHandle(v);
+	va = getObjectHandle(v);
 	if _oF(!va) return ;
 	
 	glBindVertexArray(va);
@@ -233,7 +207,7 @@ int useVertexAttrib(u64 sid)
 {
 	GLuint va;
 	
-	va = getVertexAttribHandle(getVertexAttribObject(sid, F_isok, NULL));
+	va = getObjectHandle(getObject(V_vertexAttrib, sid, F_isok, NULL));
 	if _oF(!va) return 1;
 	
 	glBindVertexArray(va);

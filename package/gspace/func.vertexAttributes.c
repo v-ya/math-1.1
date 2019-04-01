@@ -75,7 +75,7 @@ func(vertexAttribPointer)
 	argv = argv->r;
 	p = argv->v->v.v_long;
 	
-	v = getVertexAttribObject(sid, 0, NULL);
+	v = getObject(V_vertexAttrib, sid, 0, NULL);
 	
 	ret->type = type_long;
 	ret->v.v_long = vertexAttribPointer(v, bid, index, size, type, normalized, stride, (GLvoid *) p);
@@ -108,7 +108,7 @@ func(enableVertexAttrib)
 			return base->get_error(errid_FunArgvType,label);
 	}
 	
-	v = getVertexAttribObject(sid, F_isok, NULL);
+	v = getObject(V_vertexAttrib, sid, F_isok, NULL);
 	
 	ret->type = type_void;
 	if _oF(argc == 1) setVertexAttrib(v, 1, (u64)-1);
@@ -142,7 +142,7 @@ func(disableVertexAttrib)
 			return base->get_error(errid_FunArgvType,label);
 	}
 	
-	v = getVertexAttribObject(sid, F_isok, NULL);
+	v = getObject(V_vertexAttrib, sid, F_isok, NULL);
 	
 	ret->type = type_void;
 	if _oF(argc == 1) setVertexAttrib(v, 0, (u64)-1);

@@ -28,6 +28,14 @@ func(useVertexAttrib);
 func(createModel);
 func(deleteModel);
 func(finalModel);
+func(mcRunScript);
+func(mcSyncUniform);
+func(mcBindBuffer);
+func(mcBindVertexAttrib);
+func(mcDrawArrays);
+func(mcDrawElements);
+
+func(modelDraw);
 
 // draw
 func(drawClear);
