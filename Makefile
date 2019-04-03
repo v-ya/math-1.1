@@ -2,7 +2,7 @@
 export	CC		= gcc #-pie -fPIE
 export	LD		= ld
 export	MAKEFLAGS	= --no-print-directory
-obj	= main.o string.o var.o error.o math.o sbuf.o file.o BaseFunction.o package.o func.o thread.o init.o exfun.o
+obj	= main.o string.o var.o error.o math.o sbuf.o file.o BaseFunction.o package.o func.stv.o thread.o init.stv.o exfun.o
 func	= func/function.o func/key.o func/con.o func/math.o func/string.o func/transform.o func/index.o func/time.o func/file.o func/try.o func/thread.o func/init.o func/debug.o
 
 all: math package/package
@@ -15,13 +15,13 @@ error.o: error.c error.h error.string
 args/args.o: args/*.c args/*.h args/*/*
 	cd args && make && cd ..
 
-func.c: func.sv limit.h tool/tool
+func.stv.c: func.sv limit.h tool/tool
 	./tool/sv-build $< $@
 
-init-st.c: init.math tool/tool
+init.st.c: init.math tool/tool
 	./tool/init-makec $< $@ _init_text --compress
 
-init.c: init.sv tool/tool init-st.c
+init.stv.c: init.sv tool/tool init.st.c
 	./tool/sv-build $< $@
 
 tool/tool: tool/*.c
@@ -33,7 +33,7 @@ package/package: package/package.c package/package.h package/*/*.c package/*/*.h
 run: all
 	./math test.math
 clear:
-	rm -f math *.o func.c init.c init-st.c func/*.o output/*
+	rm -f math *.o func.stv.c init.stv.c init.st.c func/*.o output/*
 	rm -Rf math-root/
 	cd args && make clear && cd ..
 	cd tool && make clear && cd ..

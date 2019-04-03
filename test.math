@@ -2,3 +2,155 @@
 # test.math
 
 
+var string:code[3];
+
+"
+#version 420 core
+
+layout(location=0) in vec4 vPosition;
+layout(location=1) in vec4 vColor;
+out vec4 vfColor;
+
+void main()
+{
+	gl_Position = vPosition;
+	vfColor = vColor;
+}
+
+"@code[0];
+"
+#version 420 core
+
+in vec4 vfColor;
+out vec4 fColor;
+
+void main()
+{
+	fColor = vfColor;
+}
+
+"@code[1];
+"
+#version 420 core
+
+in vec4 vfColor;
+out vec4 fColor;
+
+void main()
+{
+	fColor = vec4(1, 0, 0, 1);
+}
+
+"@code[2];
+
+var string:package;
+package = import("g","package/model/gspace.so");
+
+var ulong:program, string:log;
+var ulong:(p1,p2);
+
+g.initWindow("test",512,512);
+
+program=g.createProgram();
+.print("program:%?\n",program);
+
+log = g.attachShader(program, g.program.type.vertex, code[0]);
+.if log; .print(log);
+
+log = g.attachShader(program, g.program.type.fragment, code[1]);
+.if log; .print(log);
+
+log = g.linkProgram(program);
+.if log; .print(log);
+
+p1 = program;
+
+program=g.createProgram();
+.print("program:%?\n",program);
+
+log = g.attachShader(program, g.program.type.vertex, code[0]);
+.if log; .print(log);
+
+log = g.attachShader(program, g.program.type.fragment, code[2]);
+.if log; .print(log);
+
+log = g.linkProgram(program);
+.if log; .print(log);
+
+p2 = program;
+
+var ulong:buffer;
+
+var float:va[8]=[
+	-0.8, -0.8,
+	0.8, -0.8,
+	-0.8, 0.8,
+	0.8, 0.8
+];
+
+var uint:vc[4]=[
+	0xff0000,
+	0x00ff00,
+	0x0000ff,
+	0xffffff
+];
+
+var uint:index[4]=[
+	0,1,2,3
+];
+
+.transform uint, va;
+
+var ulong:veo;
+veo = g.createBuffer(g.buffer.type.vertexIndices);
+.print("set-veo: %?\n",g.bufferSetData(veo, index, g.buffer.usage.static.draw));
+
+var ulong:vertexAttrib;
+
+vertexAttrib = g.createVertexAttrib();
+
+buffer = g.createBuffer(g.buffer.type.vertexArray);
+.print("set-buffer: %?\n",g.bufferSetData(buffer, va, g.buffer.usage.static.draw));
+.print("set-pointer: %?\n",g.vertexAttribPointer(vertexAttrib, buffer, 0,
+	g.vertexAttrib.size.v2, g.vertexAttrib.type.float, 0, 0, 0));
+g.deleteBuffer(buffer);
+
+buffer = g.createBuffer(g.buffer.type.vertexArray);
+.print("set-buffer: %?\n",g.bufferSetData(buffer, vc, g.buffer.usage.static.draw));
+.print("set-pointer: %?\n",g.vertexAttribPointer(vertexAttrib, buffer, 1,
+	g.vertexAttrib.size.bgra, g.vertexAttrib.type.ubyte, 1, 0, 0));
+g.deleteBuffer(buffer);
+
+g.finalVertexAttrib(vertexAttrib);
+
+g.enableVertexAttrib(vertexAttrib);
+g.useProgram(p1);
+
+var ulong:model, long:r;
+
+model = g.createModel(p1);
+.print("model: %?\n",model);
+
+# set model
+
+r = g.mcRunScript(model,{.print("The Model Script!\n");});
+r = g.mcSyncUniform(model);
+r = g.mcBindVertexAttrib(model,vertexAttrib);
+r = g.mcBindBuffer(model,veo);
+r = g.mcDrawElements(model,g.draw.mode.triangle_strip, 4);
+
+g.finalModel(model);
+
+r = g.drawModel(model);
+.print("r = %?\n",r);
+
+g.drawFlush();
+
+.debug.pause();
+
+g.deleteModel(model);
+g.deleteVertexAttrib(vertexAttrib);
+g.deleteProgram(program);
+
+.remove(package);
+

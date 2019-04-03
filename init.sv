@@ -1,5 +1,5 @@
 #include "main.h"
-#include "init-st.c"
+#include "init.st.c"
 
 // init.math 阶段该结构将挂载到 .init
 

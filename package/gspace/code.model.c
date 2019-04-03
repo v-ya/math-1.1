@@ -325,7 +325,19 @@ int modelDrawElements(var *vp, u32 mode, u32 begin, u32 count, u32 pbase)
 
 ModelPointerFunction(RunScript)
 {
-	print("RunScript: %lu\n", c[1]);
+	var *vp, *e;
+	e = base->var_find(model, S_env);
+	vp = base->var_find(model, S_script);
+	vp = base->var_find_index(vp, c[1]);
+	if _oT(vp)
+	{
+		e = base->run_script(vp, e);
+		if _oF(e)
+		{
+			base->print_error();
+			base->clr_error();
+		}
+	}
 }
 
 ModelPointerFunction(SyncUniform)
