@@ -44,9 +44,10 @@ func(initWindow)
 	return ret;
 }
 
-func(test)
+func(getOpenGLError)
 {
-	ret->type = type_void;
+	ret->type = type_long;
+	ret->v.v_long = glGetError();
 	return ret;
 }
 

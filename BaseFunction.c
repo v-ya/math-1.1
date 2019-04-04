@@ -52,6 +52,7 @@ interface_base BaseFunction = {
 	&var_replace,
 	&var_set,
 	&var_link,
+	&var_link_index,
 	&get_tmpvar,
 	&var_fixvalue,
 	&ptvar_alloc,

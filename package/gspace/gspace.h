@@ -82,6 +82,40 @@ typedef enum EModelCommand {
 	mcNumber
 } ModelCommand;
 
+// model uniform type define
+#define MODEL_UNIFORM_TYPE_mask		0x30
+#define MODEL_UNIFORM_TYPE_num(n)	((n-1)&0x03)
+#define MODEL_UNIFORM_TYPE_rc(r, c)	((((r-1)&0x03)<<2)|((c-1)&0x03))
+#define MODEL_UNIFORM_TYPE_M		0x00
+#define MODEL_UNIFORM_TYPE_F		0x10
+#define MODEL_UNIFORM_TYPE_I		0x20
+#define MODEL_UNIFORM_TYPE_U		0x30
+
+#define MODEL_UNIFORM_TYPE_f1		MODEL_UNIFORM_TYPE_F|MODEL_UNIFORM_TYPE_num(1)
+#define MODEL_UNIFORM_TYPE_f2		MODEL_UNIFORM_TYPE_F|MODEL_UNIFORM_TYPE_num(2)
+#define MODEL_UNIFORM_TYPE_f3		MODEL_UNIFORM_TYPE_F|MODEL_UNIFORM_TYPE_num(3)
+#define MODEL_UNIFORM_TYPE_f4		MODEL_UNIFORM_TYPE_F|MODEL_UNIFORM_TYPE_num(4)
+
+#define MODEL_UNIFORM_TYPE_i1		MODEL_UNIFORM_TYPE_I|MODEL_UNIFORM_TYPE_num(1)
+#define MODEL_UNIFORM_TYPE_i2		MODEL_UNIFORM_TYPE_I|MODEL_UNIFORM_TYPE_num(2)
+#define MODEL_UNIFORM_TYPE_i3		MODEL_UNIFORM_TYPE_I|MODEL_UNIFORM_TYPE_num(3)
+#define MODEL_UNIFORM_TYPE_i4		MODEL_UNIFORM_TYPE_I|MODEL_UNIFORM_TYPE_num(4)
+
+#define MODEL_UNIFORM_TYPE_u1		MODEL_UNIFORM_TYPE_U|MODEL_UNIFORM_TYPE_num(1)
+#define MODEL_UNIFORM_TYPE_u2		MODEL_UNIFORM_TYPE_U|MODEL_UNIFORM_TYPE_num(2)
+#define MODEL_UNIFORM_TYPE_u3		MODEL_UNIFORM_TYPE_U|MODEL_UNIFORM_TYPE_num(3)
+#define MODEL_UNIFORM_TYPE_u4		MODEL_UNIFORM_TYPE_U|MODEL_UNIFORM_TYPE_num(4)
+
+#define MODEL_UNIFORM_TYPE_m2		MODEL_UNIFORM_TYPE_M|MODEL_UNIFORM_TYPE_rc(2,2)
+#define MODEL_UNIFORM_TYPE_m3		MODEL_UNIFORM_TYPE_M|MODEL_UNIFORM_TYPE_rc(3,3)
+#define MODEL_UNIFORM_TYPE_m4		MODEL_UNIFORM_TYPE_M|MODEL_UNIFORM_TYPE_rc(4,4)
+#define MODEL_UNIFORM_TYPE_m2x3		MODEL_UNIFORM_TYPE_M|MODEL_UNIFORM_TYPE_rc(2,3)
+#define MODEL_UNIFORM_TYPE_m3x2		MODEL_UNIFORM_TYPE_M|MODEL_UNIFORM_TYPE_rc(3,2)
+#define MODEL_UNIFORM_TYPE_m2x4		MODEL_UNIFORM_TYPE_M|MODEL_UNIFORM_TYPE_rc(2,4)
+#define MODEL_UNIFORM_TYPE_m4x2		MODEL_UNIFORM_TYPE_M|MODEL_UNIFORM_TYPE_rc(4,2)
+#define MODEL_UNIFORM_TYPE_m3x4		MODEL_UNIFORM_TYPE_M|MODEL_UNIFORM_TYPE_rc(3,4)
+#define MODEL_UNIFORM_TYPE_m4x3		MODEL_UNIFORM_TYPE_M|MODEL_UNIFORM_TYPE_rc(4,3)
+
 // string
 #define S_src		"src"
 #define S_handle	"handle"
@@ -91,6 +125,8 @@ typedef enum EModelCommand {
 	#define S_location	"location"
 	#define S_list		"list"
 #define S_model		"model"
+	#define S_uniform	"uniform"
+	#define S_unidata	"unidata"
 	#define S_bind		"bind"
 	#define S_command	"command"
 	#define S_script	"script"
@@ -108,13 +144,13 @@ extern var *INFO_OpenglVendor;
 extern var *INFO_OpenglRenderer;
 extern var *INFO_OpenglVersion;
 extern var *INFO_OpenglShadingLanguageVersion;
-extern var *INFO_OpenglExtensions;
 
 extern var *VAR_OpenglMajor;
 extern var *VAR_OpenglMinor;
 extern var *VAR_OpenglProfile;
 extern var *VAR_DisplayMode;
 extern var *VAR_ClearBit;
+extern var *VAR_ModelUniTran;
 
 #endif
 

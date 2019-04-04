@@ -163,7 +163,6 @@ void init_window(char *title, int width, int height)
 	INFO_OpenglRenderer->v.v_string			= (char *) glGetString(GL_RENDERER);
 	INFO_OpenglVersion->v.v_string			= (char *) glGetString(GL_VERSION);
 	INFO_OpenglShadingLanguageVersion->v.v_string	= (char *) glGetString(GL_SHADING_LANGUAGE_VERSION);
-	INFO_OpenglExtensions->v.v_string		= (char *) glGetString(GL_EXTENSIONS);
 	
 	isInit = 1;
 }

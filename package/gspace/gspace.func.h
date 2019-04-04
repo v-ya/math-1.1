@@ -28,6 +28,7 @@ func(useVertexAttrib);
 func(createModel);
 func(deleteModel);
 func(finalModel);
+func(modelLinkUniform);
 func(mcRunScript);
 func(mcSyncUniform);
 func(mcBindBuffer);
@@ -46,9 +47,7 @@ func(drawElements);
 
 // system
 func(initWindow);
-
-// test
-func(test);
+func(getOpenGLError);
 
 #endif
 

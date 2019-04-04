@@ -19,14 +19,12 @@
 			renderer	string	0	r	NULL
 			version		string	0	r	NULL
 			glslv		string	0	r	NULL
-			extensions	string	0	r	NULL
 			
 			
 			INFO_OpenglVendor			-export	.info.OpenGL.vendor
 			INFO_OpenglRenderer			-export	.info.OpenGL.renderer
 			INFO_OpenglVersion			-export	.info.OpenGL.version
 			INFO_OpenglShadingLanguageVersion	-export	.info.OpenGL.glslv
-			INFO_OpenglExtensions			-export	.info.OpenGL.extensions
 		}
 		ShaderType	vmat	0	r	{
 			compute		ulong	0	r	GL_COMPUTE_SHADER
@@ -129,6 +127,33 @@
 			word			-link	.info.VertexAttribType.sword
 			int			-link	.info.VertexAttribType.sint
 		}
+		UniformType	vmat	0	r	{
+			// float(32)
+			f1	uint	0	r	MODEL_UNIFORM_TYPE_f1
+			f2	uint	0	r	MODEL_UNIFORM_TYPE_f2
+			f3	uint	0	r	MODEL_UNIFORM_TYPE_f3
+			f4	uint	0	r	MODEL_UNIFORM_TYPE_f4
+			// int(32)
+			i1	uint	0	r	MODEL_UNIFORM_TYPE_i1
+			i2	uint	0	r	MODEL_UNIFORM_TYPE_i2
+			i3	uint	0	r	MODEL_UNIFORM_TYPE_i3
+			i4	uint	0	r	MODEL_UNIFORM_TYPE_i4
+			// uint(32)
+			u1	uint	0	r	MODEL_UNIFORM_TYPE_u1
+			u2	uint	0	r	MODEL_UNIFORM_TYPE_u2
+			u3	uint	0	r	MODEL_UNIFORM_TYPE_u3
+			u4	uint	0	r	MODEL_UNIFORM_TYPE_u4
+			// mat
+			m2	uint	0	r	MODEL_UNIFORM_TYPE_m2
+			m3	uint	0	r	MODEL_UNIFORM_TYPE_m3
+			m4	uint	0	r	MODEL_UNIFORM_TYPE_m4
+			m2x3	uint	0	r	MODEL_UNIFORM_TYPE_m2x3
+			m3x2	uint	0	r	MODEL_UNIFORM_TYPE_m3x2
+			m2x4	uint	0	r	MODEL_UNIFORM_TYPE_m2x4
+			m4x2	uint	0	r	MODEL_UNIFORM_TYPE_m4x2
+			m3x4	uint	0	r	MODEL_UNIFORM_TYPE_m3x4
+			m4x3	uint	0	r	MODEL_UNIFORM_TYPE_m4x3
+		}
 		
 		
 		ClearBit	vmat	0	r	{
@@ -165,9 +190,11 @@
 			VAR_DisplayMode		-export	.set.init.DisplayMode
 		}
 		run	vmat	0	r	{
-			clearBit	ulong	0	rw	DEFAULT_CLEAR_BIT
+			clearBit		ulong	0	rw	DEFAULT_CLEAR_BIT
+			modelUniformTranspose	uint	0	rw	1
 			
 			VAR_ClearBit		-export	.set.run.clearBit
+			VAR_ModelUniTran	-export	.set.run.modelUniformTranspose
 		}
 	}
 	
@@ -243,6 +270,11 @@
 		// void delete(ulong model);
 	finalModel		fun	0	r	addr_fun(finalModel)
 		// void finalModel(ulong model);
+	modelLinkUniform	fun	0	r	addr_fun(modelLinkUniform)
+		// long error = modelLinkUniform(ulong model, string name, [u]int[] sync, UniformType);
+		// long error = modelLinkUniform(ulong model, string name, [u]int[] sync, UniformType, znum count);
+		// long error = modelLinkUniform(ulong model, string name, [u]int[] sync, UniformType, znum begin, znum count);
+		// long error = modelLinkUniform(ulong model, string name, [u]int[] sync, UniformType, znum begin, znum count, znum transpose);
 	mcRunScript		fun	0	r	addr_fun(mcRunScript)
 		// long error = mcRunScript(ulong model, string script);
 	mcSyncUniform		fun	0	r	addr_fun(mcSyncUniform)
@@ -282,9 +314,8 @@
 	// system
 	initWindow		fun	0	r	addr_fun(initWindow)
 		// void initWindow([string title,] znum width, znum height);
-	
-	// test
-	test			fun	0	r	addr_fun(test)
+	getOpenGLError		fun	0	r	addr_fun(getOpenGLError)
+		// long getOpenGLError();
 	
 	// link
 	program		vmat	0	r	{
@@ -325,9 +356,12 @@
 	}
 	
 	model		vmat	0	r	{
+		uf_type			-link	.info.UniformType
+		
 		create			-link	.createModel
 		delete			-link	.deleteModel
 		final			-link	.finalModel
+		linkUniform		-link	.modelLinkUniform
 		mcRunScript		-link	.mcRunScript
 		mcSyncUniform		-link	.mcSyncUniform
 		mcBindBuffer		-link	.mcBindBuffer

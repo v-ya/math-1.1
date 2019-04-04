@@ -11,6 +11,10 @@ u64 createModel(u64 program)
 	
 	if _oF(!(o=createSrc(V_model, tlog_vmat, &sid))) goto Err_1;
 	
+	// uniform && unidata
+	if _oF(!base->create_vmat(o, S_uniform, 0, auth_read)) goto Err;
+	if _oF(!base->create_vmat(o, S_unidata, 0, auth_read)) goto Err;
+	
 	// src refer
 	if _oF(!base->create_ulong(o, S_program, 0, auth_read, program)) goto Err;
 	if _oF(!base->create_vmat(o, S_buffer, 0, auth_read)) goto Err;
@@ -93,6 +97,135 @@ void finalModel(u64 sid)
 	{
 		base->var_delete(vp, S_bind);
 		vp->mode |= F_isok;
+	}
+}
+
+int isUniformType(u32 type, u32 *count)
+{
+	u8 t, n, r, c;
+	switch(type & MODEL_UNIFORM_TYPE_mask)
+	{
+		case MODEL_UNIFORM_TYPE_M:
+			r = (type&0x0c)>>2;
+			c = type&0x03;
+			type &= ~0x0f;
+			// 1x? || ?x1
+			if _oF(!r || !c) return 0;
+			if _oT(count) *count=(r+1)*(c+1);
+			break;
+		case MODEL_UNIFORM_TYPE_F:
+		case MODEL_UNIFORM_TYPE_I:
+		case MODEL_UNIFORM_TYPE_U:
+			type &= ~0x03;
+			if _oT(count) *count=n+1;
+			break;
+		default:
+			return 0;
+	}
+	type &= ~MODEL_UNIFORM_TYPE_mask;
+	if _oF(type) return 0;
+	
+	return 1;
+}
+
+int modelLinkUniform(var *vp, char *name, var *sync, u32 type, u32 begin, u32 count, u32 transpose)
+{
+	var *uniform, *unidata;
+	u64 *c, p;
+	u32 n;
+	GLuint program;
+	GLint index;
+	
+	if _oF(!vp) return 1;
+	
+	uniform = base->var_find(vp, S_uniform);
+	unidata = base->var_find(vp, S_unidata);
+	vp = base->var_find(vp, S_program);
+	if _oF(!uniform || !vp) return -1;
+	program = getHandle(V_program, vp->v.v_long, F_isok, NULL);
+	if _oF(!program) return -1;
+	
+	if _oF(!name) return 1;
+	index = glGetUniformLocation(program, name);
+	if _oF(index < 0) return 1;
+	
+	if _oF(!isUniformType(type, &n)) return 1;
+	if _oF(!sync || !(sync->type&type_int) || !sync->length) return 1;
+	p = count*n + begin;
+	if _oF(sync->length && p>sync->length) return 1;
+	
+	if _oF(!base->var_link_index(unidata, (u64) sync, sync)) return -1;
+	// reset auth_retype;
+	sync->mode &= ~auth_retype;
+	
+	if _oF(!(vp=base->create_var(uniform, NULL, uniform->v.v_vmat->number, tlog_long, 6, auth_read))) return -1;
+	c = vp->v.vp_long;
+	c[0] = index;
+	c[1] = type;
+	c[2] = (u64) sync;
+	c[3] = begin;
+	c[4] = count;
+	c[5] = transpose?GL_TRUE:GL_FALSE;
+	
+	return 0;
+}
+
+void modelSyncUniformOnce(u64 c[])
+{
+	u32 type, *u;
+	GLint location;
+	GLsizei count;
+	GLboolean transpose;
+	
+	location = c[0];
+	type = c[1];
+	u = ((var*)c[2])->v.vp_int + c[3];
+	count = c[4];
+	transpose = c[5];
+	
+	switch(type&MODEL_UNIFORM_TYPE_mask)
+	{
+		case MODEL_UNIFORM_TYPE_M:
+			switch(type&0x0f)
+			{
+				case MODEL_UNIFORM_TYPE_rc(2,2): glUniformMatrix2fv(location, count, transpose, (const GLfloat *) u);break;
+				case MODEL_UNIFORM_TYPE_rc(3,3): glUniformMatrix3fv(location, count, transpose, (const GLfloat *) u);break;
+				case MODEL_UNIFORM_TYPE_rc(4,4): glUniformMatrix4fv(location, count, transpose, (const GLfloat *) u);break;
+				case MODEL_UNIFORM_TYPE_rc(2,3): glUniformMatrix2x3fv(location, count, transpose, (const GLfloat *) u);break;
+				case MODEL_UNIFORM_TYPE_rc(3,2): glUniformMatrix3x2fv(location, count, transpose, (const GLfloat *) u);break;
+				case MODEL_UNIFORM_TYPE_rc(2,4): glUniformMatrix2x4fv(location, count, transpose, (const GLfloat *) u);break;
+				case MODEL_UNIFORM_TYPE_rc(4,2): glUniformMatrix4x2fv(location, count, transpose, (const GLfloat *) u);break;
+				case MODEL_UNIFORM_TYPE_rc(3,4): glUniformMatrix3x4fv(location, count, transpose, (const GLfloat *) u);break;
+				case MODEL_UNIFORM_TYPE_rc(4,3): glUniformMatrix4x3fv(location, count, transpose, (const GLfloat *) u);break;
+			}
+			break;
+		case MODEL_UNIFORM_TYPE_F:
+			switch(type&0x03)
+			{
+				case MODEL_UNIFORM_TYPE_num(1): glUniform1fv(location, count, (const GLfloat *) u);break;
+				case MODEL_UNIFORM_TYPE_num(2): glUniform2fv(location, count, (const GLfloat *) u);break;
+				case MODEL_UNIFORM_TYPE_num(3): glUniform3fv(location, count, (const GLfloat *) u);break;
+				case MODEL_UNIFORM_TYPE_num(4): glUniform4fv(location, count, (const GLfloat *) u);break;
+			}
+			break;
+		case MODEL_UNIFORM_TYPE_I:
+			switch(type&0x03)
+			{
+				case MODEL_UNIFORM_TYPE_num(1): glUniform1iv(location, count, (const GLint *) u);break;
+				case MODEL_UNIFORM_TYPE_num(2): glUniform2iv(location, count, (const GLint *) u);break;
+				case MODEL_UNIFORM_TYPE_num(3): glUniform3iv(location, count, (const GLint *) u);break;
+				case MODEL_UNIFORM_TYPE_num(4): glUniform4iv(location, count, (const GLint *) u);break;
+			}
+			break;
+		case MODEL_UNIFORM_TYPE_U:
+			switch(type&0x03)
+			{
+				case MODEL_UNIFORM_TYPE_num(1): glUniform1uiv(location, count, (const GLuint *) u);break;
+				case MODEL_UNIFORM_TYPE_num(2): glUniform2uiv(location, count, (const GLuint *) u);break;
+				case MODEL_UNIFORM_TYPE_num(3): glUniform3uiv(location, count, (const GLuint *) u);break;
+				case MODEL_UNIFORM_TYPE_num(4): glUniform4uiv(location, count, (const GLuint *) u);break;
+			}
+			break;
 	}
 }
 
@@ -329,7 +462,7 @@ ModelPointerFunction(RunScript)
 	e = base->var_find(model, S_env);
 	vp = base->var_find(model, S_script);
 	vp = base->var_find_index(vp, c[1]);
-	if _oT(vp)
+	if _oT(vp && e)
 	{
 		e = base->run_script(vp, e);
 		if _oF(e)
@@ -342,7 +475,21 @@ ModelPointerFunction(RunScript)
 
 ModelPointerFunction(SyncUniform)
 {
-	print("SyncUniform\n");
+	var *uniform, *vp;
+	u32 i, n;
+	uniform = base->var_find(model, S_uniform);
+	if _oT(uniform)
+	{
+		n = uniform->v.v_vmat->number;
+		for(i=0;i<n;i++)
+		{
+			vp = base->var_find_index(uniform, i);
+			if _oT(vp && (vp->type&type_long) && vp->length==6)
+			{
+				modelSyncUniformOnce(vp->v.vp_long);
+			}
+		}
+	}
 }
 
 ModelPointerFunction(BindBuffer)
@@ -384,9 +531,15 @@ int modelDraw(var *model)
 {
 	var *command, *vp;
 	u64 i, n, c;
+	GLuint program;
 	
+	if _oF(!model) return 1;
 	command = base->var_find(model, S_command);
-	if _oF(!model || !command) return 1;
+	if _oF(!command) return -1;
+	vp = base->var_find(model, S_program);
+	if _oF(!vp || !(program=vp->v.v_long)) return -1;
+	
+	useProgram(program);
 	
 	n = command->v.v_vmat->number;
 	for(i=0;i<n;i++)

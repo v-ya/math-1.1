@@ -148,6 +148,8 @@
 			<keyword>strarray</keyword>
 			<keyword>arrstring</keyword>
 			<keyword>transform</keyword>
+			<keyword>array_copy</keyword>
+			<keyword>array_store</keyword>
 		</context>
 		<context id="key_g" style-ref="key">
 			<prefix>\.?</prefix>

@@ -7,6 +7,8 @@
 keyword(strarray);
 keyword(arrstring);
 keyword(transform);
+func(array_copy);
+func(array_store);
 
 #endif
 

@@ -1,7 +1,7 @@
 #ifndef	_BaseFunction_h_
 #define	_BaseFunction_h_
 
-#define InterfaceBase_Version	4
+#define InterfaceBase_Version	5
 
 typedef struct Interface_Base {
 	// version
@@ -55,6 +55,7 @@ typedef struct Interface_Base {
 	var*	(*var_replace)		(var *obj, char *name, u32 tlog, u32 length);
 	var*	(*var_set)		(var *obj, char *name, u32 tlog, u32 length, u32 mode, value *v);
 	var*	(*var_link)		(var *obj, char *name, var *v);
+	var*	(*var_link_index)	(var *obj, u64 head, var *v);
 	void	(*get_tmpvar)		(char *exp, char **expp, var *v);
 	void	(*var_fixvalue)		(var *vp);
 	void	(*ptvar_alloc)		(var *object);

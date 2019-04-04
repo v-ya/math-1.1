@@ -11,6 +11,11 @@
 ## <span id="history">版本更新记录</span>
 ---
 
+2019.04.04 v1.7.2
+---
+*	package `[vya.gspace]` model 框架基本完成
+*	新增数组操作函数 `.transform` `.array_copy` `.array_store`
+
 2019.03.29 v1.7.1
 ---
 *	新增 package `[vya.gspace]`

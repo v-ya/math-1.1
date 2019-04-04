@@ -47,6 +47,88 @@ func(finalModel)
 	return ret;
 }
 
+func(modelLinkUniform)
+{
+	static char *label=label_name("modelLinkUniform");
+	static u32 type_4[4]={type_znum, type_string, type_int|type_onlyarray, type_znum};
+	static u32 type_5[5]={type_znum, type_string, type_int|type_onlyarray, type_znum, type_znum};
+	static u32 type_6[6]={type_znum, type_string, type_int|type_onlyarray, type_znum, type_znum, type_znum};
+	static u32 type_7[7]={type_znum, type_string, type_int|type_onlyarray, type_znum, type_znum, type_znum, type_znum};
+	u64 sid;
+	char *name;
+	var *sync;
+	u32 type, begin, count, transpose;
+	
+	switch(argc)
+	{
+		case 4:
+			if _oF(base->check_varlist(argv,4,type_4)) return base->get_error(errid_FunArgvType,label);
+			sid = argv->v->v.v_long;
+			argv = argv->r;
+			name = argv->v->v.v_string;
+			argv = argv->r;
+			sync = argv->v;
+			argv = argv->r;
+			type = argv->v->v.v_long;
+			begin = 0;
+			count = 1;
+			transpose = VAR_ModelUniTran->v.v_long;
+			break;
+		case 5:
+			if _oF(base->check_varlist(argv,5,type_5)) return base->get_error(errid_FunArgvType,label);
+			sid = argv->v->v.v_long;
+			argv = argv->r;
+			name = argv->v->v.v_string;
+			argv = argv->r;
+			sync = argv->v;
+			argv = argv->r;
+			type = argv->v->v.v_long;
+			argv = argv->r;
+			count = argv->v->v.v_long;
+			begin = 0;
+			transpose = VAR_ModelUniTran->v.v_long;
+			break;
+		case 6:
+			if _oF(base->check_varlist(argv,6,type_6)) return base->get_error(errid_FunArgvType,label);
+			sid = argv->v->v.v_long;
+			argv = argv->r;
+			name = argv->v->v.v_string;
+			argv = argv->r;
+			sync = argv->v;
+			argv = argv->r;
+			type = argv->v->v.v_long;
+			argv = argv->r;
+			begin = argv->v->v.v_long;
+			argv = argv->r;
+			count = argv->v->v.v_long;
+			transpose = VAR_ModelUniTran->v.v_long;
+			break;
+		case 7:
+			if _oF(base->check_varlist(argv,7,type_7)) return base->get_error(errid_FunArgvType,label);
+			sid = argv->v->v.v_long;
+			argv = argv->r;
+			name = argv->v->v.v_string;
+			argv = argv->r;
+			sync = argv->v;
+			argv = argv->r;
+			type = argv->v->v.v_long;
+			argv = argv->r;
+			begin = argv->v->v.v_long;
+			argv = argv->r;
+			count = argv->v->v.v_long;
+			argv = argv->r;
+			transpose = argv->v->v.v_long;
+			break;
+		default:
+			return base->get_error(errid_FunArgvType,label);
+	}
+	
+	ret->type = type_long;
+	ret->v.v_long = modelLinkUniform(getObject(V_model, sid, 0, NULL), name, sync, type, begin, count, transpose);
+	
+	return ret;
+}
+
 func(mcRunScript)
 {
 	static char *label=label_name("mcRunScript");

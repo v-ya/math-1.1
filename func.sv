@@ -404,6 +404,12 @@
 				// long[] => byte[] word[] int[] long[];	u64[] => u8[] u16[] u32[] u64[]
 				// int[] long[] => float[];			u32[] -> f32[] => f64[] | u64 -> f64[]
 				// float[] => int[] long[];			f64[] => f32[] -> u32[] | f64 -> u64[]
+		array_copy fun	0	r	addr_fun(array_copy)
+			// void .array_copy(num[] dst, num[] src);
+			// void .array_copy(num[] dst, num[] src, znum dst_begin, znum src_begin, znum count);
+		array_store fun	0	r	addr_fun(array_store)
+			// void .array_store(num[] dst, num[] src);
+			// void .array_store(num[] dst, num[] src, znum dst_begin, znum src_begin, znum count);
 	// 常数表
 	const	vmat	0	r	{
 		// 数学常量

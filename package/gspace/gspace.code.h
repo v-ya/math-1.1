@@ -44,6 +44,7 @@ u64 createModel(u64 program);
 void deleteModel(u64 sid);
 void deleteUserModel(u64 sid);
 void finalModel(u64 sid);
+int modelLinkUniform(var *vp, char *name, var *sync, u32 type, u32 begin, u32 count, u32 transpose);
 ulong* modelNewCommand(var *vp, u32 argc);
 void modelDeleteCommand(var *vp, u32 n);
 int modelRunScript(var *vp, char *script);

@@ -806,6 +806,40 @@ var* var_link(var *obj, char *name, var *v)
 	else return NULL;
 }
 
+var* var_link_index(var *obj, u64 head, var *v)
+{
+	vlist *vl;
+	u32 i;
+	if _oF(obj==NULL) return NULL;
+	if _oF(obj->length!=leng_no) return NULL;
+	if _oF(obj->type&type_vmat)
+	{
+		i=vhead_gen(head)&obj->v.v_vmat->mask;
+		vl=vlist_find_index(obj->v.v_vmat->avl[i],head);
+		if _oT(!vl)
+		{
+			vl=vlist_alloc_index(head);
+			if _oF(!vl) return NULL;
+			obj->v.v_vmat->avl[i]=vlist_insert(obj->v.v_vmat->avl[i],vl);
+		}
+		vlist_link(vl,v);
+		return v;
+	}
+	else if _oT(obj->type&type_vlist)
+	{
+		vl=vlist_find_index(obj->v.v_vlist,head);
+		if _oT(!vl)
+		{
+			vl=vlist_alloc_index(head);
+			if _oF(!vl) return NULL;
+			obj->v.v_vlist=vlist_insert(obj->v.v_vlist,vl);
+		}
+		vlist_link(vl,v);
+		return v;
+	}
+	else return NULL;
+}
+
 void get_tmpvar(char *exp, char **expp, var *v)
 {
 	int is_neg=0;
