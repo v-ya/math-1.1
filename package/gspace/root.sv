@@ -102,6 +102,132 @@
 				dynamic	-link	.info.BufferUsage.dynamic.copy
 			}
 		}
+		TextureType	vmat	0	r	{
+			t1D		uint	0	r	srcTextureType1D
+				// 一维纹理
+			t1DArray	uint	0	r	srcTextureType1DArray
+				// 一维纹理数组
+			t2D		uint	0	r	srcTextureType2D
+				// 二维纹理
+			t2DArray	uint	0	r	srcTextureType2DArray
+				// 二维纹理数组
+			t2DMS		uint	0	r	srcTextureType2DMS
+				// 二维多重采样纹理
+			t2DMSArray	uint	0	r	srcTextureType2DMSArray
+				// 二维多重采样纹理数组
+			t3D		uint	0	r	srcTextureType3D
+				// 三维纹理
+			tCube		uint	0	r	srcTextureTypeCube
+				// 立方体映射纹理
+			tCubeArray	uint	0	r	srcTextureTypeCubeArray
+				// 立方体映射纹理数组
+			tRect		uint	0	r	srcTextureTypeRect
+				// 矩形纹理
+			tBuffer		uint	0	r	srcTextureTypeBuffer
+				// 缓冲纹理
+		}
+		TextureInternalFormat	vmat	0	r	{
+			r8		uint	0	r	GL_R8
+			r8_s		uint	0	r	GL_R8_SNORM
+			r16		uint	0	r	GL_R16
+			r16_s		uint	0	r	GL_R16_SNORM
+			rg8		uint	0	r	GL_RG8
+			rg8_s		uint	0	r	GL_RG8_SNORM
+			rg16		uint	0	r	GL_RG16
+			rg16_s		uint	0	r	GL_RG16_SNORM
+			r3_g3_b2	uint	0	r	GL_R3_G3_B2
+			rgb4		uint	0	r	GL_RGB4
+			rgb5		uint	0	r	GL_RGB5
+			rgb8		uint	0	r	GL_RGB8
+			rgb8_s		uint	0	r	GL_RGB8_SNORM
+			rgb10		uint	0	r	GL_RGB10
+			rgb12		uint	0	r	GL_RGB12
+			rgb16_s		uint	0	r	GL_RGB16_SNORM
+			rgba2		uint	0	r	GL_RGBA2
+			rgba4		uint	0	r	GL_RGBA4
+			rgb5_a1		uint	0	r	GL_RGB5_A1
+			rgba8		uint	0	r	GL_RGBA8
+			rgba8_s		uint	0	r	GL_RGBA8_SNORM
+			rgb10_a2	uint	0	r	GL_RGB10_A2
+			rgb10_a2UI	uint	0	r	GL_RGB10_A2UI
+			rgba12		uint	0	r	GL_RGBA12
+			rgba16		uint	0	r	GL_RGBA16
+			srgb8		uint	0	r	GL_SRGB8
+			srgb8_alpha8	uint	0	r	GL_SRGB8_ALPHA8
+			r16f		uint	0	r	GL_R16F
+			rg16f		uint	0	r	GL_RG16F
+			rgb16f		uint	0	r	GL_RGB16F
+			rgba16f		uint	0	r	GL_RGBA16F
+			r32f		uint	0	r	GL_R32F
+			rg32f		uint	0	r	GL_RG32F
+			rgb32f		uint	0	r	GL_RGB32F
+			rgba32f		uint	0	r	GL_RGBA32F
+			r11f_g11f_b10f	uint	0	r	GL_R11F_G11F_B10F
+			rgb9_e5		uint	0	r	GL_RGB9_E5
+			r8i		uint	0	r	GL_R8I
+			r8ui		uint	0	r	GL_R8UI
+			r16i		uint	0	r	GL_R16I
+			r16ui		uint	0	r	GL_R16UI
+			r32i		uint	0	r	GL_R32I
+			r32ui		uint	0	r	GL_R32UI
+			rg8i		uint	0	r	GL_RG8I
+			rg8ui		uint	0	r	GL_RG8UI
+			rg16i		uint	0	r	GL_RG16I
+			rg16ui		uint	0	r	GL_RG16UI
+			rg32i		uint	0	r	GL_RG32I
+			rg32ui		uint	0	r	GL_RG32UI
+			rgb8i		uint	0	r	GL_RGB8I
+			rgb8ui		uint	0	r	GL_RGB8UI
+			rgb16i		uint	0	r	GL_RGB16I
+			rgb16ui		uint	0	r	GL_RGB16UI
+			rgb32i		uint	0	r	GL_RGB32I
+			rgb32ui		uint	0	r	GL_RGB32UI
+			rgba8i		uint	0	r	GL_RGBA8I
+			rgba8ui		uint	0	r	GL_RGBA8UI
+			rgba16i		uint	0	r	GL_RGBA16I
+			rgba16ui	uint	0	r	GL_RGBA16UI
+			rgba32i		uint	0	r	GL_RGBA32I
+			rgba32ui	uint	0	r	GL_RGBA32UI
+		}
+		TextureExternalFormat	vmat	0	r	{
+			r		uint	0	r	GL_RED
+			rg		uint	0	r	GL_RG
+			rgb		uint	0	r	GL_RGB
+			bgr		uint	0	r	GL_BGR
+			rgba		uint	0	r	GL_RGBA
+			bgra		uint	0	r	GL_BGRA
+			depth		uint	0	r	GL_DEPTH_COMPONENT
+			stencil		uint	0	r	GL_STENCIL_INDEX
+		}
+		TextureExternalType	vmat	0	r	{
+			ubyte			uint	0	r	GL_UNSIGNED_BYTE
+			sbyte			uint	0	r	GL_BYTE
+			uword			uint	0	r	GL_UNSIGNED_SHORT
+			sword			uint	0	r	GL_SHORT
+			uint			uint	0	r	GL_UNSIGNED_INT
+			sint			uint	0	r	GL_INT
+			float			uint	0	r	GL_FLOAT
+			ubyte_3_3_2		uint	0	r	GL_UNSIGNED_BYTE_3_3_2
+			ubyte_2_3_3_r		uint	0	r	GL_UNSIGNED_BYTE_2_3_3_REV
+			uword_5_6_5		uint	0	r	GL_UNSIGNED_SHORT_5_6_5
+			uword_5_6_5_r		uint	0	r	GL_UNSIGNED_SHORT_5_6_5_REV
+			uword_4_4_4_4		uint	0	r	GL_UNSIGNED_SHORT_4_4_4_4
+			uword_4_4_4_4_r		uint	0	r	GL_UNSIGNED_SHORT_4_4_4_4_REV
+			uword_5_5_5_1		uint	0	r	GL_UNSIGNED_SHORT_5_5_5_1
+			uword_1_5_5_5_r		uint	0	r	GL_UNSIGNED_SHORT_1_5_5_5_REV
+			uint_8_8_8_8		uint	0	r	GL_UNSIGNED_INT_8_8_8_8
+			uint_8_8_8_8_r		uint	0	r	GL_UNSIGNED_INT_8_8_8_8_REV
+			uint_10_10_10_2		uint	0	r	GL_UNSIGNED_INT_10_10_10_2
+			uint_2_10_10_10_r	uint	0	r	GL_UNSIGNED_INT_2_10_10_10_REV
+		}
+		TextureCubeFace		vlist	0	r	{
+			xPos	uint	0	r	0
+			xNeg	uint	0	r	1
+			yPos	uint	0	r	2
+			yNeg	uint	0	r	3
+			zPos	uint	0	r	4
+			zNeg	uint	0	r	5
+		}
 		VertexAttribSize	vlist	0	r	{
 			v1	sint	0	r	1
 			v2	sint	0	r	2
@@ -196,6 +322,10 @@
 			VAR_ClearBit		-export	.set.run.clearBit
 			VAR_ModelUniTran	-export	.set.run.modelUniformTranspose
 		}
+		limit	vmat	0	r	{
+			textureActiveMax	uint	0	r	TEXTURE_ACTIVE_MAX
+			samplerActiveMax	uint	0	r	TEXTURE_ACTIVE_MAX
+		}
 	}
 	
 	// program
@@ -237,6 +367,32 @@
 		// long error = useBuffer(ulong buffer);
 		// 使用缓冲（绑定缓冲到指定类型）
 	
+	// texture
+	createTexture		fun	0	r	addr_fun(createTexture)
+		// ulong texture = createTexture(TextureType);
+		// 创建纹理
+	deleteTexture		fun	0	r	addr_fun(deleteTexture)
+		// void deleteTexture(ulong texture);
+		// 删除纹理
+	textureStorage		fun	0	r	addr_fun(textureStorage)
+		// ulong error = textureStorage(ulong texture[t1D], znum levels, TextureInternalFormat, znum w);
+		// ulong error = textureStorage(ulong texture[t2D, t1DArray, tCube, tRect], znum levels, TextureInternalFormat, znum w, znum h);
+		// ulong error = textureStorage(ulong texture[t3D, t2DArray, tCubeArray], znum levels, TextureInternalFormat, znum w, znum h, znum d);
+		// ulong error = textureStorage(ulong texture[t2DMS], znum samples, TextureInternalFormat, znum w, znum h, znum fixed);
+		// ulong error = textureStorage(ulong texture[t2DMSArray], znum samples, TextureInternalFormat, znum w, znum h, znum d, znum fixed);
+		// ulong error = textureStorage(ulong texture[tBuffer], TextureInternalFormat, ulong buffer-tbo);
+		// 设置纹理储存属性，如果 error == 0 ，则将 texture 设置为 ok 状态
+	textureSubImage		fun	0	r	addr_fun(textureSubImage)
+		// level, format, ft, var pixels, [[begin, ]x, ]w
+		// ulong error = textureSubImage(ulong texture-ok[t1D], znum level, TextureExternalFormat, TextureExternalType, znum data[], [[znum begin, ]znum x, ]znum w);
+		// ulong error = textureSubImage(ulong texture-ok[t2D, t1DArray, tRect], znum level, TextureExternalFormat, TextureExternalType, znum data[], [[znum begin, ]znum x, znum y, ]znum w, znum h);
+		// ulong error = textureSubImage(ulong texture-ok[t3D, t2DArray, tCubeArray], znum level, TextureExternalFormat, TextureExternalType, znum data[], [[znum begin, ]znum x, znum y, znum z]znum w, znum h, znum d);
+		// ulong error = textureSubImage(ulong texture-ok[tCube], znum level, TextureCubeFace, TextureExternalFormat, TextureExternalType, znum data[], [[znum begin, ]znum x, znum y, ]znum w, znum h);
+		// 设置纹理区块数据
+	useTexture		fun	0	r	addr_fun(useTexture)
+		// long error = useTexture(znum active, ulong texture);
+		// 使用纹理
+	
 	// vertexAttrib
 	createVertexAttrib	fun	0	r	addr_fun(createVertexAttrib)
 		// ulong va = createVertexAttrib();
@@ -248,7 +404,7 @@
 		// void finalVertexAttrib(ulong va);
 		// 将 va 顶点属性设置为 ok 状态
 	vertexAttribPointer	fun	0	r	addr_fun(vertexAttribPointer)
-		// long error = vertexAttribPointer(ulong va, ulong buffer, znum index,
+		// long error = vertexAttribPointer(ulong va, ulong buffer-vbo, znum index,
 		//	VertexAttribSize, VertexAttribType, znum normalized, znum stride, znum pointer);
 		// 关联顶点属性
 	enableVertexAttrib	fun	0	r	addr_fun(enableVertexAttrib)
@@ -340,6 +496,19 @@
 		setData		-link	.bufferSetData
 		subData		-link	.bufferSubData
 		use		-link	.useBuffer
+	}
+	
+	texture		vmat	0	r	{
+		type		-link	.info.TextureType
+		iFormat		-link	.info.TextureInternalFormat
+		eFormat		-link	.info.TextureExternalFormat
+		eType		-link	.info.TextureExternalType
+		cubeFace	-link	.info.TextureCubeFace
+		
+		create		-link	.createTexture
+		delete		-link	.deleteTexture
+		storage		-link	.textureStorage
+		subImage	-link	.textureSubImage
 	}
 	
 	vertexAttrib	vmat	0	r	{

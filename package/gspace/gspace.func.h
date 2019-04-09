@@ -15,6 +15,13 @@ func(bufferSetData);
 func(bufferSubData);
 func(useBuffer);
 
+// texture
+func(createTexture);
+func(deleteTexture);
+func(textureStorage);
+func(textureSubImage);
+func(useTexture);
+
 // vertexAttrib
 func(createVertexAttrib);
 func(deleteVertexAttrib);

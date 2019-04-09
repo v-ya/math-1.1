@@ -11,6 +11,10 @@
 ## <span id="history">版本更新记录</span>
 ---
 
+2019.04.09 v1.7.2
+---
+*	package `[vya.gspace]` 增加 `texture` (纹理) 相关操作
+
 2019.04.04 v1.7.2
 ---
 *	package `[vya.gspace]` model 框架基本完成

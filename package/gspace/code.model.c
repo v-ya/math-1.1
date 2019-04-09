@@ -116,6 +116,7 @@ int isUniformType(u32 type, u32 *count)
 		case MODEL_UNIFORM_TYPE_F:
 		case MODEL_UNIFORM_TYPE_I:
 		case MODEL_UNIFORM_TYPE_U:
+			n = type&0x03;
 			type &= ~0x03;
 			if _oT(count) *count=n+1;
 			break;

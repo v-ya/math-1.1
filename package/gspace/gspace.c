@@ -8,6 +8,7 @@ u64 isInit = 0;
 var *V_src;
 var *V_program;
 var *V_buffer;
+var *V_texture;
 var *V_vertexAttrib;
 var *V_model;
 
@@ -16,6 +17,7 @@ void init(void)
 	if _oF(!(V_src=base->create_vmat(root, S_src, 0, auth_read))) goto Err;
 	if _oF(!(V_program=base->create_vmat(V_src, S_program, 0, auth_read))) goto Err;
 	if _oF(!(V_buffer=base->create_vmat(V_src, S_buffer, 0, auth_read))) goto Err;
+	if _oF(!(V_texture=base->create_vmat(V_src, S_texture, 0, auth_read))) goto Err;
 	if _oF(!(V_vertexAttrib=base->create_vmat(V_src, S_vertexAttrib, 0, auth_read))) goto Err;
 	if _oF(!(V_model=base->create_vmat(V_src, S_model, 0, auth_read))) goto Err;
 	
@@ -29,11 +31,12 @@ void uini(void)
 {
 	void FreeSrc_program(var *v);
 	void FreeSrc_buffer(var *v);
+	void FreeSrc_texture(var *v);
 	void FreeSrc_vertexAttrib(var *v);
-	void FreeSrc_model(var *v);
 	
 	base->clear_vmsrc(V_src, S_program, FreeSrc_program);
 	base->clear_vmsrc(V_src, S_buffer, FreeSrc_buffer);
+	base->clear_vmsrc(V_src, S_texture, FreeSrc_texture);
 	base->clear_vmsrc(V_src, S_vertexAttrib, FreeSrc_vertexAttrib);
 	
 	base->var_delete(root, S_src);
@@ -48,6 +51,12 @@ void FreeSrc_buffer(var *v)
 {
 	GLuint b = v->v.v_long;
 	glDeleteBuffers(1, &b);
+}
+
+void FreeSrc_texture(var *v)
+{
+	GLuint t = v->v.v_long;
+	glDeleteTextures(1, &t);
 }
 
 void FreeSrc_vertexAttrib(var *v)

@@ -30,6 +30,15 @@ int bufferSetData(GLuint buffer, u32 type, GLsizeiptr size, void *data, GLenum u
 int bufferSubData(GLuint buffer, u32 type, GLintptr offset, GLsizeiptr size, void *data);
 int useBuffer(u64 sid, u32 type);
 
+// texture
+u64 createTexture(u32 type);
+void deleteTexture(u64 sid);
+void deleteUserTexture(u64 sid);
+int textureStorage(GLuint texture, u32 type, GLuint lsb, GLenum format, GLsizei w, GLsizei h, GLsizei d, GLboolean fixed);
+int textureSubImage(GLuint texture, u32 type, GLint level, u32 cube, GLenum format, GLenum ft,
+	GLvoid *pixels, u64 length, GLint x, GLint y, GLint z, GLsizei w, GLsizei h, GLsizei d);
+int useTexture(u64 sid, u32 type, u32 active);
+
 // vertexAttrib
 u64 createVertexAttrib(void);
 void deleteVertexAttrib(u64 sid);

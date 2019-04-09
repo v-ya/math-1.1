@@ -131,6 +131,7 @@ void deleteSrcRefer(var *pool, DeleteSrcFunc f, u64 sid)
 
 #include "code.program.c"
 #include "code.buffer.c"
+#include "code.texture.c"
 #include "code.vertexAttributes.c"
 #include "code.model.c"
 #include "code.draw.c"

@@ -31,7 +31,7 @@
 #define F_type_s(m, t)	m = m & ~F_type | (t<<16)
 #define F_type_g(m)	((m&F_type)>>16)
 
-// type
+// buffer type
 typedef enum ESrcBufferType {
 	srcBufferTypeAll,
 	
@@ -65,6 +65,38 @@ typedef enum ESrcBufferType {
 	
 	srcBufferTypeMax
 } SrcBufferType;
+
+#define TEXTURE_ACTIVE_MAX	16
+
+// texture type
+typedef enum ESrcTextureType {
+	srcTextureTypeAll,
+	
+	srcTextureType1D,
+		// 一维纹理
+	srcTextureType1DArray,
+		// 一维纹理数组
+	srcTextureType2D,
+		// 二维纹理
+	srcTextureType2DArray,
+		// 二维纹理数组
+	srcTextureType2DMS,
+		// 二维多重采样纹理
+	srcTextureType2DMSArray,
+		// 二维多重采样纹理数组
+	srcTextureType3D,
+		// 三维纹理
+	srcTextureTypeCube,
+		// 立方体映射纹理
+	srcTextureTypeCubeArray,
+		// 立方体映射纹理数组
+	srcTextureTypeRect,
+		// 矩形纹理
+	srcTextureTypeBuffer,
+		// 缓冲纹理
+	
+	srcTextureTypeMax
+} SrcTextureType;
 
 #define MODEL_COMMAND_ARGC_MAX	16
 
@@ -121,6 +153,7 @@ typedef enum EModelCommand {
 #define S_handle	"handle"
 #define S_program	"program"
 #define S_buffer	"buffer"
+#define S_texture	"texture"
 #define S_vertexAttrib	"vertexAttrib"
 	#define S_location	"location"
 	#define S_list		"list"
@@ -137,6 +170,7 @@ typedef enum EModelCommand {
 extern u64 isInit;
 extern var *V_program;
 extern var *V_buffer;
+extern var *V_texture;
 extern var *V_vertexAttrib;
 extern var *V_model;
 
