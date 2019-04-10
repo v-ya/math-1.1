@@ -20,7 +20,14 @@ func(createTexture);
 func(deleteTexture);
 func(textureStorage);
 func(textureSubImage);
+func(textureGenMipmap);
 func(useTexture);
+
+// sampler
+func(createSampler);
+func(deleteSampler);
+func(samplerParam);
+func(useSampler);
 
 // vertexAttrib
 func(createVertexAttrib);

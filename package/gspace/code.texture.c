@@ -32,6 +32,7 @@ u64 createTexture(u32 type)
 	
 	ty = getTextureTarget(type);
 	if _oF(ty == NotTarget) return 0;
+	glActiveTexture(GL_TEXTURE0);
 	glGenTextures(1, &t);
 	glBindTexture(ty, t);
 	if _oF(!t) return 0;
@@ -379,6 +380,35 @@ int textureSubImage(GLuint texture, u32 type, GLint level, u32 cube, GLenum form
 	return 0;
 }
 
+int textureGenMipmap(u64 sid)
+{
+	GLuint texture;
+	u32 type;
+	GLenum t;
+	
+	texture = getHandle(V_texture, sid, F_isok, &type);
+	if _oF(!texture) return 1;
+	type = F_type_g(type);
+	t = getTextureTarget(type);
+	if _oF(t == NotTarget) return -1;
+	
+	switch(type)
+	{
+		case srcTextureType1D:
+		case srcTextureType2D:
+		case srcTextureType3D:
+		case srcTextureType1DArray:
+		case srcTextureType2DArray:
+		case srcTextureTypeCube:
+		case srcTextureTypeCubeArray:
+			glBindTexture(t, texture);
+			glGenerateMipmap(t);
+			return 0;
+		default:
+			return 2;
+	}
+}
+
 int useTexture(u64 sid, u32 type, u32 active)
 {
 	GLuint texture;
@@ -389,7 +419,7 @@ int useTexture(u64 sid, u32 type, u32 active)
 	
 	if _oT(texture && t!=NotTarget)
 	{
-		if _oF(active >= TEXTURE_ACTIVE_MAX) return 1;
+		if _oF(active >= TEXTURE_ACTIVE_MAX) return 2;
 		glActiveTexture(GL_TEXTURE0 + active);
 		glBindTexture(t, texture);
 		return 0;

@@ -383,6 +383,22 @@ func(textureSubImage)
 	return ret;
 }
 
+func(textureGenMipmap)
+{
+	static char *label=label_name("textureGenMipmap");
+	static u32 type_1[1]={type_znum};
+	u64 sid;
+	
+	if _oF(argc!=1||base->check_varlist(argv,1,type_1)) return base->get_error(errid_FunArgvType,label);
+	
+	sid = argv->v->v.v_long;
+	
+	ret->type = type_long;
+	ret->v.v_long = textureGenMipmap(sid);
+	
+	return ret;
+}
+
 func(useTexture)
 {
 	static char *label=label_name("useTexture");

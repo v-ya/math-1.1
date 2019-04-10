@@ -328,6 +328,7 @@ void put_vp_array(var *vp)
 		value=vp->v.v_string;
 		if (type&type_void) fprintf(outfile,"static void*	_sv_ar_%p[%u] = %s;\n",vp,length,value);
 		else if (type&type_string) fprintf(outfile,"static char*	_sv_ar_%p[%u] = %s;\n",vp,length,value);
+		else if (type&type_float) fprintf(outfile,"static double	_sv_ar_%p[%u] = %s;\n",vp,length,value);
 		else if (type&type_unsign)
 		{
 			if (type&type_byte) fprintf(outfile,"static u8	_sv_ar_%p[%u] = %s;\n",vp,length,value);

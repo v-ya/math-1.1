@@ -37,7 +37,14 @@ void deleteUserTexture(u64 sid);
 int textureStorage(GLuint texture, u32 type, GLuint lsb, GLenum format, GLsizei w, GLsizei h, GLsizei d, GLboolean fixed);
 int textureSubImage(GLuint texture, u32 type, GLint level, u32 cube, GLenum format, GLenum ft,
 	GLvoid *pixels, u64 length, GLint x, GLint y, GLint z, GLsizei w, GLsizei h, GLsizei d);
+int textureGenMipmap(u64 sid);
 int useTexture(u64 sid, u32 type, u32 active);
+
+// sampler
+u64 createSampler(void);
+void deleteSampler(u64 sid);
+void deleteUserSampler(u64 sid);
+int useSampler(u64 sid, u32 active);
 
 // vertexAttrib
 u64 createVertexAttrib(void);

@@ -1,5 +1,7 @@
 #include "gspace.h"
 
+#define SAMPLER_PARAM_BORDER_COLOR	{0.0, 0.0, 0.0, 0.0}
+
 // 开始自动生成静态结构
 //	name	type	length	auth	value
 
@@ -228,6 +230,78 @@
 			zPos	uint	0	r	4
 			zNeg	uint	0	r	5
 		}
+		SamplerParamName	vmat	0	r	{
+			filter_min	uint	0	r	GL_TEXTURE_MIN_FILTER
+				// 纹理缩小功能
+			filter_mag	uint	0	r	GL_TEXTURE_MAG_FILTER
+				// 纹理放大功能
+			lod_min		uint	0	r	GL_TEXTURE_MIN_LOD
+				// 设置最小细节级别参数（限制 mipmap），初始值为 -1000
+			lod_max		uint	0	r	GL_TEXTURE_MAX_LOD
+				// 设置最大细节级别参数（限制 mipmap），初始值为 +1000
+			wrap_s		uint	0	r	GL_TEXTURE_WRAP_S
+			wrap_t		uint	0	r	GL_TEXTURE_WRAP_T
+			wrap_r		uint	0	r	GL_TEXTURE_WRAP_R
+				// 设置纹理坐标 wrap 参数
+			border_color	uint	0	r	GL_TEXTURE_BORDER_COLOR
+				// 定义了应该用于边界纹素的边界值（边界颜色）。初始值为 (0, 0, 0, 0)
+			compare_mode	uint	0	r	GL_TEXTURE_COMPARE_MODE
+				// 指定纹理的比较模式
+			compare_func	uint	0	r	GL_TEXTURE_COMPARE_FUNC
+				// 制定纹理的比较运算
+		}
+		SamplerParamValue	vmat	0	r	{
+			filter		vlist	0	r	{
+				nearest		uint	0	r	GL_NEAREST
+				linear		uint	0	r	GL_LINEAR
+					// => filter_min | filter_mag
+				nearest_nearest	uint	0	r	GL_NEAREST_MIPMAP_NEAREST
+				linear_nearest	uint	0	r	GL_LINEAR_MIPMAP_NEAREST
+				nearest_linear	uint	0	r	GL_NEAREST_MIPMAP_LINEAR
+				linear_linear	uint	0	r	GL_LINEAR_MIPMAP_LINEAR
+					// => filter_min
+			}
+			lod		vlist	0	r	{
+				min	sint	0	rw	-1000
+				max	sint	0	rw	1000
+			}
+			wrap		vlist	0	r	{
+				clamp	uint	0	r	GL_CLAMP_TO_EDGE
+					// 限制到边缘
+				mirror	uint	0	r	GL_MIRRORED_REPEAT
+					// 镜像重复
+				repeat	uint	0	r	GL_REPEAT
+					// 重复
+			}
+			border_color	float	4	rw	SAMPLER_PARAM_BORDER_COLOR
+				// 纹理边界值
+			compare_mode	vlist	0	r	{
+				func	uint	0	r	GL_COMPARE_REF_TO_TEXTURE
+				none	uint	0	r	GL_NONE
+			}
+			compare_func	vlist	0	r	{
+				le	uint	0	r	GL_LEQUAL
+					// <=
+				ge	uint	0	r	GL_GEQUAL
+					// >=
+				lt	uint	0	r	GL_LESS
+					// <
+				gt	uint	0	r	GL_GREATER
+					// >
+				eq	uint	0	r	GL_EQUAL
+					// ==
+				ne	uint	0	r	GL_NOTEQUAL
+					// !=
+				always	uint	0	r	GL_ALWAYS
+					// 1
+				never	uint	0	r	GL_NEVER
+					// 0
+			}
+			
+			VAR_SamplerParamLodMin		-export	.info.SamplerParamValue.lod.min
+			VAR_SamplerParamLodMax		-export	.info.SamplerParamValue.lod.max
+			VAR_SamplerParamBorderColor	-export	.info.SamplerParamValue.border_color
+		}
 		VertexAttribSize	vlist	0	r	{
 			v1	sint	0	r	1
 			v2	sint	0	r	2
@@ -389,9 +463,30 @@
 		// ulong error = textureSubImage(ulong texture-ok[t3D, t2DArray, tCubeArray], znum level, TextureExternalFormat, TextureExternalType, znum data[], [[znum begin, ]znum x, znum y, znum z]znum w, znum h, znum d);
 		// ulong error = textureSubImage(ulong texture-ok[tCube], znum level, TextureCubeFace, TextureExternalFormat, TextureExternalType, znum data[], [[znum begin, ]znum x, znum y, ]znum w, znum h);
 		// 设置纹理区块数据
+	textureGenMipmap	fun	0	r	addr_fun(textureGenMipmap)
+		// ulong error = textureGenMipmap(ulong texture-ok[t1D, t2D, t3D, t1DArray, t2DArray, tCube, tCubeArray])
+		// 生成 mipmap
 	useTexture		fun	0	r	addr_fun(useTexture)
-		// long error = useTexture(znum active, ulong texture);
+		// long error = useTexture(znum active, ulong texture-ok);
 		// 使用纹理
+	
+	// sampler
+	createSampler		fun	0	r	addr_fun(createSampler)
+		// ulong sampler = createSampler();
+		// 创建采样器，默认为 ok 状态
+	deleteSampler		fun	0	r	addr_fun(deleteSampler)
+		// void deleteSampler(ulong sampler);
+		// 删除采样器
+	samplerParam		fun	0	r	addr_fun(samplerParam)
+		// long error = sampler(ulong sampler, SamplerParamName[lod_min, lod_max, border_color]);
+		// long error = sampler(ulong sampler, SamplerParamName, SamplerParamValue);
+		// long error = sampler(ulong sampler, SamplerParamName[lod_min, lod_max], znum value);
+		// long error = sampler(ulong sampler, SamplerParamName[border_color], znum value = 0xaarrggbb);
+		// long error = sampler(ulong sampler, SamplerParamName[border_color], float value[4] = [r, g, b, a]]);
+		// 设置采样器属性
+	useSampler		fun	0	r	addr_fun(useSampler)
+		// long error = useTexture(znum active, ulong sampler);
+		// 使用采样器或禁用采样器（sampler = 0）
 	
 	// vertexAttrib
 	createVertexAttrib	fun	0	r	addr_fun(createVertexAttrib)
@@ -509,6 +604,18 @@
 		delete		-link	.deleteTexture
 		storage		-link	.textureStorage
 		subImage	-link	.textureSubImage
+		genMipmap	-link	.textureGenMipmap
+		use		-link	.useTexture
+	}
+	
+	sampler		vmat	0	r	{
+		pname		-link	.info.SamplerParamName
+		pvalue		-link	.info.SamplerParamValue
+		
+		create		-link	.createSampler
+		delete		-link	.deleteSampler
+		param		-link	.samplerParam
+		use		-link	.useSampler
 	}
 	
 	vertexAttrib	vmat	0	r	{

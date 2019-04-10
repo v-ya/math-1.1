@@ -5,6 +5,7 @@
 #include "func.program.c"
 #include "func.buffer.c"
 #include "func.texture.c"
+#include "func.sampler.c"
 #include "func.vertexAttributes.c"
 #include "func.model.c"
 #include "func.draw.c"

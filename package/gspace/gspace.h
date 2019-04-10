@@ -154,6 +154,7 @@ typedef enum EModelCommand {
 #define S_program	"program"
 #define S_buffer	"buffer"
 #define S_texture	"texture"
+#define S_sampler	"sampler"
 #define S_vertexAttrib	"vertexAttrib"
 	#define S_location	"location"
 	#define S_list		"list"
@@ -171,6 +172,7 @@ extern u64 isInit;
 extern var *V_program;
 extern var *V_buffer;
 extern var *V_texture;
+extern var *V_sampler;
 extern var *V_vertexAttrib;
 extern var *V_model;
 
