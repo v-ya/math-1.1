@@ -50,20 +50,22 @@ func(finalModel)
 func(modelLinkUniform)
 {
 	static char *label=label_name("modelLinkUniform");
-	static u32 type_4[4]={type_znum, type_string, type_int|type_onlyarray, type_znum};
-	static u32 type_5[5]={type_znum, type_string, type_int|type_onlyarray, type_znum, type_znum};
-	static u32 type_6[6]={type_znum, type_string, type_int|type_onlyarray, type_znum, type_znum, type_znum};
-	static u32 type_7[7]={type_znum, type_string, type_int|type_onlyarray, type_znum, type_znum, type_znum, type_znum};
-	u64 sid;
+	static u32 type_5[5]={type_znum, type_znum, type_string, type_int|type_onlyarray, type_znum};
+	static u32 type_6[6]={type_znum, type_znum, type_string, type_int|type_onlyarray, type_znum, type_znum};
+	static u32 type_7[7]={type_znum, type_znum, type_string, type_int|type_onlyarray, type_znum, type_znum, type_znum};
+	static u32 type_8[8]={type_znum, type_znum, type_string, type_int|type_onlyarray, type_znum, type_znum, type_znum, type_znum};
+	u64 sid, group;
 	char *name;
 	var *sync;
 	u32 type, begin, count, transpose;
 	
 	switch(argc)
 	{
-		case 4:
-			if _oF(base->check_varlist(argv,4,type_4)) return base->get_error(errid_FunArgvType,label);
+		case 5:
+			if _oF(base->check_varlist(argv,5,type_5)) return base->get_error(errid_FunArgvType,label);
 			sid = argv->v->v.v_long;
+			argv = argv->r;
+			group = argv->v->v.v_long;
 			argv = argv->r;
 			name = argv->v->v.v_string;
 			argv = argv->r;
@@ -74,9 +76,11 @@ func(modelLinkUniform)
 			count = 1;
 			transpose = VAR_ModelUniTran->v.v_long;
 			break;
-		case 5:
-			if _oF(base->check_varlist(argv,5,type_5)) return base->get_error(errid_FunArgvType,label);
+		case 6:
+			if _oF(base->check_varlist(argv,6,type_6)) return base->get_error(errid_FunArgvType,label);
 			sid = argv->v->v.v_long;
+			argv = argv->r;
+			group = argv->v->v.v_long;
 			argv = argv->r;
 			name = argv->v->v.v_string;
 			argv = argv->r;
@@ -88,9 +92,11 @@ func(modelLinkUniform)
 			begin = 0;
 			transpose = VAR_ModelUniTran->v.v_long;
 			break;
-		case 6:
-			if _oF(base->check_varlist(argv,6,type_6)) return base->get_error(errid_FunArgvType,label);
+		case 7:
+			if _oF(base->check_varlist(argv,7,type_7)) return base->get_error(errid_FunArgvType,label);
 			sid = argv->v->v.v_long;
+			argv = argv->r;
+			group = argv->v->v.v_long;
 			argv = argv->r;
 			name = argv->v->v.v_string;
 			argv = argv->r;
@@ -103,9 +109,11 @@ func(modelLinkUniform)
 			count = argv->v->v.v_long;
 			transpose = VAR_ModelUniTran->v.v_long;
 			break;
-		case 7:
-			if _oF(base->check_varlist(argv,7,type_7)) return base->get_error(errid_FunArgvType,label);
+		case 8:
+			if _oF(base->check_varlist(argv,8,type_8)) return base->get_error(errid_FunArgvType,label);
 			sid = argv->v->v.v_long;
+			argv = argv->r;
+			group = argv->v->v.v_long;
 			argv = argv->r;
 			name = argv->v->v.v_string;
 			argv = argv->r;
@@ -124,7 +132,25 @@ func(modelLinkUniform)
 	}
 	
 	ret->type = type_long;
-	ret->v.v_long = modelLinkUniform(getObject(V_model, sid, 0, NULL), name, sync, type, begin, count, transpose);
+	ret->v.v_long = modelLinkUniform(getObject(V_model, sid, 0, NULL), group, name, sync, type, begin, count, transpose);
+	
+	return ret;
+}
+
+func(modelSyncUniform)
+{
+	static char *label=label_name("modelSyncUniform");
+	static u32 type_2[2]={type_znum, type_znum};
+	u64 sid, group;
+	
+	if _oF(argc!=2||base->check_varlist(argv,2,type_2)) return base->get_error(errid_FunArgvType,label);
+	
+	sid = argv->v->v.v_long;
+	argv = argv->r;
+	group = argv->v->v.v_long;
+	
+	ret->type = type_void;
+	modelSyncUniformGroup(getObject(V_model, sid, F_isok, NULL), group);
 	
 	return ret;
 }
@@ -151,15 +177,17 @@ func(mcRunScript)
 func(mcSyncUniform)
 {
 	static char *label=label_name("mcSyncUniform");
-	static u32 type_1[1]={type_znum};
-	u64 sid;
+	static u32 type_2[2]={type_znum, type_znum};
+	u64 sid, group;
 	
-	if _oF(argc!=1||base->check_varlist(argv,1,type_1)) return base->get_error(errid_FunArgvType,label);
+	if _oF(argc!=2||base->check_varlist(argv,2,type_2)) return base->get_error(errid_FunArgvType,label);
 	
 	sid = argv->v->v.v_long;
+	argv = argv->r;
+	group = argv->v->v.v_long;
 	
 	ret->type = type_long;
-	ret->v.v_long = modelSyncUniform(getObject(V_model, sid, 0, NULL));
+	ret->v.v_long = modelSyncUniform(getObject(V_model, sid, 0, NULL), group);
 	
 	return ret;
 }
@@ -178,6 +206,48 @@ func(mcBindBuffer)
 	
 	ret->type = type_long;
 	ret->v.v_long = modelBindBuffer(getObject(V_model, sid, 0, NULL), buffer);
+	
+	return ret;
+}
+
+func(mcBindTexture)
+{
+	static char *label=label_name("mcBindTexture");
+	static u32 type_3[3]={type_znum, type_znum, type_znum};
+	u64 sid, texture;
+	u32 active;
+	
+	if _oF(argc!=3||base->check_varlist(argv,3,type_3)) return base->get_error(errid_FunArgvType,label);
+	
+	sid = argv->v->v.v_long;
+	argv = argv->r;
+	active = argv->v->v.v_long;
+	argv = argv->r;
+	texture = argv->v->v.v_long;
+	
+	ret->type = type_long;
+	ret->v.v_long = modelBindTexture(getObject(V_model, sid, 0, NULL), texture, active);
+	
+	return ret;
+}
+
+func(mcBindSampler)
+{
+	static char *label=label_name("mcBindSampler");
+	static u32 type_3[3]={type_znum, type_znum, type_znum};
+	u64 sid, sampler;
+	u32 active;
+	
+	if _oF(argc!=3||base->check_varlist(argv,3,type_3)) return base->get_error(errid_FunArgvType,label);
+	
+	sid = argv->v->v.v_long;
+	argv = argv->r;
+	active = argv->v->v.v_long;
+	argv = argv->r;
+	sampler = argv->v->v.v_long;
+	
+	ret->type = type_long;
+	ret->v.v_long = modelBindSampler(getObject(V_model, sid, 0, NULL), sampler, active);
 	
 	return ret;
 }

@@ -522,16 +522,22 @@
 	finalModel		fun	0	r	addr_fun(finalModel)
 		// void finalModel(ulong model);
 	modelLinkUniform	fun	0	r	addr_fun(modelLinkUniform)
-		// long error = modelLinkUniform(ulong model, string name, [u]int[] sync, UniformType);
-		// long error = modelLinkUniform(ulong model, string name, [u]int[] sync, UniformType, znum count);
-		// long error = modelLinkUniform(ulong model, string name, [u]int[] sync, UniformType, znum begin, znum count);
-		// long error = modelLinkUniform(ulong model, string name, [u]int[] sync, UniformType, znum begin, znum count, znum transpose);
+		// long error = modelLinkUniform(ulong model, znum group, string name, [u]int[] sync, UniformType);
+		// long error = modelLinkUniform(ulong model, znum group, string name, [u]int[] sync, UniformType, znum count);
+		// long error = modelLinkUniform(ulong model, znum group, string name, [u]int[] sync, UniformType, znum begin, znum count);
+		// long error = modelLinkUniform(ulong model, znum group, string name, [u]int[] sync, UniformType, znum begin, znum count, znum transpose);
+	modelSyncUniform	fun	0	r	addr_fun(modelSyncUniform)
+		// long error = modelSyncUniform(ulong model-ok, znum group);
 	mcRunScript		fun	0	r	addr_fun(mcRunScript)
 		// long error = mcRunScript(ulong model, string script);
 	mcSyncUniform		fun	0	r	addr_fun(mcSyncUniform)
-		// long error = mcSyncUniform(ulong model);
+		// long error = mcSyncUniform(ulong model, znum group);
 	mcBindBuffer		fun	0	r	addr_fun(mcBindBuffer)
 		// long error = mcBindBuffer(ulong model, ulong buffer);
+	mcBindTexture		fun	0	r	addr_fun(mcBindTexture)
+		// long error = mcBindTexture(ulong model, znum active, ulong texture-ok);
+	mcBindSampler		fun	0	r	addr_fun(mcBindSampler)
+		// long error = mcBindSampler(ulong model, znum active, ulong sampler);
 	mcBindVertexAttrib	fun	0	r	addr_fun(mcBindVertexAttrib)
 		// long error = mcBindVertexAttrib(ulong model, ulong va-ok);
 	mcDrawArrays		fun	0	r	addr_fun(mcDrawArrays)
@@ -638,9 +644,12 @@
 		delete			-link	.deleteModel
 		final			-link	.finalModel
 		linkUniform		-link	.modelLinkUniform
+		syncUniform		-link	.modelSyncUniform
 		mcRunScript		-link	.mcRunScript
 		mcSyncUniform		-link	.mcSyncUniform
 		mcBindBuffer		-link	.mcBindBuffer
+		mcBindTexture		-link	.mcBindTexture
+		mcBindSampler		-link	.mcBindSampler
 		mcBindVertexAttrib	-link	.mcBindVertexAttrib
 		mcDrawArrays		-link	.mcDrawArrays
 		mcDrawElements		-link	.mcDrawElements

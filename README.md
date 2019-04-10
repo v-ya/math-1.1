@@ -15,6 +15,9 @@
 ---
 *	package `[vya.gspace]` 增加 `sampler` (采样器) 相关操作
 *	修复 `sv-build` 对预定义 `float[]` 的支持（数组需要用宏定义传入初始值）
+*	`model uniform` 支持分组操作
+*	`model` 增加 `(model command)` [`mcBindTexture` `mcBindSampler`]
+*	`[vya.gspace]` -> **v1.0.1**
 
 2019.04.09 v1.7.2
 ---

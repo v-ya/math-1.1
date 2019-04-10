@@ -10,7 +10,7 @@
 #include "gspace.func.h"
 #define AUTHOR			"vya"
 #define PACKAGE			"gspace"
-#define PACKAGE_major		0
+#define PACKAGE_major		1
 #define PACKAGE_minor		0
 #define PACKAGE_revision	1
 #define PACKAGE_value		(PACKAGE_major<<16|PACKAGE_minor<<8|PACKAGE_revision)
@@ -106,6 +106,8 @@ typedef enum EModelCommand {
 	mcRunScript,
 	mcSyncUniform,
 	mcBindBuffer,
+	mcBindTexture,
+	mcBindSampler,
 	mcBindVertexAttrib,
 	
 	mcDrawArrays,

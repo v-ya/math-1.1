@@ -18,11 +18,17 @@ u64 createModel(u64 program)
 	// src refer
 	if _oF(!base->create_ulong(o, S_program, 0, auth_read, program)) goto Err;
 	if _oF(!base->create_vmat(o, S_buffer, 0, auth_read)) goto Err;
+	if _oF(!base->create_vmat(o, S_texture, 0, auth_read)) goto Err;
+	if _oF(!base->create_vmat(o, S_sampler, 0, auth_read)) goto Err;
 	if _oF(!base->create_vmat(o, S_vertexAttrib, 0, auth_read)) goto Err;
 	
 	// this bind
 	if _oF(!(bind=base->create_vlist(o, S_bind, 0, auth_read))) goto Err;
 	if _oF(!(vp=base->create_var(bind, S_buffer, 0, tlog_long, srcBufferTypeMax, auth_read))) goto Err;
+	vp->type |= type_unsign;
+	if _oF(!(vp=base->create_var(bind, S_texture, 0, tlog_long, TEXTURE_ACTIVE_MAX, auth_read))) goto Err;
+	vp->type |= type_unsign;
+	if _oF(!(vp=base->create_var(bind, S_sampler, 0, tlog_long, TEXTURE_ACTIVE_MAX, auth_read))) goto Err;
 	vp->type |= type_unsign;
 	if _oF(!base->create_ulong(bind, S_vertexAttrib, 0, auth_read, 0)) goto Err;
 	
@@ -42,8 +48,10 @@ u64 createModel(u64 program)
 	return 0;
 }
 
-void _model_d_b(var *v) {deleteBuffer(v->v.v_long);}
+void _model_d_buffer(var *v) {deleteBuffer(v->v.v_long);}
 void _model_d_va(var *v) {deleteVertexAttrib(v->v.v_long);}
+void _model_d_texture(var *v) {deleteTexture(v->v.v_long);}
+void _model_d_sampler(var *v) {deleteSampler(v->v.v_long);}
 void model_clearSrc(var *v)
 {
 	var *vp;
@@ -51,8 +59,10 @@ void model_clearSrc(var *v)
 	vp = base->var_find(v, S_program);
 	if _oT(vp) deleteProgram(vp->v.v_long);
 	
-	base->clear_vmsrc(v, S_buffer, _model_d_b);
+	base->clear_vmsrc(v, S_buffer, _model_d_buffer);
 	base->clear_vmsrc(v, S_vertexAttrib, _model_d_va);
+	base->clear_vmsrc(v, S_texture, _model_d_texture);
+	base->clear_vmsrc(v, S_sampler, _model_d_sampler);
 }
 
 void deleteModel(u64 sid)
@@ -129,9 +139,9 @@ int isUniformType(u32 type, u32 *count)
 	return 1;
 }
 
-int modelLinkUniform(var *vp, char *name, var *sync, u32 type, u32 begin, u32 count, u32 transpose)
+int modelLinkUniform(var *vp, u64 group, char *name, var *sync, u32 type, u32 begin, u32 count, u32 transpose)
 {
-	var *uniform, *unidata;
+	var *ufg , *uniform, *unidata;
 	u64 *c, p;
 	u32 n;
 	GLuint program;
@@ -139,10 +149,15 @@ int modelLinkUniform(var *vp, char *name, var *sync, u32 type, u32 begin, u32 co
 	
 	if _oF(!vp) return 1;
 	
-	uniform = base->var_find(vp, S_uniform);
+	ufg = base->var_find(vp, S_uniform);
+	if _oF(!ufg) return -1;
+	uniform = base->var_find_index(ufg, group);
+	if _oF(!uniform) uniform = base->create_vmat(ufg, NULL, group, auth_read);
+	
 	unidata = base->var_find(vp, S_unidata);
 	vp = base->var_find(vp, S_program);
-	if _oF(!uniform || !vp) return -1;
+	if _oF(!uniform || !unidata || !vp) return -1;
+	
 	program = getHandle(V_program, vp->v.v_long, F_isok, NULL);
 	if _oF(!program) return -1;
 	
@@ -152,6 +167,7 @@ int modelLinkUniform(var *vp, char *name, var *sync, u32 type, u32 begin, u32 co
 	
 	if _oF(!isUniformType(type, &n)) return 1;
 	if _oF(!sync || !(sync->type&type_int) || !sync->length) return 1;
+	if _oF(!(sync->mode&auth_read) || !(sync->mode&auth_link)) return 1;
 	p = count*n + begin;
 	if _oF(sync->length && p>sync->length) return 1;
 	
@@ -230,6 +246,28 @@ void modelSyncUniformOnce(u64 c[])
 	}
 }
 
+void modelSyncUniformGroup(var *vp, u64 group)
+{
+	var *uniform;
+	u32 i, n;
+	
+	if _oF(!vp) return ;
+	uniform = base->var_find(vp, S_uniform);
+	uniform = base->var_find_index(uniform, group);
+	if _oT(uniform)
+	{
+		n = uniform->v.v_vmat->number;
+		for(i=0;i<n;i++)
+		{
+			vp = base->var_find_index(uniform, i);
+			if _oT(vp && (vp->type&type_long) && vp->length==6)
+			{
+				modelSyncUniformOnce(vp->v.vp_long);
+			}
+		}
+	}
+}
+
 ulong* modelNewCommand(var *vp, u32 argc)
 {
 	var *v;
@@ -288,15 +326,16 @@ int modelRunScript(var *vp, char *script)
 	return 0;
 }
 
-int modelSyncUniform(var *vp)
+int modelSyncUniform(var *vp, u64 group)
 {
 	u64 *c;
 	
 	if _oF(!vp) return 1;
 	
-	c = modelNewCommand(vp, 1);
+	c = modelNewCommand(vp, 2);
 	if _oF(!c) return -1;
 	c[0] = mcSyncUniform;
+	c[1] = group;
 	
 	return 0;
 }
@@ -361,6 +400,120 @@ int modelBindBuffer(var *vp, u64 buffer)
 	return 0;
 }
 
+int modelSetBindTexture(var *vp, u32 active, u64 sid, u64 *plast)
+{
+	vp = base->var_find(vp, S_bind);
+	vp = base->var_find(vp, S_texture);
+	if _oF(!vp) goto Err;
+	
+	if _oT(active<TEXTURE_ACTIVE_MAX && getHandle(V_texture, sid, F_isok, NULL))
+	{
+		if _oT(plast) *plast = vp->v.vp_long[active];
+		if _oF(vp->v.vp_long[active] == sid) return 0;
+		else
+		{
+			vp->v.vp_long[active] = sid;
+			return 1;
+		}
+	}
+	else
+	{
+		Err:
+		if _oT(plast) *plast = 0;
+		return -1;
+	}
+}
+
+int modelBindTexture(var *vp, u64 texture, u32 active)
+{
+	u64 last, *c;
+	var *vt;
+	
+	if _oF(!vp) return 1;
+	vt = base->var_find(vp, S_texture);
+	if _oF(!vt) return -1;
+	
+	if _oF(createSrcRefer(vt, V_texture, texture, texture) < 0) return -1;
+	
+	switch(modelSetBindTexture(vp, active, texture, &last))
+	{
+		case 0:
+			break;
+		case 1:
+			c = modelNewCommand(vp, 3);
+			if _oF(!c)
+			{
+				modelSetBindTexture(vp, active, last, NULL);
+				return -1;
+			}
+			c[0] = mcBindTexture;
+			c[1] = texture;
+			c[2] = active;
+			break;
+		default:
+			return -1;
+	}
+	
+	return 0;
+}
+
+int modelSetBindSampler(var *vp, u32 active, u64 sid, u64 *plast)
+{
+	vp = base->var_find(vp, S_bind);
+	vp = base->var_find(vp, S_sampler);
+	if _oF(!vp) goto Err;
+	
+	if _oT(active<TEXTURE_ACTIVE_MAX && getHandle(V_sampler, sid, F_isok, NULL))
+	{
+		if _oT(plast) *plast = vp->v.vp_long[active];
+		if _oF(vp->v.vp_long[active] == sid) return 0;
+		else
+		{
+			vp->v.vp_long[active] = sid;
+			return 1;
+		}
+	}
+	else
+	{
+		Err:
+		if _oT(plast) *plast = 0;
+		return -1;
+	}
+}
+
+int modelBindSampler(var *vp, u64 sampler, u32 active)
+{
+	u64 last, *c;
+	var *vs;
+	
+	if _oF(!vp) return 1;
+	vs = base->var_find(vp, S_sampler);
+	if _oF(!vs) return -1;
+	
+	if _oF(createSrcRefer(vs, V_sampler, sampler, sampler) < 0) return -1;
+	
+	switch(modelSetBindSampler(vp, active, sampler, &last))
+	{
+		case 0:
+			break;
+		case 1:
+			c = modelNewCommand(vp, 3);
+			if _oF(!c)
+			{
+				modelSetBindSampler(vp, active, last, NULL);
+				return -1;
+			}
+			c[0] = mcBindSampler;
+			c[1] = sampler;
+			c[2] = active;
+			break;
+		default:
+			return -1;
+	}
+	
+	return 0;
+}
+
 int modelSetVertexAttrib(var *vp, u64 va, u64 *plast)
 {
 	vp = base->var_find(vp, S_bind);
@@ -417,12 +570,38 @@ int modelBindVertexAttrib(var *vp, u64 va)
 	return 0;
 }
 
+// exist function
+
+int isExistBuffer(var *vp, u32 type)
+{
+	if _oT(vp && type<srcBufferTypeMax)
+	{
+		vp = base->var_find(vp, S_bind);
+		vp = base->var_find(vp, S_buffer);
+		if _oT(vp && (vp->type&type_long) && (vp->length==srcBufferTypeMax)) return !!(vp->v.vp_long[type]);
+	}
+	return 0;
+}
+
+int isExistVertexAttrib(var *vp)
+{
+	if _oT(vp)
+	{
+		vp = base->var_find(vp, S_bind);
+		vp = base->var_find(vp, S_vertexAttrib);
+		if _oT(vp) return !!(vp->v.v_long);
+	}
+	return 0;
+}
+
+// draw model command
 int modelDrawArrays(var *vp, u32 mode, u32 begin, u32 count)
 {
 	u64 *c;
 	
 	if _oF(!vp) return 1;
 	if _oF(!isDrawMode(mode)) return 1;
+	if _oF(!isExistVertexAttrib(vp)) return 2;
 	
 	c = modelNewCommand(vp, 4);
 	if _oF(!c) return -1;
@@ -441,6 +620,8 @@ int modelDrawElements(var *vp, u32 mode, u32 begin, u32 count, u32 pbase)
 	
 	if _oF(!vp) return 1;
 	if _oF(!isDrawMode(mode)) return 1;
+	if _oF(!isExistVertexAttrib(vp)) return 2;
+	if _oF(!isExistBuffer(vp, srcBufferTypeVertexIndices)) return 2;
 	
 	c = modelNewCommand(vp, 5);
 	if _oF(!c) return -1;
@@ -476,26 +657,22 @@ ModelPointerFunction(RunScript)
 
 ModelPointerFunction(SyncUniform)
 {
-	var *uniform, *vp;
-	u32 i, n;
-	uniform = base->var_find(model, S_uniform);
-	if _oT(uniform)
-	{
-		n = uniform->v.v_vmat->number;
-		for(i=0;i<n;i++)
-		{
-			vp = base->var_find_index(uniform, i);
-			if _oT(vp && (vp->type&type_long) && vp->length==6)
-			{
-				modelSyncUniformOnce(vp->v.vp_long);
-			}
-		}
-	}
+	modelSyncUniformGroup(model, c[1]);
 }
 
 ModelPointerFunction(BindBuffer)
 {
 	useBuffer(c[1], srcBufferTypeAll);
+}
+
+ModelPointerFunction(BindTexture)
+{
+	useTexture(c[1], srcTextureTypeAll, c[2]);
+}
+
+ModelPointerFunction(BindSampler)
+{
+	useSampler(c[1], c[2]);
 }
 
 ModelPointerFunction(BindVertexAttrib)
@@ -521,6 +698,8 @@ ModelFunc ModelFuncPool[mcNumber] = {
 	getModelFunc(RunScript),
 	getModelFunc(SyncUniform),
 	getModelFunc(BindBuffer),
+	getModelFunc(BindTexture),
+	getModelFunc(BindSampler),
 	getModelFunc(BindVertexAttrib),
 	
 	getModelFunc(DrawArrays),
