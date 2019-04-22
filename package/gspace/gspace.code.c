@@ -154,9 +154,18 @@ void init_window(char *title, int width, int height)
 	// 重启动
 	glEnable(GL_PRIMITIVE_RESTART);
 	glPrimitiveRestartIndex(0xffffffff);
+	/*
 	// 边缘线不被遮挡
 	glPolygonOffset(2.0,2.0);
 	glLineWidth(2.0);
+	*/
+	// 反走样
+	glShadeModel(GL_SMOOTH);
+	glEnable(GL_POINT_SMOOTH);
+	glEnable(GL_LINE_SMOOTH);
+	glEnable(GL_POLYGON_SMOOTH);
+	
+	glEnable(GL_MULTISAMPLE);
 	// 清理窗口
 	glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 	glFlush();

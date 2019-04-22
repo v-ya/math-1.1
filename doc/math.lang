@@ -148,8 +148,6 @@
 			<keyword>strarray</keyword>
 			<keyword>arrstring</keyword>
 			<keyword>transform</keyword>
-			<keyword>array_copy</keyword>
-			<keyword>array_store</keyword>
 		</context>
 		<context id="key_g" style-ref="key">
 			<prefix>\.?</prefix>
@@ -210,6 +208,8 @@
 			<keyword>strlen</keyword>
 			<keyword>strbyte</keyword>
 			<keyword>cpcode</keyword>
+			<keyword>array_copy</keyword>
+			<keyword>array_store</keyword>
 		</context>
 		<context id="fun_g" style-ref="fun">
 			<prefix>\.?</prefix>

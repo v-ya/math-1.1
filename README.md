@@ -11,6 +11,10 @@
 ## <span id="history">版本更新记录</span>
 ---
 
+2019.04.22 v1.7.2
+---
+*	package `[vya.gspace]` 默认启动多重采样
+
 2019.04.10 v1.7.2
 ---
 *	package `[vya.gspace]` 增加 `sampler` (采样器) 相关操作
