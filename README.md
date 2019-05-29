@@ -11,6 +11,10 @@
 ## <span id="history">版本更新记录</span>
 ---
 
+2019.05.29 v1.7.2
+---
+*	package '[vya.gspace]' 编译时支持根据 glxinfo 来配置默认设置的核心模式版本号
+
 2019.04.22 v1.7.2
 ---
 *	package `[vya.gspace]` 默认启动多重采样

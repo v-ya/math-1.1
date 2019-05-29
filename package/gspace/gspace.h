@@ -5,6 +5,8 @@
 #include <GL/gl.h>
 #include <GL/freeglut.h>
 
+#include "configure.h"
+
 #include "../package.h"
 #include "gspace.code.h"
 #include "gspace.func.h"
@@ -15,8 +17,8 @@
 #define PACKAGE_revision	1
 #define PACKAGE_value		(PACKAGE_major<<16|PACKAGE_minor<<8|PACKAGE_revision)
 
-#define OPENGL_MAJOR		4
-#define OPENGL_MINOR		2
+#define OPENGL_MAJOR		_sys_opengl_version_major
+#define OPENGL_MINOR		_sys_opengl_version_minor
 #define OPENGL_PROFILE		GLUT_CORE_PROFILE
 #define DISPLAY_MODE		(GLUT_RGBA|GLUT_DEPTH|GLUT_MULTISAMPLE)
 
